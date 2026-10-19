@@ -1,81 +1,76 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.dmg_temp/
-.buildlog/
-.history
-.svn/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
+# Local toolchains and caches
+.flutter/
 .pub-cache/
-.pub/
-/build/
+.pip-cache/
+.uv-cache/
+.venv/
+.python/
 
-# Symbolication related
-app.*.symbols
+# Downloads and local assets
+tools/downloads/
+tools/inno/
+tools/bin/
+third_party/
+testdata/
+artifacts/
 
-# Obfuscation related
-app.*.map.json
+# Build outputs
+build/
+.dart_tool/
+**/build/
+**/.dart_tool/
+**/ephemeral/
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-**/android/**/gradle-wrapper.jar
-.gradle/
-**/android/captures/
-**/android/gradlew
-**/android/gradlew.bat
-**/android/**/GeneratedPluginRegistrant.java
-**/android/key.properties
-*.jks
-local.properties
-**/.cxx/
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
 
-# FVM Version Cache
-.fvm/
+# Logs / temp
+*.log
+*.tmp
 
-# AppImage
-/AppDir/
-/AppDirassets/
-/AppDiricons/
-/appimage-build/
-*.AppImage
-*.AppImage.zsync
+# Local native libs
+mpv-2.dll
+fribidi-0.dll
+vulkan-1.dll
+# Local toolchains and caches
+.flutter/
+.pub-cache/
+.pip-cache/
+.uv-cache/
+.venv/
+.python/
 
-# flatpak
-.flatpak-builder
+# Downloads and local assets
+tools/downloads/
+tools/inno/
+tools/bin/
+third_party/
+testdata/
+artifacts/
 
-# Affinity lock
-*.afdesign~lock~
-*.afphoto~lock~
+# Build outputs
+build/
+.dart_tool/
+**/build/
+**/.dart_tool/
+**/ephemeral/
 
-# Inno Setup builds
-Output
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
 
-# Generated localizations
-lib/l10n/generated
-android/build/reports/problems/
+# Logs / temp
+*.log
+*.tmp
+
+# Local native libs
+mpv-2.dll
+fribidi-0.dll
+vulkan-1.dll

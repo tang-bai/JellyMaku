@@ -1,0 +1,75 @@
+
+# JellyMaku 项目文档
+
+> 状态：Draft（计划文档，尚未开始导入源码）
+> 日期：2026-10-19
+> 基座目标：DonutWare/Fladder（Flutter/Dart，GPL-3.0）
+> 说明：本文档集是后续实施的唯一计划来源。除明确标注“已验证”的内容外，所有功能、测试、截图、性能均为计划，不代表已实现。
+
+## 0. 当前仓库状态（务必先读）
+
+- 本工作区目前**没有 .git 目录**；远程仓库 https://github.com/tang-bai/JellyMaku 当前为空（size 0）。
+- 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档和本地 git 历史在本次迁移前已丢失；无法从本地或远程恢复。
+- 因此本项目按“文档先行、重新导入 Fladder”的方式重建：
+  1. 先保留完整计划（本目录）与 AGENTS.md；
+  2. 再导入 Fladder 固定 commit 与 SyncPlay PR #735；
+  3. 再实现弹幕、超分、一起看、Bangumi 增值模块。
+- 旧方案仅作为历史背景：基于 Jellyfin MPV Shim 的 Python/libmpv 桌面客户端。新方案不再以它为基座。
+
+## 1. 文档索引
+
+| 文档 | 内容 |
+|---|---|
+| [OVERVIEW.md](OVERVIEW.md) | 产品定位、目标用户、范围、非目标、Stage A/B |
+| [RESEARCH.md](RESEARCH.md) | 开源项目与 API 调研、实测事实、选型依据 |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Flutter/Riverpod/media_kit 架构、模块、数据流、文件布局 |
+| [PLAN.md](PLAN.md) | 总实施计划、阶段门、工期、交付物 |
+| [KAZUMI.md](KAZUMI.md) | Kazumi 的番剧时间表、图片识别、Bangumi 评论专项分析 |
+| [BANGUMI.md](BANGUMI.md) | Bangumi 时间表/图片识别/评论的详细设计与网络方案 |
+| [DANMAKU.md](DANMAKU.md) | 弹弹play 弹幕客户端、匹配、渲染、设置、缓存、合规 |
+| [SR.md](SR.md) | Anime4K/FSRCNNX/ArtCNN shader 超分；RTX VSR 限制 |
+| [PARTY.md](PARTY.md) | Jellyfin SyncPlay（复用 PR #735）设计与测试矩阵 |
+| [TESTING.md](TESTING.md) | 测试策略、Mock、验收清单、证据目录 |
+| [ASSETS.md](ASSETS.md) | 下载物、测试媒体、工具链、manifest、目录约定 |
+| [LICENSING.md](LICENSING.md) | GPL/第三方许可、署名、内容合规 |
+| [DECISIONS.md](DECISIONS.md) | ADR：基座、SyncPlay、弹幕、超分、Bangumi、分支 |
+| [ROADMAP.md](ROADMAP.md) | 状态表、里程碑、当前阻塞与下一步 |
+| [IMPLEMENTATION.md](IMPLEMENTATION.md) | 实施检查清单与证据模板（当前为未开始） |
+| [UPSTREAM.md](UPSTREAM.md) | Fladder/PR #735 固定与合并策略；legacy 说明 |
+
+归档目录：[docs/archive/mpv-shim/](../archive/mpv-shim/README.md)。
+
+## 2. 推荐阅读顺序
+
+1. 新 agent/新贡献者：AGENTS.md → 本文 → OVERVIEW → DECISIONS → PLAN。
+2. 做播放器/弹幕：ARCHITECTURE → DANMAKU → SR → PARTY → TESTING。
+3. 做 Bangumi 模块：RESEARCH → KAZUMI → BANGUMI → TESTING。
+4. 做打包/发布：ASSETS → LICENSING → UPSTREAM → PLAN。
+
+## 3. 术语
+
+- **Fladder**：DonutWare 的跨平台 Jellyfin 前端，Flutter/Dart，GPL-3.0。
+- **PR #735**：Fladder 社区提交的 Jellyfin SyncPlay 支持，当前 open，未合并。
+- **Stage A**：核心播放器阶段：Fladder 导入、弹幕、shader 超分、Jellyfin SyncPlay、打包。
+- **Stage B**：Bangumi 增值阶段：番剧时间表、图片识别、Bangumi 评论。
+- **DDP**：弹弹play 开放弹幕网络（api.dandanplay.net）。
+- **Next p1**：Bangumi 新前端接口（next.bgm.tv/p1），非官方 OpenAPI；评论功能依赖。
+- **trace.moe**：以图搜番服务，返回 AniList 结果。
+- **RTX VSR**：NVIDIA 驱动级视频超分；在 media_kit 的 ANGLE/OpenGL 渲染路径下不作为 v1 验收项。
+
+## 4. 阶段与边界
+
+| 阶段 | 目标 | 状态 |
+|---|---|---|
+| Stage A | 可用 Jellyfin 播放器 + 弹幕 + shader 超分 + SyncPlay + 打包 | 计划中 |
+| Stage B | Bangumi 时间表 + 图片识别 + 评论（条件功能） | 计划中，依赖 Bangumi 网络 |
+
+Stage B 不应阻塞 Stage A；两阶段可独立验收。
+
+## 5. 文档维护规则
+
+- 任何“已完成/已通过/已验证”必须有命令输出、截图、日志或性能 JSON；否则写“计划/待验证”。
+- 架构决策变更时新增 ADR，不直接改写历史结论。
+- 外部 API/网络状态变化（尤其 Bangumi、DDP）需更新 RESEARCH/ROADMAP。
+- 不把密钥、Token、真实用户数据、版权媒体写入文档或仓库。
+- 所有下载物与测试文件放在本仓库目录内，路径见 ASSETS.md。
