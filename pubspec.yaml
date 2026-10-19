@@ -196,6 +196,9 @@ dependency_overrides:
   workmanager_android: 0.9.0+2
   workmanager_apple: 0.9.1+2
   workmanager_platform_interface: 0.9.1+1
+  # smtc_windows 1.1.0 ships generated bindings for flutter_rust_bridge
+  # 2.11.1; the runtime checks the version at initialization and refuses 2.13.
+  flutter_rust_bridge: 2.11.1
 
 dev_dependencies:
   flutter_test:

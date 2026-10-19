@@ -8,6 +8,7 @@ import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smtc_windows/smtc_windows.dart' if (dart.library.html) 'package:fladder/stubs/web/smtc_web.dart';
 
 import 'package:fladder/models/settings/arguments_model.dart';
 import 'package:fladder/providers/crash_log_provider.dart';
@@ -42,6 +43,17 @@ class AppBootstrapResult {
 }
 
 Future<AppBootstrapResult> bootstrapApplication(List<String> args) async {
+  // Initialize SMTC before runApp. Doing this in a post-frame callback races
+  // with a user opening a video, and a failed SMTC construction used to abort
+  // player setup before the position/duration subscription was installed.
+  if (!kIsWeb && Platform.isWindows) {
+    try {
+      await SMTCWindows.initialize();
+    } catch (error, stackTrace) {
+      debugPrint('SMTC initialization failed: $error\n$stackTrace');
+    }
+  }
+
   final crashProvider = CrashLogNotifier();
 
   if (kIsWeb) {

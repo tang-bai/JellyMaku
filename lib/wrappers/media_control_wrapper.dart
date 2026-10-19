@@ -141,8 +141,10 @@ class MediaControlsWrapper extends BaseAudioHandler implements VideoPlayerContro
 
     _player = newPlayer;
     await newPlayer.init(ref.read(videoPlayerSettingsProvider));
-    _initPlayer();
+    // Subscribe before optional OS integrations (SMTC). A failed SMTC setup
+    // must never prevent position/duration updates from reaching the UI.
     _subscribePlayerState();
+    _initPlayer();
   }
 
   void _initPlayer() {
@@ -254,7 +256,8 @@ class MediaControlsWrapper extends BaseAudioHandler implements VideoPlayerContro
   }
 
   void _subscribePlayer() {
-    if (!kIsWeb && Platform.isWindows) {
+    try {
+      if (!kIsWeb && Platform.isWindows) {
       smtc = SMTCWindows(
         config: const SMTCConfig(
           fastForwardEnabled: true,
@@ -302,6 +305,10 @@ class MediaControlsWrapper extends BaseAudioHandler implements VideoPlayerContro
           }),
         );
       }
+      }
+    } catch (error, stackTrace) {
+      smtc = null;
+      log('SMTC unavailable: $error\n$stackTrace');
     }
 
     subscriptions.add(_player!.stateStream.listen(_updateStateStream));
