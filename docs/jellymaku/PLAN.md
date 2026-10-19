@@ -1,7 +1,7 @@
 
 # 实施总计划（Stage A / Stage B）
 
-> 状态：Draft，尚未开始。
+> 状态：Draft；Fladder + PR #735 基线已导入，尚未构建/实现。
 > 日期：2026-10-19。
 > 基座：DonutWare/Fladder develop de7b5a2a23f16f5f3bb164ec0baedf50941e4808 + PR #735。
 > 原则：先交付可用的 Jellyfin 播放器，再叠加 Bangumi；每阶段有可运行产物与证据。
@@ -33,13 +33,13 @@
 
 任务：
 
-1. 建立新分支/仓库策略：
-   - 当前无 .git；先 `git init -b main`（如用户同意）或等待恢复。
-   - 记录 Fladder 基座 commit 与 PR #735 head。
-2. 导入 Fladder：
-   - `git remote add fladder https://github.com/DonutWare/Fladder.git`
-   - fetch develop；创建 jellymaku 分支；merge PR #735。
+1. 仓库/基线策略：
+   - 本地 main 已初始化；已导入 PR #735 head（Fladder + SyncPlay）与文档。
+   - 记录 Fladder 基座 commit 与 PR #735 head；保存 upstream README 存档。
+2. 补最新 develop 合并：
+   - fetch fladder develop；把最新 develop 合入 main/jellymaku。
    - 解决冲突（video_player_provider、playback_model、settings、ARB、pubspec、生成文件）。
+   - PR #735 已在基线中；如冲突过大，保留 PR head 基线并记录待办。
 3. 工具链：
    - Flutter 3.35.7 下载到 .flutter；PUB_CACHE 到 .pub-cache。
    - VS 2022 BuildTools/Windows SDK/Developer Mode 检查。
