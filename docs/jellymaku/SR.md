@@ -1,7 +1,7 @@
 
 # 视频超分设计（GLSL shader）
 
-> 状态：v1 核心已实现（Anime4K Fast/Quality + glsl-shaders + 菜单）；画质/性能验收未做。
+> 状态：v1 核心已实现（Anime4K Fast/Quality + glsl-shaders + 菜单）；画质/性能验收未做；RTX VSR spike 已测试并回退（2026-10-20）。
 > 目标：在 Fladder/media_kit 的 libmpv 上提供可切换的 Anime4K/FSRCNNX/ArtCNN 超分；RTX VSR 不作为 v1 验收。
 
 ## 1. 背景与限制
@@ -49,6 +49,20 @@
 - 检查 vf/hwdec-current/画面；黑屏/无效则移除/隐藏。
 - 记录 artifacts/perf/rtx-vsr-result.json。
 - 若未来必须支持：fork media_kit Windows 视频输出为 D3D11，或外部 mpv 模式；+3–5 天，高风险。
+
+### 5.1 2026-10-20 RTX VSR spike 结果
+
+环境：RTX 5070、驱动 617.42、2560×1440 全屏、libmpv/media_kit。
+
+尝试：
+
+1. 在实验档中设置 `hwdec=d3d11va` + `vf=d3d11vpp=scaling-mode=nvidia:scale=1.5`。
+2. 视频已加载后切换：与 Off 同一暂停帧的差异仅约 `0.07/255`，肉眼无变化。
+3. 先选 RTX 档再重启/重新打开视频，让 d3d11va 从解码开始生效：应用卡在“加载中”，窗口“未响应”。
+
+结论：当前 media_kit ANGLE/OpenGL render API 无法可靠承载 `d3d11vpp`；不是换一个 mpv 参数就能启用。实验代码已保留在本地分支 `experiment/rtx-vsr`（commit `fac4a9ce`），**未合入 main、未推送**；main 已回退到备份 `dc1f8d5c`。
+
+若未来必须支持：需要独立的 D3D11 视频输出路径，或原生集成 NVIDIA RTX Video SDK；不能在现有 Flutter 纹理路径上直接承诺。
 
 ## 6. UI/设置
 

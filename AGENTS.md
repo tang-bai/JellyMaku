@@ -2,12 +2,12 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：Stage A 核心已构建（Windows release 可启动；analyze 0 issue；100 tests passed）；已推送 GitHub（e2b3ca7）。
+> 状态：Stage A 核心已构建（Windows release 可启动；analyze 0 issue；100 tests passed）；已推送 GitHub（Stage A 基线 `dc1f8d5c`；RTX VSR spike 失败已回退）。
 > 日期：2026-10-19。
 
 ## 0. 当前仓库状态（必须先理解）
 
-- 本地 git 已初始化，main 为工作分支；origin https://github.com/tang-bai/JellyMaku 已推送（e2b3ca7）。
+- 本地 git 已初始化，main 为工作分支；origin https://github.com/tang-bai/JellyMaku 已推送（Stage A 基线 `dc1f8d5c`）。
 - main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 项目文档/AGENTS。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
 - Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、100 tests passed、Windows release 构建成功、启动冒烟通过**。
@@ -130,16 +130,16 @@ dart analyze lib test
 | 超分 | Anime4K 资产+profile+glsl-shaders+菜单已接入；画质/性能未验收 |
 | 品牌/打包 | JellyMaku exe/窗口/资源；portable zip；安装器/中文 ARB 未完成 |
 | Bangumi 时间表/图片/评论 | 未开始 |
-| 推送 GitHub | 完成（e2b3ca7） |
+| 推送 GitHub | 完成（基线 dc1f8d5c） |
 
 ## 10. 已知陷阱
 
 1. **Bangumi 官方不可达**：api.bgm.tv/next.bgm.tv 超时；api.kazumi.fyi 评论/搜索 401；不要在无代理时宣称评论可用。
 2. **trace.moe 配额**：100/天、并发 1；不要批量/自动上传。
-3. **RTX VSR**：media_kit ANGLE/OpenGL 下不可靠；不要把它写成已支持。
+3. **RTX VSR**：2026-10-20 spike 失败：已加载后切换无变化（0.07/255）；先选 RTX 再重启加载会卡死。media_kit ANGLE/OpenGL 无法直接承载 d3d11vpp；不要把它写成已支持。回退备份：分支 `backup/pre-rtx-vsr`、标签 `backup/pre-rtx-vsr-2026-10-20`。
 4. **PR #735 冲突**：基于旧 develop；合并需解决 settings/player/ARB 冲突。
 5. **中文路径**：Cargokit 生成的 pubspec 会用系统代码页，Dart 无法解析；用 ASCII 路径 + `/utf-8`。
-6. **已推送**：main 已推送 origin e2b3ca7；后续 push/force-push 仍需用户确认。
+6. **已推送**：main 已推送 origin（Stage A 基线 `dc1f8d5c`）；RTX 实验分支 `experiment/rtx-vsr` 仅本地保留。后续 push/force-push 仍需用户确认。
 7. **旧实现丢失**：不要从远程“恢复”旧 MPV Shim 代码（远程为空）。
 8. **许可**：Kazumi 代码 GPL-3.0 可用，但资产不可复制；Anime4K MIT 已附许可。
 9. **原生依赖下载**：libmpv/ANGLE/MDK/SQLite/NuGet 可能卡在 GitHub/SourceForge/sqlite.org/nuget.org；用 third_party 预置与本地 feed。
