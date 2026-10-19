@@ -1,11 +1,11 @@
 
 # 实施总计划（Stage A / Stage B）
 
-> 状态：Draft；Fladder + PR #735 基线已导入，尚未构建/实现。
+> 状态：Stage A 核心已构建/验证（Windows release + 100 tests + 启动冒烟）；真实 E2E/最新 develop/安装器未完成。
 > 日期：2026-10-19。
 > 基座：DonutWare/Fladder develop de7b5a2a23f16f5f3bb164ec0baedf50941e4808 + PR #735。
 > 原则：先交付可用的 Jellyfin 播放器，再叠加 Bangumi；每阶段有可运行产物与证据。
-> 当前基线：main e7ce1e97 = Fladder + PR #735 head + 文档；最新 develop 未合并；Flutter 未安装/未构建。
+> 当前基线：main 本地（PR #735 head + Stage A 代码/文档）；最新 develop 未合并；尚未推送。
 
 ## 0. 交付概要
 

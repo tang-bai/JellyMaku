@@ -2,7 +2,7 @@
 # 下载物与测试资产
 
 > 用户要求：测试文件和需要下载的文件都放在本仓库目录。大文件 gitignore，脚本/manifest 入库。
-> 状态：Draft。以下为计划路径；尚未下载。
+> 状态：2026-10-19 已下载并用于构建 Flutter/libmpv/ANGLE/MDK/SQLite/NuGet；Jellyfin/.NET/测试媒体/Inno 尚未下载。
 
 ## 1. 目录约定
 
@@ -31,25 +31,33 @@ artifacts/build/                便携包/安装器
 
 | 资产 | 版本/来源 | 目标 | 说明 |
 |---|---|---|---|
-| Flutter SDK | 3.35.7 stable（Fladder .fvmrc） | .flutter/ | 约 1.76GB zip；PUB_CACHE 本地 |
-| Fladder | develop de7b5a2a23f16f5f3bb164ec0baedf50941e4808 | 源码根 | 固定 commit；PR #735 合并 |
-| SyncPlay PR | head 79e249ebf99ecc8dc8f0d5d43c3604ace45fbba9 | 源码 | open；合并/适配 |
-| Jellyfin | 12.2 amd64 zip | third_party/jellyfin/ | 需要 .NET 10 |
-| .NET runtime | 10.0 win-x64 | third_party/dotnet/ | Jellyfin 运行 |
-| shader pack | default-shader-pack v3.0.0 | third_party/shader-pack/、assets/shaders/ | 选中 shader 入源码 |
-| Inno Setup | 6.x | tools/inno/ | 安装器 |
-| 7zr | 7-zip.org/a/7zr.exe | tools/bin/ | 解压 7z（如需要） |
-| 测试视频 | ffmpeg 生成 + 可选 BBB | testdata/media/ | 1080p60/480p/720p/多音轨 |
-| Mock DDP | tool/mock_ddp.dart | 源码 | 测试 |
-| Mock Bangumi | tool/mock_bangumi.dart | 源码 | 测试 |
-| Mock trace.moe | tool/mock_trace.dart | 源码 | 测试 |
+| Flutter SDK | 3.35.7 stable | .flutter/ | 已安装；zip 在 tools/downloads/（gitignore） |
+| Fladder | PR #735 head 79e249e | 源码根 | 已导入；最新 develop 未合并 |
+| libmpv | mpv-dev-x86_64-20260531-git-13a3e3a.7z | third_party/mpv/ | MD5 69141eef...；构建时复制到 build |
+| ANGLE | ANGLE.7z（v1.0.1） | third_party/angle/ | MD5 e866f13e... |
+| MDK SDK | mdk-sdk-windows-x64.7z | third_party/mdk/ | 解压到 FVP pub cache |
+| SQLite | sqlite-autoconf-3520000.tar.gz | third_party/sqlite/ | 本地补丁给 sqlite3_flutter_libs |
+| NuGet | nuget.exe + 3 nupkg | tools/nuget/、third_party/nuget/ | WIL/CppWinRT |
+| Anime4K | Clamp/Restore/Upscale M | assets/shaders/anime4k/ | MIT；已入源码 |
+| Jellyfin | 12.2 amd64 zip | third_party/jellyfin/ | 尚未下载；需要 .NET 10 |
+| .NET runtime | 10.0 win-x64 | third_party/dotnet/ | 尚未下载 |
+| Inno Setup | 6.x | tools/inno/ | 尚未下载；当前 portable zip |
+| 测试视频 | ffmpeg 生成 + 可选 BBB | testdata/media/ | 尚未生成 |
+| Mock DDP | test/danmaku/ddp_client_test.dart | 源码 | 本地 HttpServer mock |
+| Mock Bangumi/trace.moe | tool/mock_* | 源码 | 未开始 |
 
 ## 3. 下载 URL 参考
 
 - Flutter：https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_3.35.7-stable.zip
+  - 可用镜像：https://storage.flutter-io.cn/flutter_infra_release/...
+- libmpv：https://github.com/DonutWare/mpv-winbuild-cmake/releases/download/20260531/mpv-dev-x86_64-20260531-git-13a3e3a.7z
+- ANGLE：https://github.com/alexmercerind/flutter-windows-ANGLE-OpenGL-ES/releases/download/v1.0.1/ANGLE.7z
+- MDK SDK：https://sourceforge.net/projects/mdk-sdk/files/nightly/mdk-sdk-windows-x64.7z
+- SQLite：https://sqlite.org/2026/sqlite-autoconf-3520000.tar.gz
+- NuGet：https://dist.nuget.org/win-x86-commandline/v6.0.0/nuget.exe
+- Anime4K：https://github.com/bloc97/Anime4K（glsl/Restore、glsl/Upscale）
 - Jellyfin：https://repo.jellyfin.org/files/server/windows/stable/v12.2/amd64/jellyfin_12.2-amd64.zip
 - .NET 10：https://aka.ms/dotnet/10.0/dotnet-runtime-win-x64.zip
-- shader pack：https://github.com/iwalton3/default-shader-pack/releases/tag/v3.0.0
 - Inno Setup：https://jrsoftware.org/isdl.php
 - Fladder：https://github.com/DonutWare/Fladder
 - PR #735：https://github.com/DonutWare/Fladder/pull/735

@@ -1,7 +1,7 @@
 
 # 实施检查清单与证据模板
 
-> 状态：A0 部分完成（源码已导入；工具链/构建未开始）。所有未完成项保持空 checkbox。
+> 状态：Stage A 核心已构建/验证（2026-10-19）：Flutter 3.35.7、analyze 0、100 tests、Windows release + 启动冒烟、portable zip。真实 Jellyfin/DDP/SyncPlay E2E 仍未完成。
 > 用途：让后续 agent 按清单推进，避免“文档写了但没做”。
 
 ## 1. Stage A 检查清单
@@ -12,44 +12,45 @@
 - [x] 固定 Fladder commit de7b5a2；记录 PR #735 head。
 - [x] 以 PR #735 head 导入 Fladder + SyncPlay，并 merge 文档。
 - [x] 解决 README/.gitignore 冲突；main 已快进到导入提交。
-- [ ] 补最新 develop 合并；flutter pub get/analyze/test 通过。
-- [ ] Flutter 3.35.7 到 .flutter；PUB_CACHE 本地。
-- [ ] VS BuildTools/Windows SDK/Developer Mode 检查通过。
-- [ ] flutter build windows --release 成功。
+- [ ] 补最新 develop 合并（仍为 PR #735 head）。
+- [x] Flutter 3.35.7 到 .flutter；PUB_CACHE 本地。
+- [x] VS BuildTools/Windows SDK/Developer Mode 检查通过。
+- [x] flutter analyze/test 通过（0 issue；100 tests）。
+- [x] flutter build windows --release 成功；启动冒烟通过。
 - [ ] 本地 Jellyfin 12.2 + .NET 10 启动；登录/播放测试片。
 - [ ] third_party/manifest.json 生成；verify-assets 通过。
 
 ### A1/A2 弹幕
 
-- [ ] lib/danmaku 核心；DDP 签名/错误/缓存。
-- [ ] 匹配/手动映射/本地 XML。
-- [ ] Flutter 叠加层；设置页；播放器入口。
-- [ ] 单测/Widget/Mock；5000 条性能。
+- [x] lib/danmaku 核心；DDP 签名/错误/缓存。
+- [ ] 匹配/手动映射/本地 XML（自动匹配/映射数据层已做；手动 UI/local XML 未做）。
+- [x] Flutter 叠加层；设置弹窗；播放器入口。
+- [x] 单测/Mock（DDP HTTP mock、解析、DPAPI）。
 - [ ] 本地 Jellyfin E2E：主字幕共存/seek/pause/切集。
-- [ ] 截图/日志。
+- [ ] 截图/性能日志（5000 条未压测）。
 
 ### A3 超分
 
-- [ ] shader 资产/许可；profile 模型。
-- [ ] glsl-shaders 应用；失败回退。
-- [ ] 设置页/持久化。
+- [x] shader 资产/许可；profile 模型（Anime4K Fast/Quality）。
+- [x] glsl-shaders 应用；失败仅日志回退。
+- [x] 播放器菜单/持久化（独立设置页未做）。
 - [ ] 至少 3 个 profile 截图；性能记录。
-- [ ] RTX VSR spike 结论（可选）。
+- [ ] RTX VSR spike 结论（可选，不作 v1）。
 
 ### A4 SyncPlay
 
-- [ ] PR #735 合并/适配；Windows/libMPV 回调。
-- [ ] 双客户端矩阵；Jellyfin 12.2 WebSocket。
-- [ ] 中文文案/组面板。
+- [x] PR #735 代码导入；Windows release 构建包含 smtc_windows。
+- [ ] 双客户端矩阵；Jellyfin 12.2 WebSocket（单测已通过，真实联调未做）。
+- [ ] 中文文案/组面板完善。
 - [ ] 日志/截图/误差。
 
 ### A5 品牌/打包
 
-- [ ] JellyMaku 名称/exe/窗口/安装器/关于页。
+- [x] JellyMaku 名称/exe/窗口/版本资源（关于页/安装器未做）。
 - [ ] 更新检查不指回 Fladder。
-- [ ] i18n ARB en/zh；gen-l10n。
-- [ ] Inno Setup/portable zip；许可/第三方声明。
-- [ ] 干净目录验证；Stage A 验收。
+- [ ] i18n ARB en/zh；gen-l10n（弹幕设置仍硬编码英文）。
+- [x] portable zip；Anime4K/Fladder 许可保留（Inno 安装器未做）。
+- [ ] 干净目录完整功能验证；Stage A 真实 E2E 验收。
 
 ## 2. Stage B 检查清单
 

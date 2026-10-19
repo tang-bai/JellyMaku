@@ -1,7 +1,9 @@
 
 # 测试策略与验收
 
-> 状态：Draft。以下测试尚未执行；所有“已通过”必须以后续实际命令/截图/日志为准。
+> 状态：部分执行。2026-10-19 已完成 analyze、100 tests、Windows release 构建、启动冒烟；真实 Jellyfin/DDP/SyncPlay 联调仍未执行。
+>
+> 已执行证据见 [STAGE_A_REPORT.md](STAGE_A_REPORT.md) 与 artifacts/logs/（本地，不入库）。
 
 ## 1. 测试层级
 
@@ -17,35 +19,32 @@
 
 ## 2. 环境
 
-- Windows 10/11 x64；VS 2022 BuildTools；Developer Mode；Flutter 3.35.7。
-- Jellyfin 12.2 + .NET 10；本地 127.0.0.1:8096。
+- Windows 10/11 x64；VS 2022 BuildTools；Developer Mode；Flutter 3.35.7（已安装）。
+- Jellyfin 12.2 + .NET 10；本地 127.0.0.1:8096（尚未下载/启动）。
 - ffmpeg 9.0.1；测试媒体在 testdata/media。
 - DDP：无凭证时 Mock/本地 XML；真实凭证可选。
 - Bangumi：无网络路径时 Mock；真实联调需用户代理/Worker。
 - trace.moe：Mock 或真实（quota 100/day，concurrency 1）。
 
-## 3. 命令（计划）
+## 3. 已执行命令
 
 ~~~powershell
-pwsh -File tools/bootstrap.ps1
-pwsh -File tools/verify-assets.ps1
-pwsh -File tools/setup-jellyfin.ps1
-pwsh -File tools/run-dev.ps1
-pwsh -File tools/test.ps1
-pwsh -File tools/pack.ps1
-~~~
+# 从 ASCII 路径运行（中文路径会导致 Cargokit 编码失败）
+$env:PUB_CACHE = "K:\.pub-cache"
+$env:PUB_HOSTED_URL = "https://pub.flutter-io.cn"
+$env:PATH = "K:\tools\nuget;" + $env:PATH
+$env:CL = "/utf-8"
 
-Flutter 直接命令：
-
-~~~powershell
 .flutter\bin\flutter.bat pub get
-.flutter\bin\flutter.bat gen-l10n
-.flutter\bin\flutter.bat analyze
-.flutter\bin\flutter.bat test
-.flutter\bin\flutter.bat build windows --release
+dart analyze lib test                 # 0 issue
+.flutter\bin\flutter.bat test --no-pub   # 100 passed
+.flutter\bin\flutter.bat build windows --release --no-pub
+& .\tools\pack.ps1 -Version 0.1.0
 ~~~
 
-若中文路径导致问题，使用 subst J: 映射仓库根目录后再执行。
+结果：Windows release + 启动冒烟通过；portable zip 90,656,631 bytes，SHA256 28BA756190439324A6F0FCC30AAB1E562B381D48E17E4B1EF8ADA3D934F3986A。
+
+尚未执行的计划脚本：tools/bootstrap.ps1、verify-assets.ps1、setup-jellyfin.ps1、run-dev.ps1、test.ps1（当前只有 pack.ps1）。
 
 ## 4. Mock
 

@@ -1,18 +1,19 @@
 
 # JellyMaku 项目文档
 
-> 状态：Draft（Fladder + PR #735 已导入本地 main；尚未构建）
+> 状态：Stage A 核心已构建并验证（见 [STAGE_A_REPORT.md](STAGE_A_REPORT.md)）；最新 develop、真实 Jellyfin/DDP/SyncPlay 联调未完成。
 > 日期：2026-10-19
-> 基座目标：DonutWare/Fladder（Flutter/Dart，GPL-3.0）
-> 说明：本文档集是后续实施的唯一计划来源。除明确标注“已验证”的内容外，所有功能、测试、截图、性能均为计划，不代表已实现。
+> 基座：DonutWare/Fladder（Flutter/Dart，GPL-3.0）+ SyncPlay PR #735
+> 说明：除明确标注“已验证”的内容外，所有功能、测试、截图、性能均为计划，不代表已实现。
 
 ## 0. 当前仓库状态（务必先读）
 
-- 本地 git 已初始化；main 已导入 Fladder + SyncPlay PR #735（PR head 79e249e）+ 本文档。
-- 远程 https://github.com/tang-bai/JellyMaku 仍为空；尚未推送。
-- 基线以 PR #735 head 为准（含 Fladder + SyncPlay）；最新 develop 合并、Flutter 工具链、pub get/analyze/test/build 均未完成。
+- 本地 main 已包含 Fladder + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 文档。
+- origin https://github.com/tang-bai/JellyMaku 已配置；远程为空，尚未推送。
+- Flutter 3.35.7 已安装；analyze 0 issue；100 tests passed；Windows release 已构建并通过启动冒烟。
+- 基线仍是 PR #735 head；最新 develop 未合并。真实 Jellyfin 12.2、DDP 凭证、SyncPlay 双端均未联调。
 - 旧 MPV Shim 实现/旧文档/旧 git 历史已丢失，不可恢复；新方案不再以它为基座。
-- 下一步：安装 Flutter 3.35.7，补最新 develop 合并，跑基线构建。
+- 下一步：合并最新 develop → 真实 Jellyfin/DDP/SyncPlay 联调 → 手动弹幕匹配/本地导入 → 安装器/中文文案。
 
 ## 1. 文档索引
 
@@ -32,7 +33,9 @@
 | [LICENSING.md](LICENSING.md) | GPL/第三方许可、署名、内容合规 |
 | [DECISIONS.md](DECISIONS.md) | ADR：基座、SyncPlay、弹幕、超分、Bangumi、分支 |
 | [ROADMAP.md](ROADMAP.md) | 状态表、里程碑、当前阻塞与下一步 |
-| [IMPLEMENTATION.md](IMPLEMENTATION.md) | 实施检查清单与证据模板（当前为未开始） |
+| [IMPLEMENTATION.md](IMPLEMENTATION.md) | 实施检查清单与证据模板 |
+| [STAGE_A_REPORT.md](STAGE_A_REPORT.md) | Stage A 构建、测试、冒烟、便携包与实际限制 |
+| [BUILD_WINDOWS.md](BUILD_WINDOWS.md) | Windows 原生依赖、构建命令、已知失败与处理 |
 | [UPSTREAM.md](UPSTREAM.md) | Fladder/PR #735 固定与合并策略；legacy 说明 |
 
 归档目录：[docs/archive/mpv-shim/](../archive/mpv-shim/README.md)。

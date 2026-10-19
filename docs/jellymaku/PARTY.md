@@ -1,7 +1,7 @@
 
 # 一起看（Jellyfin SyncPlay）设计
 
-> 状态：Draft。
+> 状态：PR #735 代码已导入；Windows 构建/单测通过；真实 Jellyfin 双端联调未做。
 > 决策：复用 Fladder PR #735，不重写 SyncPlay，不使用 Kazumi 的公共 SyncPlay 服务器。
 
 ## 1. 目标与前提

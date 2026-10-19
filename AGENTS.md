@@ -2,19 +2,20 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：Fladder + SyncPlay PR #735 已导入本地 main；尚未安装 Flutter/构建。
+> 状态：Stage A 核心已构建（Windows release 可启动；analyze 0 issue；100 tests passed）；尚未推送 GitHub。
 > 日期：2026-10-19。
 
 ## 0. 当前仓库状态（必须先理解）
 
-- 本地 git 已初始化，main 为工作分支；远程 https://github.com/tang-bai/JellyMaku 仍为空（size 0），尚未推送。
-- main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e），以及项目文档/AGENTS。
+- 本地 git 已初始化，main 为工作分支；origin https://github.com/tang-bai/JellyMaku 已配置，远程为空，尚未推送。
+- main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 项目文档/AGENTS。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
-- Flutter 3.35.7 尚未安装；尚未执行 pub get/analyze/test/build，因此“可构建”仍未验证。
-- 基线说明：为尽快拿到可运行起点，main 以 PR #735 head 为基线（包含 Fladder + SyncPlay），**尚未合并最新 develop**；Phase A0 需要补这次合并并处理冲突。
+- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、100 tests passed、Windows release 构建成功、启动冒烟通过**。
+- 基线说明：为尽快拿到可运行起点，main 以 PR #735 head 为基线（包含 Fladder + SyncPlay），**尚未合并最新 develop**；Phase A0 仍需补这次合并。
+- 未验证：真实 Jellyfin 12.2 E2E、真实 DDP 凭证、SyncPlay 双客户端、超分画质/性能。
 - 因此：
   - 不要把“计划”当成“已实现”；
-  - 不要声称测试通过/截图完成/性能达标；
+  - 不要把单测/构建通过当成真实 E2E 通过；
   - 不要在没有用户确认的情况下 push/force-push/改写历史。
 
 ## 1. 项目使命
@@ -66,25 +67,26 @@ artifacts/               截图/日志/性能/安装包（gitignore）
 6. **证据**：更新 docs/jellymaku/IMPLEMENTATION.md、ROADMAP.md；未验证项明确标注。
 7. **提交**：逻辑 commit；不提交密钥/大文件；推送前用户确认。
 
-## 5. 命令（计划，尚未可用）
+## 5. 命令（已实际使用）
 
 ~~~powershell
-pwsh -File tools/bootstrap.ps1
-pwsh -File tools/verify-assets.ps1
-pwsh -File tools/setup-jellyfin.ps1
-pwsh -File tools/run-dev.ps1
-pwsh -File tools/test.ps1
-pwsh -File tools/pack.ps1
+# 从 ASCII 路径构建（如 subst L: <repo-parent>; cd L:\JellyMaku）
+$env:PUB_CACHE = "K:\.pub-cache"
+$env:PUB_HOSTED_URL = "https://pub.flutter-io.cn"
+$env:PATH = "K:\tools\nuget;" + $env:PATH
+$env:CL = "/utf-8"
 
 .flutter\bin\flutter.bat pub get
-.flutter\bin\flutter.bat gen-l10n
-.flutter\bin\flutter.bat analyze
-.flutter\bin\flutter.bat test
-.flutter\bin\flutter.bat build windows --release
+dart analyze lib test
+.flutter\bin\flutter.bat test --no-pub
+.flutter\bin\flutter.bat build windows --release --no-pub
+& .\tools\pack.ps1 -Version 0.1.0
 ~~~
 
-- 若中文/空格路径导致构建问题，使用 `subst J:` 映射仓库根。
-- 不要在没有工具链时伪造“构建成功”。
+- 完整依赖预置与失败处理见 docs/jellymaku/BUILD_WINDOWS.md。
+- 中文/空格路径会导致 Cargokit pubspec 编码错误；必须用 ASCII 路径构建。
+
+- 不要在没有工具链/依赖时伪造“构建成功”。
 
 ## 6. 编码约定
 
@@ -120,13 +122,15 @@ pwsh -File tools/pack.ps1
 
 | 功能 | 状态 |
 |---|---|
-| 文档/AGENTS | 完成（0c46705） |
-| Fladder 源码导入 | 完成（e7ce1e97，PR #735 head 基线） |
-| SyncPlay | 代码已导入；未构建/验证 |
-| 弹幕 | 未开始 |
-| 超分 | 未开始 |
+| 文档/AGENTS | 完成；Stage A 报告/BUILD_WINDOWS 已补 |
+| Fladder 源码导入 | 完成（PR #735 head 基线） |
+| Flutter/构建 | 完成：analyze 0、100 tests、Windows release 成功、启动冒烟 |
+| SyncPlay | 代码已导入；单测通过；真实双端未联调 |
+| 弹幕 | DDP 客户端/自动匹配/缓存/叠加层/设置/DPAPI 已接入；手动匹配/本地 XML/真实联调未完成 |
+| 超分 | Anime4K 资产+profile+glsl-shaders+菜单已接入；画质/性能未验收 |
+| 品牌/打包 | JellyMaku exe/窗口/资源；portable zip；安装器/中文 ARB 未完成 |
 | Bangumi 时间表/图片/评论 | 未开始 |
-| 打包/发布 | 未开始 |
+| 推送 GitHub | 未推送 |
 
 ## 10. 已知陷阱
 
@@ -134,15 +138,17 @@ pwsh -File tools/pack.ps1
 2. **trace.moe 配额**：100/天、并发 1；不要批量/自动上传。
 3. **RTX VSR**：media_kit ANGLE/OpenGL 下不可靠；不要把它写成已支持。
 4. **PR #735 冲突**：基于旧 develop；合并需解决 settings/player/ARB 冲突。
-5. **中文路径**：Flutter/CMake 可能失败；用 subst。
-6. **尚未推送**：本地 main 已有导入；远程为空、origin 已配置但未推送；不要擅自 push/force-push。
+5. **中文路径**：Cargokit 生成的 pubspec 会用系统代码页，Dart 无法解析；用 ASCII 路径 + `/utf-8`。
+6. **尚未推送**：本地 main 已有 Stage A 提交；远程为空、origin 已配置但未推送；不要擅自 push/force-push。
 7. **旧实现丢失**：不要从远程“恢复”旧 MPV Shim 代码（远程为空）。
-8. **许可**：Kazumi 代码 GPL-3.0 可用，但资产不可复制。
+8. **许可**：Kazumi 代码 GPL-3.0 可用，但资产不可复制；Anime4K MIT 已附许可。
+9. **原生依赖下载**：libmpv/ANGLE/MDK/SQLite/NuGet 可能卡在 GitHub/SourceForge/sqlite.org/nuget.org；用 third_party 预置与本地 feed。
+10. **插件注册器过期**：升级 screen_brightness_windows 后必须删除并重新生成 generated_plugin_registrant.cc/.h。
 
 ## 11. 文档索引
 
 - docs/jellymaku/README.md
-- OVERVIEW / RESEARCH / ARCHITECTURE / PLAN / KAZUMI / BANGUMI / DANMAKU / SR / PARTY / TESTING / ASSETS / LICENSING / DECISIONS / ROADMAP / IMPLEMENTATION / UPSTREAM
+- OVERVIEW / RESEARCH / ARCHITECTURE / PLAN / KAZUMI / BANGUMI / DANMAKU / SR / PARTY / TESTING / ASSETS / LICENSING / DECISIONS / ROADMAP / IMPLEMENTATION / STAGE_A_REPORT / BUILD_WINDOWS / UPSTREAM
 - docs/upstream/FLADDER_README.md（上游 README 存档）
 - docs/archive/mpv-shim/README.md
 

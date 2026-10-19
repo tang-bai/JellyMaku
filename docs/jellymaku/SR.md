@@ -1,7 +1,7 @@
 
 # 视频超分设计（GLSL shader）
 
-> 状态：Draft。
+> 状态：v1 核心已实现（Anime4K Fast/Quality + glsl-shaders + 菜单）；画质/性能验收未做。
 > 目标：在 Fladder/media_kit 的 libmpv 上提供可切换的 Anime4K/FSRCNNX/ArtCNN 超分；RTX VSR 不作为 v1 验收。
 
 ## 1. 背景与限制

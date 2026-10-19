@@ -1,7 +1,7 @@
 
 # 弹幕设计（DanDanPlay + Flutter 叠加层）
 
-> 状态：Draft。
+> 状态：v1 核心已实现（DDP/自动匹配/缓存/叠加层/设置/DPAPI）；手动匹配、本地 XML、真实 DDP/播放器 E2E 未完成。
 > 目标：在 Fladder 上实现弹弹play 弹幕：自动/手动匹配、滚动/顶部/底部、样式/过滤/偏移、缓存/降级。
 > 参考：Kazumi 的 DDP 客户端/解析/屏蔽实现（GPL-3.0），但渲染改为 Flutter CustomPainter。
 

@@ -1,9 +1,9 @@
 
 # JellyMaku
 
-> 状态：Fladder + SyncPlay PR #735 已导入本地 main；尚未安装 Flutter/构建（2026-10-19）
+> 状态：Stage A 核心已构建（Windows release 可启动；analyze 0 issue；100 tests passed）；尚未推送 GitHub（2026-10-19）
 > 目标基座：DonutWare/Fladder（Flutter/Dart，GPL-3.0）
-> 当前仓库：本地 git 已初始化；main 已包含 Fladder + PR #735；远程为空，未推送。
+> 当前仓库：本地 main 已包含 Fladder + PR #735 + Stage A 代码；origin 已配置，远程为空、未推送。
 
 JellyMaku 是面向 Windows 10/11 的 Jellyfin 桌面播放器，基于 Fladder 二次开发，计划提供：
 
@@ -14,24 +14,28 @@ JellyMaku 是面向 Windows 10/11 的 Jellyfin 桌面播放器，基于 Fladder 
 
 ## 现在能做什么
 
-- 查看已导入的 Fladder 源码：lib/、windows/、pubspec.yaml
+- 运行 Windows 构建：`build/windows/x64/runner/Release/JellyMaku.exe`
+- 使用便携包：`artifacts/JellyMaku-0.1.0-windows-x64-portable.zip`（本地生成，不入库）
+- 在播放器底栏打开弹幕设置（弹弹play AppId/AppSecret）与超分菜单（Anime4K）
+- 查看 Stage A 构建/测试证据：docs/jellymaku/STAGE_A_REPORT.md
+- 查看 Windows 构建复现步骤：docs/jellymaku/BUILD_WINDOWS.md
 - 阅读完整计划：docs/jellymaku/README.md
 - 查看 agent 规则：AGENTS.md
-- 查看 Kazumi 三项能力分析：docs/jellymaku/KAZUMI.md
-- 查看 Bangumi 网络限制：docs/jellymaku/BANGUMI.md
-- 查看下载/测试资产约定：docs/jellymaku/ASSETS.md
 
 ## 还没做什么
 
-- Flutter 工具链尚未安装（3.35.7）
-- Fladder + PR #735 基线尚未构建/测试
-- 弹幕/超分/Bangumi 尚未实现
-- 没有可运行构建、测试、截图或安装包
+- 最新 Fladder develop 尚未合并（基线仍是 PR #735 head）
+- 真实 Jellyfin 12.2 登录/播放/字幕/seek/切集 E2E 尚未执行
+- 真实 DDP AppId/AppSecret 联调、手动匹配/本地 XML 尚未完成
+- SyncPlay 双客户端真实联调尚未执行
+- 超分画质/性能对比、安装器、中文 ARB 文案尚未完成
+- Bangumi 时间表/图片识别/评论（Stage B）尚未开始
 
 ## 重要限制
 
+- 当前环境无法直连 DDP 真实服务（无 AppId/AppSecret）；弹幕行为由本地 mock/单测覆盖，真实联调需用户凭证。
 - Bangumi 官方 API 在当前网络不可达；评论/搜索镜像要求签名，不能复用 Kazumi 私有凭证。评论功能必须由用户提供代理/自建 Worker，否则只能 Mock/离线验证。
-- media_kit 的 Windows 渲染路径为 ANGLE/OpenGL，RTX VSR 不作为 v1 验收项；v1 使用 GLSL shader 超分。
+- media_kit 的 Windows 渲染路径为 ANGLE/OpenGL，RTX VSR 不作为 v1 验收项；v1 使用 GLSL shader 超分。Anime4K 输出尚未做画质/性能验收。
 - 所有下载物/测试文件放在本仓库目录；大文件不提交。
 
 ## 许可
