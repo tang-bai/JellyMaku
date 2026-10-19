@@ -20,8 +20,8 @@
 - 可执行文件版本资源：ProductName/FileDescription = JellyMaku；OriginalFilename = JellyMaku.exe。
 - 冒烟：进程启动成功，窗口标题 `JellyMaku`，12 秒后正常关闭（`CloseMainWindow`）。
 - 便携包：`artifacts/JellyMaku-0.1.0-windows-x64-portable.zip`
-  - 大小：90,656,631 bytes
-  - SHA256：`28BA756190439324A6F0FCC30AAB1E562B381D48E17E4B1EF8ADA3D934F3986A`
+  - 大小：90,650,603 bytes（SMTC 修复后重打包）
+  - SHA256：`63BA9ABB07A8282916C517D899ADF5E3538A383810E778B0A0B1310A9F077AAD`
   - 结构：`JellyMaku/JellyMaku.exe` + DLL + `data/` + README/LICENSE/AGENTS。
 
 ## 3. 验证结果
@@ -85,3 +85,23 @@
 - media_kit/ANGLE/FVP/sqlite3 默认从 GitHub/SourceForge/sqlite.org 下载；本环境已预置到 `third_party/` 并修补本地 pub cache，否则需代理。
 - NuGet 使用本地 feed（`third_party/nuget`）与本地 `nuget.exe`；否则 `local_auth_windows`/`permission_handler_windows` 会卡在 nuget.org。
 - 详细构建步骤见 `docs/jellymaku/BUILD_WINDOWS.md`。
+
+## 7. 播放进度/SMTC 修复（2026-10-19 22:50）
+
+现象：视频画面正常，但进度条停在 00:00、总时长 -00:00，并显示持续加载。
+
+根因（来自 `%LOCALAPPDATA%\JellyMaku contributors\JellyMaku\crash_logs.json`）：
+
+1. `MediaControlsWrapper.setup` 先调用 `_initPlayer()`，再调用 `_subscribePlayerState()`。
+2. `_initPlayer()` 构造 `SMTCWindows` 时，SMTC 的 Rust 桥未初始化（启动时 `SMTCWindows.initialize()` 在 post-frame callback 中，存在竞态）。
+3. 异常导致 `_subscribePlayerState()` 没有执行，`mediaPlaybackProvider` 永远收不到 position/duration/buffering 更新；画面仍由播放器输出。
+4. 额外发现 `smtc_windows 1.1.0` 的 codegen 是 `flutter_rust_bridge 2.11.1`，而依赖解析到了 2.13.0，版本检查必然失败。
+
+修复：
+
+- 在 `bootstrapApplication` 中、`runApp` 之前初始化 SMTC，并捕获失败。
+- `MediaControlsWrapper.setup` 改为先 `_subscribePlayerState()`，再 `_initPlayer()`。
+- `_subscribePlayer` 对 SMTC 构造/监听做 try/catch；SMTC 不可用时只记录日志，不影响播放状态。
+- `pubspec.yaml` pin `flutter_rust_bridge: 2.11.1`。
+
+验证：`dart analyze lib` 0 issue；100 tests passed；Windows release 构建成功；启动后 crash_logs 无新增 SMTC 错误。真实视频的进度条仍需用户在已登录的 Jellyfin 环境复测。

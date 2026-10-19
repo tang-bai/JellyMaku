@@ -144,6 +144,7 @@ dart analyze lib test
 8. **许可**：Kazumi 代码 GPL-3.0 可用，但资产不可复制；Anime4K MIT 已附许可。
 9. **原生依赖下载**：libmpv/ANGLE/MDK/SQLite/NuGet 可能卡在 GitHub/SourceForge/sqlite.org/nuget.org；用 third_party 预置与本地 feed。
 10. **插件注册器过期**：升级 screen_brightness_windows 后必须删除并重新生成 generated_plugin_registrant.cc/.h。
+11. **SMTC 初始化竞态**：SMTC 必须在 runApp 前初始化；`_subscribePlayerState` 必须先于可选 SMTC 设置，SMTC 异常不得中断进度订阅。`smtc_windows 1.1.0` 需配 `flutter_rust_bridge 2.11.1`，否则 codegen/runtime 版本检查会失败。
 
 ## 11. 文档索引
 

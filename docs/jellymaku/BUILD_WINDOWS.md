@@ -79,3 +79,5 @@ $env:FLUTTER_SUPPRESS_ANALYTICS = "true"
 | `flutter_assemble` exit 255 | 先看 `flutter build -v` 日志；本次是盘符根路径问题 |
 | C4819 被当作错误 | 设置 `CL=/utf-8` |
 | screen brightness 注册失败 | 删除并重新生成 plugin registrant |
+| SMTC codegen/runtime 版本不匹配 | 保持 `flutter_rust_bridge: 2.11.1`（smtc_windows 1.1.0 的生成版本） |
+| 视频播放但进度条 00:00/一直加载 | 检查 SMTC 初始化竞态；SMTC 异常不得跳过 player state 订阅 |
