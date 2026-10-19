@@ -1,4 +1,4 @@
-﻿# Miscellaneous
+# Miscellaneous
 *.class
 *.log
 *.pyc
@@ -119,3 +119,9 @@ Thumbs.db
 mpv-2.dll
 fribidi-0.dll
 vulkan-1.dll
+
+# Local tool downloads (keep scripts/manifests, not binaries)
+tools/nuget/
+tools/downloads/
+tools/inno/
+tools/bin/
