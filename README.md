@@ -1,151 +1,43 @@
 
-<h1 align="center">
-  <br>
-    <a href="https://github.com/DonutWare/Fladder"><img src="https://raw.githubusercontent.com/DonutWare/Fladder/refs/heads/develop/icons/production/fladder_macos_icon.png" alt="Fladder" width="200"></a>
-  <br>
-  Fladder
-  <br>
-</h1>
+# JellyMaku
 
-<h4 align="center">A cross-platform Jellyfin Frontend built on top of <a href="https://flutter.dev/" target="_blank">Flutter</a>.</h4>
+> 状态：Fladder + SyncPlay PR #735 已导入本地 main；尚未安装 Flutter/构建（2026-10-19）
+> 目标基座：DonutWare/Fladder（Flutter/Dart，GPL-3.0）
+> 当前仓库：本地 git 已初始化；main 已包含 Fladder + PR #735；远程为空，未推送。
 
-<p align="center">
-  <a href="#key-features">Key Features</a> •
-  <a href="#screenshots">Screenshots</a> •
-  <a href="#planned-features">Planned Features</a> •
-  <a href="#download">Download</a> •
-  <a href="#how-to-contribute">Contributing</a> •
-  <a href="#credits">Credits</a> •
-  <a href="#license">License</a>
-</p>
+JellyMaku 是面向 Windows 10/11 的 Jellyfin 桌面播放器，基于 Fladder 二次开发，计划提供：
 
-<div align="center">
-  
-  [![Build](https://github.com/DonutWare/Fladder/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/DonutWare/Fladder/actions/workflows/build.yml)
-  [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/DonutWare/fladder/total)](https://github.com/DonutWare/Fladder/releases/latest)
-  [![GitHub Release](https://img.shields.io/github/v/release/DonutWare/fladder?display_name=tag)](https://github.com/DonutWare/Fladder/releases/latest)
-  [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
-  
-</div>
+- 弹弹play 弹幕（自动/手动匹配、Flutter 叠加层、样式/过滤/偏移）
+- Anime4K / FSRCNNX / ArtCNN GLSL 视频超分
+- Jellyfin SyncPlay 一起看（复用 Fladder PR #735）
+- Stage B：Bangumi 番剧时间表、以图搜番、Bangumi 评论（条件功能）
 
+## 现在能做什么
 
+- 查看已导入的 Fladder 源码：lib/、windows/、pubspec.yaml
+- 阅读完整计划：docs/jellymaku/README.md
+- 查看 agent 规则：AGENTS.md
+- 查看 Kazumi 三项能力分析：docs/jellymaku/KAZUMI.md
+- 查看 Bangumi 网络限制：docs/jellymaku/BANGUMI.md
+- 查看下载/测试资产约定：docs/jellymaku/ASSETS.md
 
-## Key Features
+## 还没做什么
 
-* Play media – Stream or sync content locally to your device
-* Manage your library – Refresh content and edit metadata
-* Multiple profiles – add multiple users or different servers easily switching between
-* Direct, Transcode and Offline playback
-* Media segments skipping (Intro/Credits etc.)
-* Trickplay support (timeline scrubbing)
-* Dark/Light mode and multiple color styles to pick
-* Simple comic book format reading support (.cbz, .cbr)
-* Sync items for all platforms
-* Download items and keep progress in sync
-* Keyboard shortcuts
-* Adaptive layout for all platforms
-* Next-up overview when watching a queue
-* Server management
-* Seerr/Jellyseerr integration
-* Platforms
-  - Android + TV
-  - Web + Docker
-  - macOS
-  - Windows 
-  - iOS 
-  - Linux 
- 
-## Screenshots
-<details close>
-  <summary>Mobile</summary>
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Mobile/Dashboard.png?raw=true" alt="Fladder" width="200">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Mobile/Details.png?raw=true" alt="Fladder" width="200">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Mobile/Details_2.png?raw=true" alt="Fladder" width="200">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Mobile/Favourites.png?raw=true" alt="Fladder" width="200">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Mobile/Library.png?raw=true" alt="Fladder" width="200">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Mobile/Library_Search.png?raw=true" alt="Fladder" width="200">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Mobile/Resume_Tab.png?raw=true" alt="Fladder" width="200">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Mobile/Sync.png?raw=true" alt="Fladder" width="200">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Mobile/Settings.png?raw=true" alt="Fladder" width="200">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Mobile/Player.png?raw=true" alt="Fladder" width="1280">  
-</details>
+- Flutter 工具链尚未安装（3.35.7）
+- Fladder + PR #735 基线尚未构建/测试
+- 弹幕/超分/Bangumi 尚未实现
+- 没有可运行构建、测试、截图或安装包
 
-<details close>
-  <summary>Tablet</summary>
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Tablet/Dashboard.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Tablet/Details.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Tablet/Details_2.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Tablet/Favourites.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Tablet/Library.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Tablet/Library_Search.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Tablet/Resume_Tab.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Tablet/Sync.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Tablet/Settings.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Tablet/Player.png?raw=true" alt="Fladder" width="1280">   
-</details>
+## 重要限制
 
-<details close>
-  <summary>Television</summary>
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Television/Dashboard.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Television/Details.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Television/Favourites.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Television/Library.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Television/Library_Search.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Television/Sync.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Television/Settings.png?raw=true" alt="Fladder" width="1280">  
-   <img src="https://github.com/DonutWare/Fladder/blob/develop/assets/marketing/screenshots/Television/Player.png?raw=true" alt="Fladder" width="1280">   
-</details>
+- Bangumi 官方 API 在当前网络不可达；评论/搜索镜像要求签名，不能复用 Kazumi 私有凭证。评论功能必须由用户提供代理/自建 Worker，否则只能 Mock/离线验证。
+- media_kit 的 Windows 渲染路径为 ANGLE/OpenGL，RTX VSR 不作为 v1 验收项；v1 使用 GLSL shader 超分。
+- 所有下载物/测试文件放在本仓库目录；大文件不提交。
 
-Web/Desktop [try out the web build!](https://DonutWare.github.io/Fladder)
-> [!NOTE]
-> The GitHub hosted web build only allows `https` connections. This is a limitation on GitHub's end, for self-hosted versions `http` works fine.
+## 许可
 
-## Planned Features
+本项目计划以 GPL-3.0 分发，保留 Fladder、PR #735、Kazumi、Anime4K/default-shader-pack、DanDanPlay、Bangumi、trace.moe 等署名；详见 docs/jellymaku/LICENSING.md。
 
-* Chromecast support
-* Improved dPad navigation for non-tv devices
-* [And more???](https://github.com/DonutWare/Fladder/discussions/categories/ideas)
+## 文档索引
 
-## Download
-
-The latest executables for Windows, macOS, Linux, iOS, Android and Web can be found on the [releases page](https://github.com/DonutWare/Fladder/releases).
-
-You can pull the Docker version using the following tags: ```ghcr.io/donutware/fladder:latest```. or ```ghcr.io/donutware/fladder-rootless:latest```
-
-*Platform-specific installation and usage instructions can be found [here](https://github.com/DonutWare/Fladder/blob/develop/INSTALL.md).*
-
-<a href='https://play.google.com/store/apps/details?id=nl.jknaapen.fladder&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=250 align='middle'/></a>
-<a href='https://flathub.org/apps/nl.jknaapen.fladder'><img alt='Get it on Flathub' src='https://flathub.org/api/badge?locale=en' width=192 align='middle'/></a>
-
-> [!WARNING]
-> (Windows) Some flutter applications are marked as false positives by windows defender for more info see [this issue](https://github.com/DonutWare/Fladder/issues/197#issuecomment-2568906874).
-
-## How to Contribute
-Interested in contributing? Here are a couple of ways you can help:
-
-### 🐛 Reporting Bugs
-- Before reporting a bug, **please ensure** that the issue hasn't been reported already.
-- When submitting a bug report, provide detailed steps on how the bug can be reproduced. This will help us to understand and fix the issue faster.
-- Bug reports are appreciated and very helpful!
-
-### 🚀 Submitting Pull Requests
-- **Pull requests are always welcome!** 
-- For new features or large changes, please open a discussion or issue first to ensure that no one else is already working on it.
-- **Keep pull requests short and focused**: try to avoid fixing multiple issues in a single pull request. This helps make the review process smoother and quicker.
-
-### 🌐 Translations 
-<a href="https://hosted.weblate.org/engage/fladder/">
-<img src="https://hosted.weblate.org/widget/fladder/fladder/multi-auto.svg" alt="Translation status" />
-</a>
-
-Thank you for helping to make this project better! 🙌
-
-
-## Credits
-
-This software uses the following open source packages:
-- [Flutter](https://flutter.dev/)
-
-## License
-
-This project is licensed under the GNU General Public License v3.0. More information about the license can be found in [this file](https://github.com/DonutWare/Fladder/blob/develop/LICENSE).
+docs/jellymaku/README.md 是完整索引；建议按 OVERVIEW → DECISIONS → PLAN → 对应模块阅读。

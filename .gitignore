@@ -1,41 +1,86 @@
-# Local toolchains and caches
-.flutter/
-.pub-cache/
-.pip-cache/
-.uv-cache/
-.venv/
-.python/
-
-# Downloads and local assets
-tools/downloads/
-tools/inno/
-tools/bin/
-third_party/
-testdata/
-artifacts/
-
-# Build outputs
-build/
-.dart_tool/
-**/build/
-**/.dart_tool/
-**/ephemeral/
-
-# IDE / OS
-.idea/
-.vscode/
-*.iml
-.DS_Store
-Thumbs.db
-
-# Logs / temp
+﻿# Miscellaneous
+*.class
 *.log
-*.tmp
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.dmg_temp/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
 
-# Local native libs
-mpv-2.dll
-fribidi-0.dll
-vulkan-1.dll
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+**/android/**/gradle-wrapper.jar
+.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+*.jks
+local.properties
+**/.cxx/
+
+# FVM Version Cache
+.fvm/
+
+# AppImage
+/AppDir/
+/AppDirassets/
+/AppDiricons/
+/appimage-build/
+*.AppImage
+*.AppImage.zsync
+
+# flatpak
+.flatpak-builder
+
+# Affinity lock
+*.afdesign~lock~
+*.afphoto~lock~
+
+# Inno Setup builds
+Output
+
+# Generated localizations
+lib/l10n/generated
+android/build/reports/problems/
+
+# ---- JellyMaku local toolchain/assets (added on import) ----
 # Local toolchains and caches
 .flutter/
 .pub-cache/

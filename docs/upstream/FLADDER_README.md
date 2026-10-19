@@ -1,4 +1,4 @@
-﻿
+
 <h1 align="center">
   <br>
     <a href="https://github.com/DonutWare/Fladder"><img src="https://raw.githubusercontent.com/DonutWare/Fladder/refs/heads/develop/icons/production/fladder_macos_icon.png" alt="Fladder" width="200"></a>
