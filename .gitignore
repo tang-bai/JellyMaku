@@ -1,0 +1,38 @@
+# Local toolchains and caches
+.flutter/
+.pub-cache/
+.pip-cache/
+.uv-cache/
+.venv/
+.python/
+
+# Downloads and local assets
+tools/downloads/
+tools/inno/
+tools/bin/
+third_party/
+testdata/
+artifacts/
+
+# Build outputs
+build/
+.dart_tool/
+**/build/
+**/.dart_tool/
+**/ephemeral/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+*.tmp
+
+# Local native libs
+mpv-2.dll
+fribidi-0.dll
+vulkan-1.dll
