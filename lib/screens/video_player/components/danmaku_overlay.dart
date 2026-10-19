@@ -150,9 +150,38 @@ class DanmakuPainter extends CustomPainter {
     final maxDuration = math.max(settings.speedSeconds, 6.0) + 2;
     final startIndex = _lowerBound(comments, time - maxDuration);
 
-    final scrollEnds = List<double>.filled(maxLanes, -1);
-    var topRow = 0;
-    var bottomRow = 0;
+    // Assign a stable lane/row to every comment before drawing. Assigning
+    // only the currently visible comments made lanes change whenever an older
+    // comment left the window, which looked like the rows were jumping.
+    final scrollLanes = List<int>.filled(comments.length, 0);
+    final topRows = List<int>.filled(comments.length, 0);
+    final bottomRows = List<int>.filled(comments.length, 0);
+    final scrollEnds = List<double>.filled(maxLanes, double.negativeInfinity);
+    final topEnds = List<double>.filled(maxLanes, double.negativeInfinity);
+    final bottomEnds = List<double>.filled(maxLanes, double.negativeInfinity);
+
+    for (var i = 0; i < comments.length; i++) {
+      final comment = comments[i];
+      final duration =
+          comment.mode == DanmakuMode.scroll ? settings.speedSeconds : 4.5;
+
+      if (comment.mode == DanmakuMode.scroll) {
+        var lane = scrollEnds.indexWhere((end) => end <= comment.time);
+        if (lane < 0) lane = _leastEnd(scrollEnds);
+        scrollEnds[lane] = comment.time + duration;
+        scrollLanes[i] = lane;
+      } else if (comment.mode == DanmakuMode.top) {
+        var row = topEnds.indexWhere((end) => end <= comment.time);
+        if (row < 0) row = _leastEnd(topEnds);
+        topEnds[row] = comment.time + duration;
+        topRows[i] = row;
+      } else {
+        var row = bottomEnds.indexWhere((end) => end <= comment.time);
+        if (row < 0) row = _leastEnd(bottomEnds);
+        bottomEnds[row] = comment.time + duration;
+        bottomRows[i] = row;
+      }
+    }
 
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, areaHeight));
@@ -170,23 +199,16 @@ class DanmakuPainter extends CustomPainter {
       final progress = (elapsed / duration).clamp(0.0, 1.0);
 
       if (comment.mode == DanmakuMode.scroll) {
-        var lane = scrollEnds.indexWhere((end) => end <= comment.time);
-        if (lane < 0) {
-          lane = scrollEnds.indexOf(scrollEnds.reduce(math.min));
-        }
-        scrollEnds[lane] = comment.time + duration;
-        final y = lane * lineHeight;
+        final y = scrollLanes[i] * lineHeight;
         if (y + lineHeight > areaHeight) continue;
         final x = size.width - progress * (size.width + textPainter.width);
         _paintText(canvas, textPainter, Offset(x, y), comment.color);
       } else if (comment.mode == DanmakuMode.top) {
-        final row = topRow++ % maxLanes;
-        final y = row * lineHeight;
+        final y = topRows[i] * lineHeight;
         final x = (size.width - textPainter.width) / 2;
         _paintText(canvas, textPainter, Offset(x, y), comment.color);
       } else {
-        final row = bottomRow++ % maxLanes;
-        final y = areaHeight - (row + 1) * lineHeight;
+        final y = areaHeight - (bottomRows[i] + 1) * lineHeight;
         if (y < 0) continue;
         final x = (size.width - textPainter.width) / 2;
         _paintText(canvas, textPainter, Offset(x, y), comment.color);
@@ -235,6 +257,14 @@ class DanmakuPainter extends CustomPainter {
       textDirection: TextDirection.ltr,
     )..layout();
     paint.paint(canvas, offset);
+  }
+
+  int _leastEnd(List<double> ends) {
+    var index = 0;
+    for (var i = 1; i < ends.length; i++) {
+      if (ends[i] < ends[index]) index = i;
+    }
+    return index;
   }
 
   int _lowerBound(List<DanmakuComment> values, double target) {
