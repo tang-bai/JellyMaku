@@ -20,8 +20,8 @@
 - 可执行文件版本资源：ProductName/FileDescription = JellyMaku；OriginalFilename = JellyMaku.exe。
 - 冒烟：进程启动成功，窗口标题 `JellyMaku`，12 秒后正常关闭（`CloseMainWindow`）。
 - 便携包：`artifacts/JellyMaku-0.1.0-windows-x64-portable.zip`
-  - 大小：90,650,603 bytes（SMTC 修复后重打包）
-  - SHA256：`63BA9ABB07A8282916C517D899ADF5E3538A383810E778B0A0B1310A9F077AAD`
+  - 大小：90,648,237 bytes（弹幕轨道修复后重打包）
+  - SHA256：`328BF993A2808B71350FDED8CB504DD7DD917F58262C23CA6A7199990B43D0FC`
   - 结构：`JellyMaku/JellyMaku.exe` + DLL + `data/` + README/LICENSE/AGENTS。
 
 ## 3. 验证结果
@@ -105,3 +105,24 @@
 - `pubspec.yaml` pin `flutter_rust_bridge: 2.11.1`。
 
 验证：`dart analyze lib` 0 issue；100 tests passed；Windows release 构建成功；启动后 crash_logs 无新增 SMTC 错误。真实视频的进度条仍需用户在已登录的 Jellyfin 环境复测。
+
+
+## 8. 弹幕行列跳动修复（2026-10-19 23:00）
+
+现象：视频播放时，滚动/顶部/底部弹幕所在行会跳动，尤其是在旧弹幕离开屏幕、新弹幕进入时。
+
+根因：`DanmakuPainter.paint` 每帧只对“当前可见”的评论重新分配轨道：
+
+- `scrollEnds` 每帧从 -1 开始，只记录当前活动评论占用的轨道；
+- `topRow`/`bottomRow` 每帧从 0 递增。
+
+因此一条评论的 lane 会随其他评论进出活动窗口而变化，表现为整行跳变。
+
+修复：
+
+- 在绘制前按完整时间轴为每条评论预分配轨道/行；
+- 滚动、顶部、底部分别维护占用结束时间；
+- 优先选择已空闲的轨道，轨道不足时选择最早结束的轨道；
+- 绘制阶段只读取预分配的 `scrollLanes[i]`、`topRows[i]`、`bottomRows[i]`。
+
+验证：`dart analyze lib` 0 issue；100 tests passed；Windows release 构建成功。真实视频弹幕仍需用户复测。
