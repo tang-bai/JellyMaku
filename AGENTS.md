@@ -2,19 +2,20 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：项目从“文档先行”重建中；当前没有可运行源码。
+> 状态：Fladder + SyncPlay PR #735 已导入本地 main；尚未安装 Flutter/构建。
 > 日期：2026-10-19。
 
 ## 0. 当前仓库状态（必须先理解）
 
-- 工作区目前**没有 .git 目录**；远程 https://github.com/tang-bai/JellyMaku 为空（size 0）。
-- 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、本地 git 历史已丢失，无法从本地/远程恢复。
-- 当前只有 docs/ 与本文档；Fladder 源码尚未导入，Flutter 工具链尚未安装。
+- 本地 git 已初始化，main 为工作分支；远程 https://github.com/tang-bai/JellyMaku 仍为空（size 0），尚未推送。
+- main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e），以及项目文档/AGENTS。
+- 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
+- Flutter 3.35.7 尚未安装；尚未执行 pub get/analyze/test/build，因此“可构建”仍未验证。
+- 基线说明：为尽快拿到可运行起点，main 以 PR #735 head 为基线（包含 Fladder + SyncPlay），**尚未合并最新 develop**；Phase A0 需要补这次合并并处理冲突。
 - 因此：
   - 不要把“计划”当成“已实现”；
   - 不要声称测试通过/截图完成/性能达标；
-  - 不要尝试从远程恢复旧代码（远程为空）；
-  - 不要在没有用户确认的情况下 git init/推送/改写历史。
+  - 不要在没有用户确认的情况下 push/force-push/改写历史。
 
 ## 1. 项目使命
 
@@ -119,11 +120,11 @@ pwsh -File tools/pack.ps1
 
 | 功能 | 状态 |
 |---|---|
-| 文档/AGENTS | 本次落盘 |
-| Fladder 源码导入 | 未开始 |
+| 文档/AGENTS | 完成（0c46705） |
+| Fladder 源码导入 | 完成（e7ce1e97，PR #735 head 基线） |
+| SyncPlay | 代码已导入；未构建/验证 |
 | 弹幕 | 未开始 |
 | 超分 | 未开始 |
-| SyncPlay | 未开始 |
 | Bangumi 时间表/图片/评论 | 未开始 |
 | 打包/发布 | 未开始 |
 
@@ -134,7 +135,7 @@ pwsh -File tools/pack.ps1
 3. **RTX VSR**：media_kit ANGLE/OpenGL 下不可靠；不要把它写成已支持。
 4. **PR #735 冲突**：基于旧 develop；合并需解决 settings/player/ARB 冲突。
 5. **中文路径**：Flutter/CMake 可能失败；用 subst。
-6. **仓库缺失**：没有 .git；不要擅自 push/force-push。
+6. **尚未推送**：本地 main 已有导入；远程为空、origin 已配置但未推送；不要擅自 push/force-push。
 7. **旧实现丢失**：不要从远程“恢复”旧 MPV Shim 代码（远程为空）。
 8. **许可**：Kazumi 代码 GPL-3.0 可用，但资产不可复制。
 
@@ -142,6 +143,7 @@ pwsh -File tools/pack.ps1
 
 - docs/jellymaku/README.md
 - OVERVIEW / RESEARCH / ARCHITECTURE / PLAN / KAZUMI / BANGUMI / DANMAKU / SR / PARTY / TESTING / ASSETS / LICENSING / DECISIONS / ROADMAP / IMPLEMENTATION / UPSTREAM
+- docs/upstream/FLADDER_README.md（上游 README 存档）
 - docs/archive/mpv-shim/README.md
 
 ## 12. 阻塞时怎么做

@@ -16,15 +16,14 @@
 
 ## 2. 分支/仓库策略
 
-当前工作区无 .git，远程仓库为空；旧实现丢失。建议：
+当前本地 main 已初始化并导入 PR #735 head（含 Fladder + SyncPlay）+ 文档；远程为空，未推送。实际采用：
 
-1. **新本地仓库**：`git init -b main`，提交文档；再导入 Fladder 历史。
-2. **导入方式**（二选一）：
-   - 方案 A（推荐）：以 Fladder commit 为根新建 `jellymaku` 分支；合并 PR #735；文档作为额外 commit。旧 MPV Shim 历史已不可恢复，不强求。
-   - 方案 B：新仓库 main 先放文档；`git remote add fladder`，fetch，创建孤立分支/合并 unrelated histories；历史较复杂，但保留上游提交。
-3. 不直接在上游 develop 上提交；不 force-push 上游；不向 DonutWare 提交未经讨论的大改。
-4. PR #735：合并/移植时保留作者与提交信息；在 README/THIRD_PARTY_NOTICES 署名。
-5. 后续升级：固定 commit；小范围 merge/rebase；每次升级跑 analyze/test/build + 弹幕/SyncPlay smoke。
+1. **本地 main**：提交文档（0c46705）。
+2. **导入基线**：以 PR #735 head 为起点（含 Fladder + SyncPlay），merge 文档得到 e7ce1e97；main 快进到该提交。
+3. **待办**：尚未合并最新 develop；Phase A0 需 merge/rebase 并解决冲突。
+4. 不直接在上游 develop 上提交；不 force-push 上游；不向 DonutWare 提交未经讨论的大改。
+5. PR #735：保留作者与提交信息；在 README/THIRD_PARTY_NOTICES 署名。
+6. 后续升级：固定 commit；小范围 merge/rebase；每次升级跑 analyze/test/build + 弹幕/SyncPlay smoke。
 
 ## 3. 旧实现（legacy MPV Shim）
 

@@ -5,6 +5,7 @@
 > 日期：2026-10-19。
 > 基座：DonutWare/Fladder develop de7b5a2a23f16f5f3bb164ec0baedf50941e4808 + PR #735。
 > 原则：先交付可用的 Jellyfin 播放器，再叠加 Bangumi；每阶段有可运行产物与证据。
+> 当前基线：main e7ce1e97 = Fladder + PR #735 head + 文档；最新 develop 未合并；Flutter 未安装/未构建。
 
 ## 0. 交付概要
 

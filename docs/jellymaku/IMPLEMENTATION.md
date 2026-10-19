@@ -1,17 +1,18 @@
 
 # 实施检查清单与证据模板
 
-> 状态：未开始。所有 checkbox 默认未完成；完成后附命令/截图/日志。
+> 状态：A0 部分完成（源码已导入；工具链/构建未开始）。所有未完成项保持空 checkbox。
 > 用途：让后续 agent 按清单推进，避免“文档写了但没做”。
 
 ## 1. Stage A 检查清单
 
 ### A0 仓库/工具链
 
-- [ ] 确认仓库策略（git init/恢复/分支）。
-- [ ] 固定 Fladder commit de7b5a2；记录 PR #735 head。
-- [ ] 创建 jellymaku 分支；导入 Fladder；合并 PR #735。
-- [ ] 解决冲突；flutter pub get/analyze/test 通过。
+- [x] 确认仓库策略（新建 main）。
+- [x] 固定 Fladder commit de7b5a2；记录 PR #735 head。
+- [x] 以 PR #735 head 导入 Fladder + SyncPlay，并 merge 文档。
+- [x] 解决 README/.gitignore 冲突；main 已快进到导入提交。
+- [ ] 补最新 develop 合并；flutter pub get/analyze/test 通过。
 - [ ] Flutter 3.35.7 到 .flutter；PUB_CACHE 本地。
 - [ ] VS BuildTools/Windows SDK/Developer Mode 检查通过。
 - [ ] flutter build windows --release 成功。
@@ -109,8 +110,8 @@
 
 ## 5. 当前进度
 
-- 文档：本次落盘。
-- 代码：未导入/未实现。
-- 构建：未执行。
+- 文档：完成（0c46705）。
+- 代码：Fladder + PR #735 head 已导入（e7ce1e97）；弹幕/超分/Bangumi 未实现。
+- 构建：未执行（Flutter 未安装）。
 - 测试：未执行。
 - 发布：未执行。

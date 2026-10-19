@@ -14,7 +14,7 @@
 
 ## ADR-002：复用 Fladder PR #735 实现 Jellyfin SyncPlay
 
-- 状态：Proposed（需合并/验证）。
+- 状态：Proposed（PR head 代码已导入；待构建/验证）。
 - 背景：PR 已实现 WebSocket、时间同步、命令调度、UI、文档；重写成本高。
 - 决策：以 PR #735 为起点，合并到 Fladder develop；适配 Windows/libMPV；补测试/中文。
 - 后果：减少开发；PR 未合并/可能冲突；需署名与维护。
@@ -54,9 +54,9 @@
 ## ADR-007：品牌/分支策略
 
 - 状态：Proposed。
-- 背景：仓库当前无 .git，远程为空；旧 MPV Shim 实现已丢失。
-- 决策：新建本地仓库/分支；显示名 JellyMaku；Dart 包名/内部 ID 尽量保持 Fladder，降低改动；更新检查不指回 Fladder。
-- 后果：新历史从文档/Fladder 导入开始；旧实现不可恢复；需文档说明。
+- 背景：本地 main 已初始化；PR #735 head 基线已导入；远程为空；旧实现已丢失。
+- 决策：main 作为工作分支；显示名 JellyMaku；Dart 包名/内部 ID 尽量保持 Fladder；更新检查不指回 Fladder；后续补最新 develop。
+- 后果：已有可查看源码；尚未构建；旧实现不可恢复；需文档说明。
 - 备选：完全重命名包名/ID（成本高，暂不选）。
 
 ## ADR-008：不使用 Kazumi 作为基座

@@ -7,14 +7,14 @@
 
 | 项目 | 状态 | 说明 |
 |---|---|---|
-| 文档集 + AGENTS.md | 本次落盘 | 计划文档；非实现 |
-| 本地 git 仓库 | 缺失 | 工作区无 .git；远程 tang-bai/JellyMaku 为空 |
+| 文档集 + AGENTS.md | 完成（0c46705） | 计划文档；非实现 |
+| 本地 git 仓库 | 完成 | main 已初始化；远程为空/未推送 |
 | 旧 MPV Shim 实现 | 丢失 | 本地/远程均不可恢复；不再作为基座 |
-| Fladder 源码 | 未导入 | 需固定 commit + PR #735 |
+| Fladder 源码 | 已导入 | PR #735 head 基线 e7ce1e97；最新 develop 待合并 |
 | Flutter 工具链 | 未安装 | 需下载 3.35.7；VS BuildTools/Developer Mode 已具备 |
 | 弹幕 | 未开始 | 设计见 DANMAKU |
 | 超分 | 未开始 | 设计见 SR |
-| SyncPlay | 未开始 | 复用 PR #735；见 PARTY |
+| SyncPlay | 代码已导入；未验证 | PR #735 head；见 PARTY |
 | Bangumi 时间表/图片/评论 | 未开始 | 条件功能；见 BANGUMI/KAZUMI |
 | 打包/品牌 | 未开始 | PLAN Stage A5 |
 
@@ -35,9 +35,9 @@
 
 ## 3. 当前阻塞
 
-1. **仓库缺失**：无 .git；远程为空。需决定 `git init` 新仓库，还是先导入 Fladder 历史（unrelated histories/独立分支）。
-2. **Fladder 源码未导入**：需网络/磁盘；固定 commit。
-3. **PR #735 未合并**：需解决冲突、验证 Jellyfin 12.2/Windows。
+1. **尚未推送**：本地 main 已有导入；远程为空、origin 已配置。需确认是否/何时推送。
+2. **基线不含最新 develop**：当前为 PR #735 head；Phase A0 需 merge/rebase 最新 develop 并解决冲突。
+3. **PR #735 上游未合并**：代码已导入；仍需构建/测试验证 Jellyfin 12.2/Windows。
 4. **Flutter SDK 未安装**：1.76GB；需 VS 构建验证。
 5. **Bangumi 网络**：官方不可达；评论/搜索镜像 401；需用户代理/自建 Worker。
 6. **DDP 凭证**：真实弹幕联调需 AppId/AppSecret；否则 Mock/本地 XML。
@@ -45,15 +45,15 @@
 
 ## 4. 下一步（建议顺序）
 
-1. 用户确认仓库策略（init/新分支/是否推送）。
-2. 导入 Fladder + PR #735；flutter analyze/test/build 基线。
-3. 下载 Flutter/Jellyfin/.NET/shader/Inno 到本目录；manifest。
+1. 安装 Flutter 3.35.7；确认 VS BuildTools/Developer Mode；必要时 subst J:。
+2. 补最新 develop 合并；flutter pub get/analyze/test/build 基线。
+3. 下载 Jellyfin/.NET/shader/Inno 到本目录；manifest。
 4. Stage A1 弹幕；Stage A3 超分；Stage A4 SyncPlay；Stage A5 打包。
 5. Stage B0 Bangumi 数据层/Mock；再决定是否做真实评论联调。
 
 ## 5. 决策待确认
 
-- 是否 `git init -b main` 新仓库，还是等待恢复旧 .git？
+- 是否现在配置 origin 并推送 main（远程仍为空）？
 - 是否将 JellyMaku 作为显示名、保留 Fladder 内部包名/ID？
 - 是否 Stage A 先交付、Stage B 后置？
 - 是否必须 RTX VSR（否则 v1 只做 shader 超分）？
