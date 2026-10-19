@@ -9,7 +9,7 @@
 ## 0. 当前仓库状态（务必先读）
 
 - 本地 main 已包含 Fladder + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 文档。
-- origin https://github.com/tang-bai/JellyMaku 已配置；远程为空，尚未推送。
+- origin https://github.com/tang-bai/JellyMaku 已推送 main（e2b3ca7）。
 - Flutter 3.35.7 已安装；analyze 0 issue；100 tests passed；Windows release 已构建并通过启动冒烟。
 - 基线仍是 PR #735 head；最新 develop 未合并。真实 Jellyfin 12.2、DDP 凭证、SyncPlay 双端均未联调。
 - 旧 MPV Shim 实现/旧文档/旧 git 历史已丢失，不可恢复；新方案不再以它为基座。

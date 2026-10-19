@@ -8,7 +8,7 @@
 | 项目 | 状态 | 说明 |
 |---|---|---|
 | 文档集 + AGENTS.md | 完成；Stage A 报告/构建说明已补 | 见 STAGE_A_REPORT/BUILD_WINDOWS |
-| 本地 git 仓库 | 完成 | main 已初始化；origin 已配置；远程为空/未推送 |
+| 本地 git 仓库 | 完成 | main 已推送到 origin（e2b3ca7） |
 | 旧 MPV Shim 实现 | 丢失 | 本地/远程均不可恢复；不再作为基座 |
 | Fladder 源码 | 已导入 | PR #735 head 基线；最新 develop 待合并 |
 | Flutter 工具链 | 完成 | 3.35.7；analyze 0 issue |
@@ -36,7 +36,7 @@
 
 ## 3. 当前阻塞
 
-1. **尚未推送**：本地 Stage A 提交完成；远程为空、origin 已配置；待执行 push。
+1. **已推送**：main 已推送到 origin（e2b3ca7）；后续变更需确认后再 push。
 2. **基线不含最新 develop**：当前为 PR #735 head；Phase A0 仍需 merge/rebase 最新 develop 并解决冲突。
 3. **真实 Jellyfin E2E 未做**：未下载/启动 Jellyfin 12.2；登录/播放/字幕/seek/切集未验证。
 4. **DDP 凭证缺失**：真实弹幕联调需 AppId/AppSecret；当前只有本地 mock/单测。
@@ -56,7 +56,7 @@
 
 ## 5. 决策待确认
 
-- 是否立即推送 main 到 origin（本地提交已完成，待执行）？
+- 后续 develop 合并/修复是否直接推送 main？
 - 是否将 JellyMaku 作为显示名、保留 Fladder 内部包名/ID？
 - 是否 Stage A 先交付、Stage B 后置？
 - 是否必须 RTX VSR（否则 v1 只做 shader 超分）？

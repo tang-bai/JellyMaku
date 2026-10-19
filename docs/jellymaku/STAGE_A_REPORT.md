@@ -77,7 +77,7 @@
 4. **未做 SyncPlay 双端联调**：只有单测；Jellyfin 12.2 WebSocket/时钟误差未验证。
 5. **超分未做画质/性能验收**：未截图、未测掉帧；ANGLE/OpenGL 下部分 shader 可能被 libmpv 拒绝。
 6. **弹幕设置文案未走 ARB**：当前为英文硬编码；中文 i18n 待补。
-7. **未推送 GitHub**：本地提交完成后才推送；远程仍为空。
+7. **已推送 GitHub**：main 已推送 origin（e2b3ca7）；后续变更需重新推送。
 
 ## 6. 复现提示
 
