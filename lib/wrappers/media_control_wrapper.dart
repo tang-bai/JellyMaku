@@ -196,6 +196,13 @@ class MediaControlsWrapper extends BaseAudioHandler implements VideoPlayerContro
     }
   }
 
+  Future<void> applyVideoEnhancement() async {
+    final player = _player;
+    if (player is LibMPV) {
+      await player.applyVideoEnhancement();
+    }
+  }
+
   Future<void> _restorePreviousPlayer() async {
     if (_previousPlayer == null) return;
     await setup(_previousPlayer!);

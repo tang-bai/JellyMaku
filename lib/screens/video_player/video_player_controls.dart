@@ -14,7 +14,9 @@ import 'package:fladder/models/playback/playback_model.dart';
 import 'package:fladder/models/settings/video_player_settings.dart';
 import 'package:fladder/providers/pip_provider.dart';
 import 'package:fladder/providers/settings/client_settings_provider.dart';
+import 'package:fladder/providers/settings/video_enhancement_provider.dart';
 import 'package:fladder/providers/settings/video_player_settings_provider.dart';
+import 'package:fladder/video/video_enhancement.dart';
 import 'package:fladder/providers/syncplay/syncplay_provider.dart';
 import 'package:fladder/providers/user_provider.dart';
 import 'package:fladder/providers/video_player_provider.dart';
@@ -27,6 +29,7 @@ import 'package:fladder/screens/video_player/components/video_player_controls_ex
 import 'package:fladder/screens/video_player/components/video_player_options_sheet.dart';
 import 'package:fladder/screens/video_player/components/video_player_quality_controls.dart';
 import 'package:fladder/screens/video_player/components/video_player_screenshot_indicator.dart';
+import 'package:fladder/screens/video_player/components/danmaku_settings_sheet.dart';
 import 'package:fladder/screens/video_player/components/video_player_seek_indicator.dart';
 import 'package:fladder/screens/video_player/components/video_player_speed_indicator.dart';
 import 'package:fladder/screens/video_player/components/video_player_volume_indicator.dart';
@@ -447,6 +450,37 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                   ),
                   seekForwardButton(ref),
                   nextVideoButton,
+                  Tooltip(
+                    message: 'Danmaku',
+                    child: IconButton(
+                      onPressed: () => showDanmakuSettings(context),
+                      icon: const Icon(Icons.chat_bubble_outline_rounded),
+                    ),
+                  ),
+                  PopupMenuButton<VideoEnhancementProfile>(
+                    tooltip: 'Super resolution',
+                    icon: const Icon(Icons.auto_awesome),
+                    onSelected: (profile) {
+                      ref.read(videoEnhancementProvider.notifier).setProfile(profile);
+                      ref.read(videoPlayerProvider.notifier).applyVideoEnhancement();
+                    },
+                    itemBuilder: (context) {
+                      final current = ref.read(videoEnhancementProvider);
+                      return VideoEnhancementProfile.values
+                          .map(
+                            (profile) => PopupMenuItem<VideoEnhancementProfile>(
+                              value: profile,
+                              child: ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(profile.label),
+                                subtitle: Text(profile.description),
+                                trailing: current == profile ? const Icon(Icons.check) : null,
+                              ),
+                            ),
+                          )
+                          .toList();
+                    },
+                  ),
                   Flexible(
                     flex: 2,
                     child: Row(

@@ -11,6 +11,7 @@ import 'package:fladder/models/playback/playback_model.dart';
 import 'package:fladder/models/playback/tv_playback_model.dart';
 import 'package:fladder/providers/settings/video_player_settings_provider.dart';
 import 'package:fladder/providers/video_player_provider.dart';
+import 'package:fladder/screens/video_player/components/danmaku_overlay.dart';
 import 'package:fladder/screens/video_player/components/video_player_guide_wrapper.dart';
 import 'package:fladder/screens/video_player/components/video_player_next_wrapper.dart';
 import 'package:fladder/screens/video_player/video_player_controls.dart';
@@ -176,6 +177,7 @@ class _VideoPlayerState extends ConsumerState<VideoPlayer> with WidgetsBindingOb
                       video: player,
                       controls: const DesktopControls(),
                       overlays: [
+                        const DanmakuOverlay(),
                         if (errorPlaying) const _VideoErrorWidget(),
                       ],
                     ),

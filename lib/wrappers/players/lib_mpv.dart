@@ -22,6 +22,7 @@ import 'package:fladder/models/settings/video_player_settings.dart';
 import 'package:fladder/providers/settings/subtitle_settings_provider.dart';
 import 'package:fladder/screens/video_player/video_player.dart' as video_screen;
 import 'package:fladder/util/subtitle_position_calculator.dart';
+import 'package:fladder/video/video_enhancement.dart';
 import 'package:fladder/wrappers/players/base_player.dart';
 import 'package:fladder/wrappers/players/player_states.dart';
 
@@ -67,6 +68,20 @@ class LibMPV extends BasePlayer {
 
   Future<void> updateSettings(VideoPlayerSettingsModel settings) async {
     _settings = settings;
+    await _applyVideoEnhancement();
+  }
+
+  Future<void> applyVideoEnhancement() => _applyVideoEnhancement();
+
+  Future<void> _applyVideoEnhancement() async {
+    final player = _player;
+    if (player?.platform is! mpv.NativePlayer) return;
+    try {
+      final paths = await prepareVideoEnhancementShaders(VideoEnhancementSettings.profile);
+      await (player!.platform as dynamic).setProperty('glsl-shaders', glslShaderList(paths));
+    } catch (error, stackTrace) {
+      log('Unable to apply video enhancement shaders: $error\n$stackTrace');
+    }
   }
 
   @override
@@ -113,6 +128,7 @@ class LibMPV extends BasePlayer {
     }
 
     await _applyReplayGainSettings();
+    await _applyVideoEnhancement();
   }
 
   @override
@@ -254,6 +270,7 @@ class LibMPV extends BasePlayer {
     _firstLoadAttempt = DateTime.now();
 
     await setStartPosition(startPosition);
+    await _applyVideoEnhancement();
 
     await _player?.open(mpv.Media(url), play: play);
 

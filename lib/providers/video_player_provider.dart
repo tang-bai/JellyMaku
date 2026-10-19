@@ -35,6 +35,8 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
 
   final Ref ref;
 
+  Future<void> applyVideoEnhancement() => state.applyVideoEnhancement();
+
   List<StreamSubscription> subscriptions = [];
 
   late final mediaState = ref.read(mediaPlaybackProvider.notifier);

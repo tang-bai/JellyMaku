@@ -297,6 +297,7 @@ class _VideoPlayerNextWrapperState extends ConsumerState<VideoPlayerNextWrapper>
                             ),
                             child: widget.video,
                           ),
+                          ...widget.overlays,
                           IgnorePointer(
                             ignoring: show,
                             child: AnimatedOpacity(
