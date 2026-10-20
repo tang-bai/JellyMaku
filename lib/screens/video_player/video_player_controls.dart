@@ -515,7 +515,7 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                     ),
                   ),
                   PopupMenuButton<VideoEnhancementProfile>(
-                    tooltip: 'Super resolution / 超分',
+                    tooltip: context.localized.superResolution,
                     constraints: const BoxConstraints(
                       minWidth: 320,
                       maxWidth: 440,

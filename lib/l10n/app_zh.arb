@@ -566,6 +566,7 @@
     "subtitleConfigurator": "字幕配置器",
     "subtitleConfiguratorPlaceHolder": "这是占位符文本，此处无任何内容。",
     "subtitles": "字幕",
+    "superResolution": "超分",
     "switchUser": "切换用户",
     "sync": "同步",
     "syncDeleteItemDesc": "为 {item} 删除所有已同步的数据？",

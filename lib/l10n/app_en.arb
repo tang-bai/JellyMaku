@@ -1088,6 +1088,8 @@
   "subtitleConfiguratorPlaceHolder": "This is placeholder text, nothing to see here.",
   "@subtitleConfiguratorPlaceHolder": {},
   "subtitles": "Subtitles",
+  "superResolution": "Super resolution",
+  "@superResolution": {},
   "@subtitles": {},
   "switchUser": "Switch user",
   "@switchUser": {},
