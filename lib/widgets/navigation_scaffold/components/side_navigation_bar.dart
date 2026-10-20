@@ -225,37 +225,16 @@ class SideNavigationRail extends ConsumerWidget {
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                             horizontal: 4)
-                                        .copyWith(
-                                            bottom: expandedSideBar ? 10 : 0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      spacing: 8,
-                                      children: [
-                                        hasCustomFab
-                                            ? actionButtonWidget(
-                                                context, shouldExpand)
-                                            : AnimatedFadeSize(
-                                                duration: const Duration(
-                                                    milliseconds: 250),
-                                                child: actionButtonWidget(
-                                                    context, shouldExpand),
-                                              ),
-                                        NavigationButton(
-                                          label: context.localized.syncPlay,
-                                          selected: isSyncPlayActive,
-                                          selectedIcon: const Icon(
-                                              IconsaxPlusBold.people),
-                                          icon: const Icon(
-                                              IconsaxPlusLinear.people),
-                                          horizontal: true,
-                                          expanded: shouldExpand,
-                                          onPressed: () =>
-                                              showSyncPlaySheet(context),
-                                        ),
-                                      ],
-                                    ),
+                                        .copyWith(bottom: 6),
+                                    child: hasCustomFab
+                                        ? actionButtonWidget(
+                                            context, shouldExpand)
+                                        : AnimatedFadeSize(
+                                            duration: const Duration(
+                                                milliseconds: 250),
+                                            child: actionButtonWidget(
+                                                context, shouldExpand),
+                                          ),
                                   ),
                                 ],
                                 Expanded(
@@ -265,6 +244,20 @@ class SideNavigationRail extends ConsumerWidget {
                                     tooltipPosition: tooltipPosition,
                                     currentIndex: currentIndex,
                                     shouldExpand: shouldExpand,
+                                    leading: largeBar
+                                        ? NavigationButton(
+                                            label: context.localized.syncPlay,
+                                            selected: isSyncPlayActive,
+                                            selectedIcon: const Icon(
+                                                IconsaxPlusBold.people),
+                                            icon: const Icon(
+                                                IconsaxPlusLinear.people),
+                                            horizontal: true,
+                                            expanded: shouldExpand,
+                                            onPressed: () =>
+                                                showSyncPlaySheet(context),
+                                          )
+                                        : null,
                                   ),
                                 ),
                                 NavigationButton(

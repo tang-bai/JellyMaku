@@ -34,6 +34,7 @@ class SideNavigationButtons extends ConsumerWidget {
     required this.currentIndex,
     required this.shouldExpand,
     this.useOverflow = true,
+    this.leading,
   });
 
   final bool largeBar;
@@ -42,6 +43,10 @@ class SideNavigationButtons extends ConsumerWidget {
   final int currentIndex;
   final bool shouldExpand;
   final bool useOverflow;
+
+  /// Pinned above the destinations (e.g. SyncPlay) so it keeps the same
+  /// vertical rhythm as the destination buttons.
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -114,6 +119,7 @@ class SideNavigationButtons extends ConsumerWidget {
     return Column(
       mainAxisAlignment: !largeBar ? MainAxisAlignment.center : MainAxisAlignment.start,
       children: [
+        if (leading != null) leading!,
         ...destinations.mapIndexed(
           (index, destination) => CustomTooltip(
             tooltipContent: expandedSideBar
