@@ -496,6 +496,13 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                   ),
                   previousButton,
                   seekBackwardButton(ref),
+                  Tooltip(
+                    message: context.localized.danmaku,
+                    child: IconButton(
+                      onPressed: () => showDanmakuSettings(context),
+                      icon: const Icon(Icons.chat_bubble_outline_rounded),
+                    ),
+                  ),
                   IconButton.filledTonal(
                     iconSize: 38,
                     onPressed: () {
@@ -507,13 +514,6 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                   ),
                   seekForwardButton(ref),
                   nextVideoButton,
-                  Tooltip(
-                    message: context.localized.danmaku,
-                    child: IconButton(
-                      onPressed: () => showDanmakuSettings(context),
-                      icon: const Icon(Icons.chat_bubble_outline_rounded),
-                    ),
-                  ),
                   PopupMenuButton<VideoEnhancementProfile>(
                     tooltip: context.localized.superResolution,
                     constraints: const BoxConstraints(
