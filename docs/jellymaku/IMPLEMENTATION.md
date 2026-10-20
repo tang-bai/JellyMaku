@@ -1,7 +1,9 @@
 
 # 实施检查清单与证据模板
 
-> 状态：Stage A 核心已构建/验证（2026-10-19）：Flutter 3.35.7、analyze 0、100 tests、Windows release + 启动冒烟、portable zip。真实 Jellyfin/DDP/SyncPlay E2E 仍未完成。
+> 状态：Stage A 核心已构建/验证：Flutter 3.35.7、analyze 0、110 tests（2026-10-20 复核）；Windows release + 启动冒烟、portable zip 为 2026-10-19 产物。
+> 弹幕在 2026-10-20 增加了 Kazumi 对齐能力：手动匹配三步 UI、来源过滤、合并去重、实时类型/来源开关、描边/颜色开关。
+> 真实 Jellyfin/DDP/SyncPlay E2E 仍未完成；弹幕未做真实凭证联调。
 > 用途：让后续 agent 按清单推进，避免“文档写了但没做”。
 
 ## 1. Stage A 检查清单
@@ -15,7 +17,7 @@
 - [ ] 补最新 develop 合并（仍为 PR #735 head）。
 - [x] Flutter 3.35.7 到 .flutter；PUB_CACHE 本地。
 - [x] VS BuildTools/Windows SDK/Developer Mode 检查通过。
-- [x] flutter analyze/test 通过（0 issue；100 tests）。
+- [x] flutter analyze/test 通过（0 issue；110 tests）。
 - [x] flutter build windows --release 成功；启动冒烟通过。
 - [ ] 本地 Jellyfin 12.2 + .NET 10 启动；登录/播放测试片。
 - [ ] third_party/manifest.json 生成；verify-assets 通过。
@@ -23,9 +25,15 @@
 ### A1/A2 弹幕
 
 - [x] lib/danmaku 核心；DDP 签名/错误/缓存。
-- [ ] 匹配/手动映射/本地 XML（自动匹配/映射数据层已做；手动 UI/local XML 未做）。
+- [x] 自动匹配（标题+集号→search/episodes 第一条候选）。
+- [x] 手动匹配：三步对话框（搜索番剧→分集→应用），mapping.json 持久化，可清除。
+- [x] 来源过滤：p[3] → BiliBili/Gamer/弹弹play 自有，绘制层实时开关。
+- [x] 合并重复弹幕：归一化（全角/空白/符号/重复字符）+5 秒窗口 +「xN」顶部白字。
+- [x] 实时过滤：类型/来源开关无需重载；解析类设置 300ms 防抖重载。
+- [x] 样式：颜色开关、描边（独立 stroke TextPainter）、显示区域/透明度/字号/速度/偏移。
+- [ ] 本地 XML/JSON 导入；发送弹幕本地回显。
 - [x] Flutter 叠加层；设置弹窗；播放器入口。
-- [x] 单测/Mock（DDP HTTP mock、解析、DPAPI）。
+- [x] 单测/Mock（DDP HTTP mock、解析/来源/合并、手动匹配请求、DPAPI）。
 - [ ] 本地 Jellyfin E2E：主字幕共存/seek/pause/切集。
 - [ ] 截图/性能日志（5000 条未压测）。
 
@@ -100,6 +108,19 @@
 - 未验证项：
 ~~~
 
+### 弹幕 v2（手动匹配/来源/合并）
+
+- 日期：2026-10-20
+- commit：feat(danmaku): add source filters, manual match and duplicate merge（2026-10-20）
+- 命令：
+  - `.\.flutter\bin\flutter.bat test --no-pub` → 110 tests passed
+  - `.\.flutter\bin\dart.bat analyze lib test` → No issues found
+- 结果：通过（单元/静态）；未做真实 DDP/Jellyfin E2E、未重新构建 Windows 包。
+- 截图：artifacts/screenshots/danmaku-*（未生成）
+- 性能：5000 条未压测
+- 已知问题：p[3] 来源语义待真实凭证确认；自动匹配仍取第一条候选。
+- 未验证项：真实凭证搜索/拉取、手动匹配落盘后的播放、来源开关在真实混合弹幕下的表现。
+
 ## 4. 禁止事项
 
 - 不把“文档计划”写成“已实现”。
@@ -111,8 +132,9 @@
 
 ## 5. 当前进度
 
-- 文档：完成（0c46705）。
-- 代码：Fladder + PR #735 head 已导入（e7ce1e97）；弹幕/超分/Bangumi 未实现。
-- 构建：未执行（Flutter 未安装）。
-- 测试：未执行。
-- 发布：未执行。
+- 文档：完成；本次更新 DANMAKU/IMPLEMENTATION/ROADMAP/AGENTS。
+- 代码：Fladder + PR #735 head 已导入；弹幕（自动+手动匹配/来源/合并/叠加层）、超分（Anime4K）已接入；Bangumi Stage B 未开始。
+- 构建：Windows release 成功、启动冒烟通过（2026-10-19）；本次改动未重新构建，仅 analyze/test。
+- 测试：110 tests passed（2026-10-20）；`dart analyze lib test` → No issues found。
+- 发布：portable zip 已出；安装器/中文 ARB 未做。
+- 未验证：真实 DDP 凭证、真实 Jellyfin 播放、SyncPlay 双端、超分画质/性能、弹幕 p[3] 来源语义。

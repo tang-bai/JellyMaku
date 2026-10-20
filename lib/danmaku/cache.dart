@@ -76,6 +76,25 @@ class DanmakuCache {
     await _writeAtomic(file, jsonEncode(all));
   }
 
+  Future<void> removeMapping(String itemId) async {
+    final file = await _file('mapping.json');
+    if (!await file.exists()) return;
+    Map<String, dynamic> all;
+    try {
+      final decoded = jsonDecode(await file.readAsString());
+      if (decoded is! Map) return;
+      all = Map<String, dynamic>.from(decoded);
+    } catch (_) {
+      return;
+    }
+    if (all.remove(itemId) == null) return;
+    if (all.isEmpty) {
+      await file.delete();
+    } else {
+      await _writeAtomic(file, jsonEncode(all));
+    }
+  }
+
   Future<void> clear() async {
     if (await root.exists()) {
       await root.delete(recursive: true);

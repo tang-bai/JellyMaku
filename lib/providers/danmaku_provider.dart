@@ -70,10 +70,11 @@ class DanmakuController extends StateNotifier<DanmakuState> {
   final Ref ref;
   int _generation = 0;
   DanmakuMediaInfo? _media;
+  DanmakuCache? _cacheInstance;
 
   DanmakuMediaInfo? get media => _media;
 
-  Future<void> load(DanmakuMediaInfo? media) async {
+  Future<void> load(DanmakuMediaInfo? media, {bool force = false}) async {
     if (media == null) {
       stop();
       return;
@@ -98,7 +99,8 @@ class DanmakuController extends StateNotifier<DanmakuState> {
       return;
     }
 
-    if (_media?.itemId == media.itemId &&
+    if (!force &&
+        _media?.itemId == media.itemId &&
         state.status == DanmakuLoadStatus.ready) {
       return;
     }
@@ -188,7 +190,73 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     final media = _media;
     if (media == null) return;
     state = const DanmakuState();
-    await load(media);
+    await load(media, force: true);
+  }
+
+  /// 手动匹配第一步：搜索番剧。调用方负责错误提示。
+  Future<List<DanmakuAnime>> searchAnime(String keyword) async {
+    final client = _requireClient();
+    try {
+      return await client.searchAnime(keyword.trim());
+    } finally {
+      client.dispose();
+    }
+  }
+
+  /// 手动匹配第二步：拉取某个番剧的分集列表。
+  Future<List<DanmakuEpisodeRef>> episodesForAnime(int animeId) async {
+    final client = _requireClient();
+    try {
+      return await client.getEpisodes(animeId);
+    } finally {
+      client.dispose();
+    }
+  }
+
+  /// 写入手动映射并重新加载当前条目（成功后 source 会变成 manual）。
+  Future<void> applyManualMatch({
+    required int episodeId,
+    required String animeTitle,
+    required String episodeTitle,
+    double shift = 0,
+  }) async {
+    final media = _media;
+    if (media == null) {
+      throw const DanmakuException('当前没有正在播放的条目');
+    }
+    final cache = await _cache();
+    await cache.writeMapping(media.itemId, {
+      'episodeId': episodeId,
+      'animeTitle': animeTitle,
+      'episodeTitle': episodeTitle,
+      'shift': shift,
+      'source': 'manual',
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+    state = const DanmakuState();
+    await load(media, force: true);
+  }
+
+  /// 删除当前条目的手动映射，回退到自动匹配。
+  Future<void> clearManualMatch() async {
+    final media = _media;
+    if (media == null) return;
+    final cache = await _cache();
+    await cache.removeMapping(media.itemId);
+    state = const DanmakuState();
+    await load(media, force: true);
+  }
+
+  DdpClient _requireClient() {
+    final settings = ref.read(danmakuSettingsProvider);
+    if (!settings.hasCredentials) {
+      throw const DanmakuException('请先在弹幕设置中填写 AppId / AppSecret');
+    }
+    return DdpClient(
+      baseUrl: settings.apiBase,
+      appId: settings.appId,
+      appSecret: settings.appSecret,
+    );
   }
 
   void stop() {
@@ -198,10 +266,12 @@ class DanmakuController extends StateNotifier<DanmakuState> {
   }
 
   Future<DanmakuCache> _cache() async {
+    final existing = _cacheInstance;
+    if (existing != null) return existing;
     final support = await getApplicationSupportDirectory();
     final directory =
         Directory('${support.path}${Platform.pathSeparator}danmaku');
-    return DanmakuCache(directory);
+    return _cacheInstance = DanmakuCache(directory);
   }
 
   @override

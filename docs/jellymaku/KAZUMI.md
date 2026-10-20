@@ -137,7 +137,7 @@
 | 时间表数据/排序/过滤 | 移植逻辑，重写 Riverpod/UI | 保留 API 参数/日期算法 |
 | 图片识别 API/模型 | 移植 Dart 模型/请求 | trace.moe 配额/隐私 |
 | 评论模型/UI 结构 | 移植模型/交互，重写组件 | Next API 不稳定；BBCode 简化 |
-| 弹幕 DDP/解析/屏蔽 | 参考/移植到 Fladder 弹幕 | canvas_danmaku vs CustomPainter |
+| 弹幕 DDP/解析/屏蔽 | 已移植（2026-10-20）：来源过滤、合并去重、手动匹配；渲染仍用 CustomPainter | canvas_danmaku vs CustomPainter；p[3] 语义待真实凭证确认 |
 | Anime4K shader/服务 | 复用资产/加载思路 | GPL/Anime4K 许可；渲染验证 |
 | 一起看 | 不复用 | Kazumi 公共 SyncPlay，Jellyfin 用 PR #735 |
 | 图标/字体/美术 | 不复制 | Kazumi 有单独版权限制 |

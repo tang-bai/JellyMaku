@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:fladder/danmaku/comment_parser.dart';
 import 'package:fladder/danmaku/danmaku_models.dart';
 import 'package:fladder/models/settings/danmaku_settings_model.dart';
 import 'package:fladder/providers/danmaku_provider.dart';
@@ -26,6 +29,7 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
   Duration _frozenPosition = Duration.zero;
   bool _wasPlaying = false;
   String? _loadedItemId;
+  Timer? _reloadDebounce;
 
   @override
   void initState() {
@@ -41,8 +45,17 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
 
   @override
   void dispose() {
+    _reloadDebounce?.cancel();
     _ticker.dispose();
     super.dispose();
+  }
+
+  /// 解析类设置变化时重算评论列表；300ms 防抖避免拖动滑杆时反复解析。
+  void _scheduleReload() {
+    _reloadDebounce?.cancel();
+    _reloadDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) ref.read(danmakuProvider.notifier).reload();
+    });
   }
 
   void _loadFrom(dynamic model) {
@@ -76,20 +89,33 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
       final connectionChanged = previous.enabled != next.enabled ||
           previous.appId != next.appId ||
           previous.appSecret != next.appSecret ||
-          previous.apiBase != next.apiBase ||
-          previous.chConvert != next.chConvert ||
-          previous.cacheDays != next.cacheDays;
-      if (!connectionChanged) return;
-      if (!next.enabled) {
-        ref.read(danmakuProvider.notifier).stop();
+          previous.apiBase != next.apiBase;
+      if (connectionChanged) {
+        if (!next.enabled) {
+          ref.read(danmakuProvider.notifier).stop();
+          return;
+        }
+        if (previous.enabled != next.enabled) {
+          _loadedItemId = null;
+          _loadFrom(ref.read(playBackModel));
+        } else {
+          ref.read(danmakuProvider.notifier).reload();
+        }
         return;
       }
-      if (previous.enabled != next.enabled) {
-        _loadedItemId = null;
-        _loadFrom(ref.read(playBackModel));
-      } else {
-        ref.read(danmakuProvider.notifier).reload();
-      }
+
+      // 这些设置会改变解析结果（时间轴/文本/条数），需要重算；
+      // 来源与类型开关只影响绘制，由 painter 实时判断。
+      final parseChanged = previous.offsetSeconds != next.offsetSeconds ||
+          previous.chConvert != next.chConvert ||
+          previous.cacheDays != next.cacheDays ||
+          previous.maxComments != next.maxComments ||
+          previous.mergeDuplicates != next.mergeDuplicates ||
+          previous.autoMatch != next.autoMatch ||
+          previous.hashMatch != next.hashMatch ||
+          !listEquals(previous.blockWords, next.blockWords) ||
+          !listEquals(previous.blockUsers, next.blockUsers);
+      if (parseChanged) _scheduleReload();
     });
 
     if (!settings.enabled ||
@@ -196,6 +222,12 @@ class DanmakuPainter extends CustomPainter {
       fontSize,
       maxLanes,
       settings.speedSeconds,
+      settings.showScroll,
+      settings.showTop,
+      settings.showBottom,
+      settings.showBiliBiliSource,
+      settings.showGamerSource,
+      settings.showDanDanPlaySource,
     );
     var layout = _laneCache[laneKey];
     if (layout == null) {
@@ -213,55 +245,83 @@ class DanmakuPainter extends CustomPainter {
     for (var i = startIndex; i < comments.length; i++) {
       final comment = comments[i];
       if (comment.time > time) break;
+      if (!isDanmakuVisible(comment, settings)) continue;
 
       final duration =
           comment.mode == DanmakuMode.scroll ? settings.speedSeconds : 4.5;
       final elapsed = time - comment.time;
       if (elapsed < 0 || elapsed > duration) continue;
 
-      final textPainter = _layout(comment.text, fontSize, comment.color);
+      final color = settings.showColor ? comment.color : 0xFFFFFF;
+      final textPainter = _layout(comment.text, fontSize, color);
+      final strokePainter = settings.strokeWidth > 0
+          ? _layout(comment.text, fontSize, color, stroke: true)
+          : null;
       final progress = (elapsed / duration).clamp(0.0, 1.0);
 
+      double x;
+      double y;
       if (comment.mode == DanmakuMode.scroll) {
-        final y = scrollLanes[i] * lineHeight;
+        y = scrollLanes[i] * lineHeight;
         if (y + lineHeight > areaHeight) continue;
-        final x = size.width - progress * (size.width + textPainter.width);
-        textPainter.paint(canvas, Offset(x, y));
+        x = size.width - progress * (size.width + textPainter.width);
       } else if (comment.mode == DanmakuMode.top) {
-        final y = topRows[i] * lineHeight;
-        final x = (size.width - textPainter.width) / 2;
-        textPainter.paint(canvas, Offset(x, y));
+        y = topRows[i] * lineHeight;
+        x = (size.width - textPainter.width) / 2;
       } else {
-        final y = areaHeight - (bottomRows[i] + 1) * lineHeight;
+        y = areaHeight - (bottomRows[i] + 1) * lineHeight;
         if (y < 0) continue;
-        final x = (size.width - textPainter.width) / 2;
-        textPainter.paint(canvas, Offset(x, y));
+        x = (size.width - textPainter.width) / 2;
       }
+
+      final offset = Offset(x, y);
+      strokePainter?.paint(canvas, offset);
+      textPainter.paint(canvas, offset);
     }
 
     canvas.restore();
   }
 
-  TextPainter _layout(String text, double fontSize, int color) {
+  TextPainter _layout(String text, double fontSize, int color,
+      {bool stroke = false}) {
     final key =
-        '$text|$fontSize|${settings.fontFamily}|$color|${settings.opacity}';
+        '$text|$fontSize|${settings.fontFamily}|$color|${settings.opacity}'
+        '|${stroke ? settings.strokeWidth : 0}';
     final cached = _textCache[key];
     if (cached != null) return cached;
 
+    final TextStyle style;
+    if (stroke) {
+      style = TextStyle(
+        fontSize: fontSize,
+        fontFamily: settings.fontFamily,
+        fontWeight: FontWeight.w600,
+        foreground: Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = settings.strokeWidth
+          ..strokeJoin = StrokeJoin.round
+          ..color = Colors.black.withValues(alpha: settings.opacity),
+      );
+    } else {
+      style = TextStyle(
+        fontSize: fontSize,
+        fontFamily: settings.fontFamily,
+        fontWeight: FontWeight.w600,
+        color: Color(color).withValues(alpha: settings.opacity),
+        // 有描边时不再叠加阴影，避免两层黑边糊在一起。
+        shadows: settings.strokeWidth > 0
+            ? null
+            : const [
+                Shadow(
+                    blurRadius: 2.5,
+                    color: Colors.black87,
+                    offset: Offset(0, 1)),
+              ],
+      );
+    }
+
     final painter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontFamily: settings.fontFamily,
-          fontWeight: FontWeight.w600,
-          color: Color(color).withValues(alpha: settings.opacity),
-          shadows: const [
-            Shadow(
-                blurRadius: 2.5, color: Colors.black87, offset: Offset(0, 1)),
-          ],
-        ),
-      ),
+      text: TextSpan(text: text, style: style),
       maxLines: 1,
       textDirection: TextDirection.ltr,
     )..layout();
@@ -284,6 +344,8 @@ class DanmakuPainter extends CustomPainter {
 
     for (var i = 0; i < comments.length; i++) {
       final comment = comments[i];
+      // 隐藏的评论不占轨道，切换来源/类型后重新布局不会留下空洞。
+      if (!isDanmakuVisible(comment, settings)) continue;
       final duration =
           comment.mode == DanmakuMode.scroll ? settings.speedSeconds : 4.5;
 

@@ -19,6 +19,12 @@ class DanmakuSettingsModel {
   final bool showScroll;
   final bool showTop;
   final bool showBottom;
+  final bool showBiliBiliSource;
+  final bool showGamerSource;
+  final bool showDanDanPlaySource;
+  final bool mergeDuplicates;
+  final bool showColor;
+  final double strokeWidth;
   final String? localFile;
 
   const DanmakuSettingsModel({
@@ -42,6 +48,12 @@ class DanmakuSettingsModel {
     this.showScroll = true,
     this.showTop = true,
     this.showBottom = true,
+    this.showBiliBiliSource = true,
+    this.showGamerSource = true,
+    this.showDanDanPlaySource = true,
+    this.mergeDuplicates = false,
+    this.showColor = true,
+    this.strokeWidth = 1.5,
     this.localFile,
   });
 
@@ -71,6 +83,12 @@ class DanmakuSettingsModel {
     bool? showScroll,
     bool? showTop,
     bool? showBottom,
+    bool? showBiliBiliSource,
+    bool? showGamerSource,
+    bool? showDanDanPlaySource,
+    bool? mergeDuplicates,
+    bool? showColor,
+    double? strokeWidth,
     String? localFile,
   }) {
     return DanmakuSettingsModel(
@@ -94,6 +112,12 @@ class DanmakuSettingsModel {
       showScroll: showScroll ?? this.showScroll,
       showTop: showTop ?? this.showTop,
       showBottom: showBottom ?? this.showBottom,
+      showBiliBiliSource: showBiliBiliSource ?? this.showBiliBiliSource,
+      showGamerSource: showGamerSource ?? this.showGamerSource,
+      showDanDanPlaySource: showDanDanPlaySource ?? this.showDanDanPlaySource,
+      mergeDuplicates: mergeDuplicates ?? this.mergeDuplicates,
+      showColor: showColor ?? this.showColor,
+      strokeWidth: strokeWidth ?? this.strokeWidth,
       localFile: localFile ?? this.localFile,
     );
   }
@@ -119,6 +143,12 @@ class DanmakuSettingsModel {
       'showScroll': showScroll,
       'showTop': showTop,
       'showBottom': showBottom,
+      'showBiliBiliSource': showBiliBiliSource,
+      'showGamerSource': showGamerSource,
+      'showDanDanPlaySource': showDanDanPlaySource,
+      'mergeDuplicates': mergeDuplicates,
+      'showColor': showColor,
+      'strokeWidth': strokeWidth,
       'localFile': localFile,
     };
   }
@@ -163,6 +193,12 @@ class DanmakuSettingsModel {
       showScroll: json['showScroll'] as bool? ?? true,
       showTop: json['showTop'] as bool? ?? true,
       showBottom: json['showBottom'] as bool? ?? true,
+      showBiliBiliSource: json['showBiliBiliSource'] as bool? ?? true,
+      showGamerSource: json['showGamerSource'] as bool? ?? true,
+      showDanDanPlaySource: json['showDanDanPlaySource'] as bool? ?? true,
+      mergeDuplicates: json['mergeDuplicates'] as bool? ?? false,
+      showColor: json['showColor'] as bool? ?? true,
+      strokeWidth: number(json['strokeWidth'], 1.5),
       localFile: json['localFile']?.toString(),
     );
   }

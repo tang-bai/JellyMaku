@@ -78,7 +78,7 @@ class DanmakuSettingsNotifier extends StateNotifier<DanmakuSettingsModel> {
       _apply(state.copyWith(displayArea: value.clamp(0.2, 1.0)));
 
   void setOffset(double value) =>
-      _apply(state.copyWith(offsetSeconds: value.clamp(-30, 30)));
+      _apply(state.copyWith(offsetSeconds: value.clamp(-180, 180)));
 
   void setChConvert(int value) =>
       _apply(state.copyWith(chConvert: value.clamp(0, 2)));
@@ -104,6 +104,23 @@ class DanmakuSettingsNotifier extends StateNotifier<DanmakuSettingsModel> {
   void setShowTop(bool value) => _apply(state.copyWith(showTop: value));
 
   void setShowBottom(bool value) => _apply(state.copyWith(showBottom: value));
+
+  void setShowBiliBiliSource(bool value) =>
+      _apply(state.copyWith(showBiliBiliSource: value));
+
+  void setShowGamerSource(bool value) =>
+      _apply(state.copyWith(showGamerSource: value));
+
+  void setShowDanDanPlaySource(bool value) =>
+      _apply(state.copyWith(showDanDanPlaySource: value));
+
+  void setMergeDuplicates(bool value) =>
+      _apply(state.copyWith(mergeDuplicates: value));
+
+  void setShowColor(bool value) => _apply(state.copyWith(showColor: value));
+
+  void setStrokeWidth(double value) =>
+      _apply(state.copyWith(strokeWidth: value.clamp(0, 6)));
 
   void setLocalFile(String? value) {
     _apply(state.copyWith(localFile: value));

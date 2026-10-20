@@ -9,12 +9,31 @@ enum DanmakuMode {
   bottom,
 }
 
+/// 弹幕来源。
+///
+/// 弹弹play 在 `withRelated=true` 时会把第三方站点的弹幕合并进同一个响应，
+/// 并用 `p` 的第 4 段标记来源（BiliBili / Gamer）；没有标记的条目属于
+/// 弹弹play 自有库。这里按 Kazumi 的口径归一为三类，其余一律算弹弹play。
+enum DanmakuSource {
+  biliBili,
+  gamer,
+  danDanPlay,
+}
+
+DanmakuSource parseDanmakuSource(String raw) {
+  final value = raw.toLowerCase();
+  if (value.contains('bilibili')) return DanmakuSource.biliBili;
+  if (value.contains('gamer')) return DanmakuSource.gamer;
+  return DanmakuSource.danDanPlay;
+}
+
 class DanmakuComment {
   final double time;
   final DanmakuMode mode;
   final int color;
   final String uid;
   final String text;
+  final DanmakuSource source;
 
   const DanmakuComment({
     required this.time,
@@ -22,6 +41,31 @@ class DanmakuComment {
     required this.color,
     required this.uid,
     required this.text,
+    this.source = DanmakuSource.danDanPlay,
+  });
+}
+
+/// 手动匹配用的搜索结果：弹弹play 的番剧条目。
+class DanmakuAnime {
+  final int animeId;
+  final String animeTitle;
+  final String typeDescription;
+
+  const DanmakuAnime({
+    required this.animeId,
+    required this.animeTitle,
+    this.typeDescription = '',
+  });
+}
+
+/// 手动匹配用的分集条目。
+class DanmakuEpisodeRef {
+  final int episodeId;
+  final String episodeTitle;
+
+  const DanmakuEpisodeRef({
+    required this.episodeId,
+    required this.episodeTitle,
   });
 }
 

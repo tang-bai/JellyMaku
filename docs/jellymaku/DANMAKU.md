@@ -1,9 +1,10 @@
 
 # 弹幕设计（DanDanPlay + Flutter 叠加层）
 
-> 状态：v1 核心已实现（DDP/自动匹配/缓存/叠加层/设置/DPAPI）；手动匹配、本地 XML、真实 DDP/播放器 E2E 未完成。
-> 目标：在 Fladder 上实现弹弹play 弹幕：自动/手动匹配、滚动/顶部/底部、样式/过滤/偏移、缓存/降级。
-> 参考：Kazumi 的 DDP 客户端/解析/屏蔽实现（GPL-3.0），但渲染改为 Flutter CustomPainter。
+> 状态：v1 核心 + Kazumi 对齐增强已实现（2026-10-20）：DDP 签名/缓存/自动匹配/手动匹配 UI/来源过滤/去重合并/叠加层/设置/DPAPI。
+> 未完成：真实 DDP 凭证联调、真实 Jellyfin 播放器 E2E、本地 XML/JSON 导入、发送弹幕。
+> 目标：在 Fladder 上实现弹弹play 弹幕：自动/手动匹配、滚动/顶部/底部、来源/类型过滤、样式/偏移、缓存/降级。
+> 参考：Kazumi 的 DDP 客户端/解析/来源过滤/合并去重（GPL-3.0）；渲染仍为 Flutter CustomPainter，不引入 canvas_danmaku。
 
 ## 1. 为什么不使用 ASS secondary subtitle
 
@@ -28,9 +29,10 @@
 
 | 用途 | 端点 | 说明 |
 |---|---|---|
-| 文件匹配 | POST /api/v2/match | 可选 hash/文件名 |
-| 搜索剧集 | GET /api/v2/search/episodes?anime=...&episode=... | 候选 |
-| 评论 | GET /api/v2/comment/{episodeId}?withRelated=true&chConvert=1 | 弹幕列表 |
+| 搜索番剧（手动匹配） | GET /api/v2/search/episodes?anime=...&v2=true | 返回 animes[]（animeId/animeTitle/typeDescription） |
+| 分集列表（手动匹配） | GET /api/v2/bangumi/{animeId} | bangumi.episodes[]（episodeId/episodeTitle） |
+| 搜索剧集（自动匹配） | GET /api/v2/search/episodes?anime=...&episode=... | 候选 |
+| 评论 | GET /api/v2/comment/{episodeId}?withRelated=true&chConvert=1 | 弹幕列表；withRelated 合并第三方源 |
 | 连接测试 | 搜索一个固定关键词 | UI Test connection |
 
 ### 2.3 错误
@@ -39,42 +41,55 @@
 - 429：配额/限流；读取 Retry-After。
 - 网络/超时：提示；使用缓存（若有）。
 - 时钟偏差：提示校准系统时间。
-- 失败短缓存 10 分钟，避免反复请求；用户可强制刷新。
+- 失败短缓存 10 分钟，避免反复请求；用户可强制刷新（重新加载）。
 
 ### 2.4 缓存
 
 - comments/<episodeId>-<chconvert>.json；TTL 默认 7 天。
-- mapping.json：serverId:itemId → episodeId/shift/source/updatedAt。
-- failures.json：短 TTL。
-- 原子写；损坏 JSON 容错；清缓存入口。
+- mapping.json：itemId → episodeId/shift/source/updatedAt；手动匹配写在这里，清除匹配即删除该键。
+- failures.json：短 TTL（未实现，失败仅提示）。
+- 原子写；损坏 JSON 容错；清缓存入口（未做 UI，服务层有 clear）。
 - DDP 请求只带标题/TMDB/集号/hash，不带 Jellyfin token/服务器地址。
 
 ## 3. 匹配
 
 优先级：
 
-1. 手动映射。
-2. 可选文件 hash（/match）。
-3. TMDB/ProviderIds。
-4. 系列名/标题 + 集号。
-5. 无匹配 → 候选/手动匹配。
+1. 手动映射（mapping.json，source=manual）。
+2. 可选文件 hash（/match，未实现）。
+3. TMDB/ProviderIds（字段已采集，未参与匹配）。
+4. 系列名/标题 + 集号（search/episodes，取第一条候选）。
+5. 无匹配 → 候选/手动匹配（弹窗）。
+
+手动匹配流程（与 Kazumi 一致的三步）：
+
+1. 设置弹窗 →「手动匹配…」，预填系列名/标题。
+2. 搜索番剧 → 选择条目（animeId）。
+3. 选择分集（episodeId）→ 写 mapping 并 reload(force)。
+4. 「清除匹配」删除映射，回到自动匹配。
 
 MediaInfo：
 
 - itemId、name、seriesName、originalTitle、episode、season、tmdbId、isMovie、fileName、fileSize、duration。
+- 当前采集：itemId/name/seriesName/episode/season/isMovie/duration/tmdbId。
 
-低置信度必须人工确认；不静默绑定错误条目。
+低置信度必须人工确认；不静默绑定错误条目。自动匹配仍取第一条候选，属于已知弱点（见 §10）。
 
 ## 4. 评论解析
 
-- p 字段：time,mode,color,uid,...；m 为文本。
+- p 字段：time,mode,color,uid；m 为文本。
+- **来源**：withRelated=true 时 p[3] 可能是来源标签（BiliBili / Gamer），否则是用户 id。解析规则：包含 bilibili → BiliBili；包含 gamer → Gamer；其余 → 弹弹play 自有。uid 原样保留用于屏蔽。
 - 模式：1/2/3 滚动、4 底部、5 顶部（按 DDP 约定归一）。
 - 颜色：十进制 RGB；透明度由设置。
-- 文本：去控制字符、限制长度、XML/HTML 安全。
-- 过滤：屏蔽词/用户、模式、最大条数、均匀采样。
-- 偏移：danmaku_offset + match shift。
+- 文本：去控制字符、限制 200 字、屏蔽词过滤。
+- 偏移：offsetSeconds + match.shift；负数丢弃。
 - chConvert：0/1/2 由 DDP 服务端处理。
-- 去重：同用户+文本+时间窗口（建议改为 last-seen map，避免桶边界问题）。
+- 去重：
+  - 始终做精确去重（uid + 绝对时间 + 文本）。
+  - 可选「合并重复弹幕」：全角转半角、去空白/符号、连续重复字符压缩到 3 个，5 秒窗口内相同文本合并为「文本 xN」顶部白字（Kazumi 规则）。
+- 条数：maxComments 均匀采样。
+
+**实时过滤**：来源与顶/底/滚动开关不参与解析，而在绘制时用 isDanmakuVisible() 判断；播放中切换立即生效。时间偏移/屏蔽词/合并/条数变化触发 300ms 防抖重载。
 
 ## 5. Flutter 叠加层
 
@@ -82,7 +97,7 @@ MediaInfo：
 
 - DanmakuController：评论列表、样式、状态、generation。
 - DanmakuOverlay：ConsumerStatefulWidget + Ticker；读取 mediaPlaybackProvider 的 position/playing/rate。
-- DanmakuPainter：CustomPainter；TextPainter 缓存；RepaintBoundary；IgnorePointer。
+- DanmakuPainter：CustomPainter；TextPainter 缓存（含描边副本）；RepaintBoundary；IgnorePointer。
 - 插入 VideoPlayer Stack：视频之上、控制条之下。
 
 ### 5.2 时间同步
@@ -91,29 +106,39 @@ MediaInfo：
 - 暂停：停止插值，保持当前时间。
 - seek/切集/倍速：重置/重算。
 - 活跃集合：按 startTime 排序 + 二分查找；只绘制 [start, start+duration]。
-- 顶部/底部固定行；滚动 lane 分配；避免重叠。
+- 顶部/底部固定行；滚动 lane 分配；隐藏的评论不占轨道，避免切换来源后留空洞。
+- 轨道满时复用最早结束的轨道（等价 Kazumi 的 massiveMode 常开）；不丢弃弹幕。
+- 倍速：显示时钟按 rate 前进、弹幕时长按视频时间计，等价于 Kazumi「跟随倍速」常开。
 - 显示区域限制在视频上部；底部留给字幕/控制条。
 
-### 5.3 性能
+### 5.3 样式
+
+- 字号/字体/透明度/显示区域/滚动时长（现有）。
+- 颜色开关：关闭后统一白色。
+- 描边：独立描边 TextPainter（strokeWidth 0–6），有描边时不再叠加阴影。
+- 合并重复弹幕统一白色顶部（与 Kazumi 一致）。
+
+### 5.4 性能
 
 - 5000 条解析 <200ms（Dart VM 基准）。
-- 只绘制活跃评论；TextPainter 缓存；避免每帧重建列表。
+- 只绘制活跃评论；TextPainter 缓存；lane 布局缓存（key 含来源/类型开关）。
 - 大字号/高 DPI 下限制最大条数；必要时降采样。
-- 性能测试记录到 artifacts/perf。
+- 性能测试记录到 artifacts/perf（未做）。
 
 ## 6. UI/设置
 
-- 播放器按钮/菜单：Toggle、Match…、Reload、Settings。
-- 状态 badge：ready/loading/no_match/no_credentials/error。
+- 播放器按钮/菜单：Toggle、Settings。
+- 状态行：ready/loading/no_match/no_credentials/error；显示当前匹配标题与手动/自动。
 - 设置页：
-  - AppId/AppSecret（留空保留；DPAPI）。
-  - Test connection、API Base（高级）。
-  - 字体/字号/透明度/速度/区域/偏移。
-  - 屏蔽词/用户、简繁、自动匹配、hash、最大条数、缓存天数。
-  - 本地 XML/JSON 文件；清缓存。
-- 手动匹配对话框：预填作品/集号；搜索候选；shift；Use this/clear。
-- 本地导入：Bilibili XML / DDP JSON；无凭证演示。
-- 快捷键可选 Ctrl+D；避免冲突。
+  - AppId/AppSecret（DPAPI）、Test connection、API Base（高级）。
+  - 字体/字号/透明度/速度/区域/偏移/描边/颜色。
+  - 顶/底/滚动开关；**来源开关：BiliBili / Gamer / 弹弹play 自有**。
+  - 合并重复弹幕；简繁；自动匹配/hash/最大条数/缓存天数（字段存在）。
+  - 手动匹配… / 重新加载 / 清除匹配。
+  - 本地 XML/JSON 文件；清缓存（未做）。
+- 手动匹配对话框（三步）：搜索番剧 → 选择分集（支持标题筛选）→ 应用。
+- 本地导入：Bilibili XML / DDP JSON（未做）。
+- 快捷键可选 Ctrl+D（未做）；避免冲突。
 
 ## 7. 生命周期/并发
 
@@ -121,7 +146,8 @@ MediaInfo：
 - 后台线程/异步；不阻塞 mpv/UI。
 - 切集/停止取消请求、清理状态。
 - mpv 重启/重新打开后重载。
-- 设置变更重新生成/重绘，不破坏播放位置。
+- 设置变更：解析类防抖重载；样式类直接重绘，不破坏播放位置。
+- 手动匹配：写 mapping → 清空 state → 强制 load；旧 generation 失效。
 
 ## 8. 隐私/合规
 
@@ -133,15 +159,33 @@ MediaInfo：
 
 ## 9. 测试/验收
 
-- 单测：签名固定向量、Path 去 query、错误映射、解析/过滤/偏移/去重、缓存 key、布局。
-- Mock DDP：签名头、search/comment/match、401/403/429/空评论/无匹配。
-- 本地 Jellyfin：弹幕加载、主字幕共存、seek/pause/切集、设置变更。
-- 5000 条性能；截图。
+- 单测（test/danmaku/danmaku_test.dart 9 条 + danmaku_ui_test.dart 2 条 widget）：
+  - 签名固定向量；手动匹配 searchAnime/getEpisodes 解析与请求路径。
+  - 解析/模式/偏移/屏蔽/精确去重/来源/合并规则/实时可见性。
+  - 设置序列化（不落 AppSecret；新字段 round-trip）。
+- Mock DDP：签名头、search/comment、401/403/429/空评论/无匹配（部分）。
+- 本地 Jellyfin：弹幕加载、主字幕共存、seek/pause/切集、设置变更（未做）。
+- 5000 条性能；截图（未做）。
 - Gate：核心测试全绿；Mock E2E；无凭证/无匹配/错误不阻塞播放；缓存正确失效。
 
 ## 10. 已知限制
 
-- 不支持发送弹幕/回复/举报。
-- 特殊 ASS 特效不还原。
-- 截图默认不含弹幕层；需外部截屏。
-- DDP 需要用户凭证；无凭证时仅本地导入/ Mock。
+- 自动匹配只取第一条候选，遇到同名片目可能匹配错；请用「手动匹配」。
+- p[3] 若在某些响应里始终是用户 id，则来源全部归为弹弹play 自有，来源过滤会表现为“全部显示/全部隐藏”——需要用真实凭证抓一次响应确认。
+- 不支持发送弹幕/回复/举报（与 Kazumi 一样只做本地回显，我们暂未实现回显）。
+- 不支持本地 XML/JSON 导入。
+- 特殊 ASS 特效不还原；截图默认不含弹幕层。
+- DDP 需要用户凭证；无凭证时弹幕入口只提示配置。
+
+## 11. 与 Kazumi 实现的对应关系
+
+| 能力 | Kazumi | JellyMaku |
+|---|---|---|
+| 拉取 | /comment/{episodeId}，withRelated+chConvert | 相同 |
+| episodeId | animeId*10000+4 位集号 | 走 search/episodes 返回的 episodeId（不拼 ID） |
+| 来源过滤 | p[3] 标签，播放时过滤 | 相同，绘制层实时过滤 |
+| 手动匹配 | 三步搜索 | 三步对话框 + mapping 持久化 |
+| 去重合并 | 归一化 + 5s 窗口 + xN | 相同，默认关闭 |
+| 渲染 | canvas_danmaku（Ticker+CustomPaint） | 自绘 CustomPainter + 独立显示时钟 |
+| 暂停 | canvas.pause() | 冻结显示时钟 |
+| 发送 | 本地回显 / SyncPlay 聊天 | 未实现 |

@@ -143,6 +143,54 @@ class DdpClient {
     return candidates;
   }
 
+  /// 手动匹配第一步：按番名搜索弹弹play 的番剧条目。
+  Future<List<DanmakuAnime>> searchAnime(String anime) async {
+    final data = await _get(
+      '/api/v2/search/episodes',
+      query: {'anime': anime, 'v2': 'true'},
+    );
+
+    final animes = <DanmakuAnime>[];
+    final rawAnimes = data['animes'];
+    if (rawAnimes is List) {
+      for (final entry in rawAnimes) {
+        if (entry is! Map) continue;
+        final animeId = (entry['animeId'] as num?)?.toInt();
+        final title = entry['animeTitle']?.toString() ?? '';
+        if (animeId == null || animeId <= 0 || title.isEmpty) continue;
+        animes.add(DanmakuAnime(
+          animeId: animeId,
+          animeTitle: title,
+          typeDescription: entry['typeDescription']?.toString() ?? '',
+        ));
+      }
+    }
+    return animes;
+  }
+
+  /// 手动匹配第二步：列出某个番剧的全部分集。
+  Future<List<DanmakuEpisodeRef>> getEpisodes(int animeId) async {
+    final data = await _get('/api/v2/bangumi/$animeId');
+
+    final episodes = <DanmakuEpisodeRef>[];
+    final bangumi = data['bangumi'];
+    if (bangumi is Map) {
+      final rawEpisodes = bangumi['episodes'];
+      if (rawEpisodes is List) {
+        for (final entry in rawEpisodes) {
+          if (entry is! Map) continue;
+          final episodeId = (entry['episodeId'] as num?)?.toInt();
+          if (episodeId == null || episodeId <= 0) continue;
+          episodes.add(DanmakuEpisodeRef(
+            episodeId: episodeId,
+            episodeTitle: entry['episodeTitle']?.toString() ?? '',
+          ));
+        }
+      }
+    }
+    return episodes;
+  }
+
   Future<List<DdpComment>> getComments(
     int episodeId, {
     int chConvert = 1,

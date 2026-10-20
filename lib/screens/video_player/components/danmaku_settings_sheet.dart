@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fladder/danmaku/ddp_client.dart';
 import 'package:fladder/providers/danmaku_provider.dart';
 import 'package:fladder/providers/settings/danmaku_settings_provider.dart';
+import 'package:fladder/screens/video_player/components/danmaku_match_dialog.dart';
 
 Future<void> showDanmakuSettings(BuildContext context) {
   return showDialog<void>(
@@ -108,6 +109,15 @@ class _DanmakuSettingsDialogState
               const SizedBox(height: 8),
               Text('弹弹play · 状态：${_statusLabel(state.status)}',
                   style: theme.textTheme.bodySmall),
+              if (state.match != null)
+                Text(
+                  '已匹配：${state.match!.animeTitle}'
+                  '${state.match!.episodeTitle.isEmpty ? '' : ' · ${state.match!.episodeTitle}'}'
+                  '（${state.match!.source == 'manual' ? '手动' : '自动'}）',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall,
+                ),
               if (state.error != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 4),
@@ -216,10 +226,12 @@ class _DanmakuSettingsDialogState
                     _SliderTile(
                       label: '时间偏移',
                       value: settings.offsetSeconds,
-                      min: -15,
-                      max: 15,
-                      divisions: 60,
-                      display: '${settings.offsetSeconds.toStringAsFixed(1)} 秒',
+                      min: -60,
+                      max: 60,
+                      divisions: 120,
+                      display:
+                          '${settings.offsetSeconds > 0 ? '+' : ''}'
+                          '${settings.offsetSeconds.toStringAsFixed(1)} 秒',
                       onChanged: notifier.setOffset,
                     ),
                     const SizedBox(height: 8),
@@ -259,6 +271,100 @@ class _DanmakuSettingsDialogState
                       title: const Text('显示底部弹幕'),
                       value: settings.showBottom,
                       onChanged: notifier.setShowBottom,
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('合并重复弹幕'),
+                      subtitle: const Text('5 秒内相同内容合并为“xN”顶部弹幕'),
+                      value: settings.mergeDuplicates,
+                      onChanged: notifier.setMergeDuplicates,
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('保留弹幕颜色'),
+                      subtitle: const Text('关闭后全部按白色绘制'),
+                      value: settings.showColor,
+                      onChanged: notifier.setShowColor,
+                    ),
+                    _SliderTile(
+                      label: '描边粗细',
+                      value: settings.strokeWidth,
+                      min: 0,
+                      max: 6,
+                      divisions: 12,
+                      display: settings.strokeWidth.toStringAsFixed(1),
+                      onChanged: notifier.setStrokeWidth,
+                    ),
+                    const Divider(height: 28),
+                    Text('弹幕来源', style: theme.textTheme.titleSmall),
+                    const SizedBox(height: 4),
+                    Text(
+                      '弹弹play 会把第三方站点弹幕合并进同一条响应，'
+                      '这里只控制显示，不额外发请求。',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('BiliBili'),
+                      value: settings.showBiliBiliSource,
+                      onChanged: notifier.setShowBiliBiliSource,
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Gamer（巴哈动画疯）'),
+                      value: settings.showGamerSource,
+                      onChanged: notifier.setShowGamerSource,
+                    ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('弹弹play 自有'),
+                      subtitle: const Text('关闭时只保留 BiliBili / Gamer 来源'),
+                      value: settings.showDanDanPlaySource,
+                      onChanged: notifier.setShowDanDanPlaySource,
+                    ),
+                    const Divider(height: 28),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton.tonalIcon(
+                          onPressed: () async {
+                            final applied =
+                                await showDanmakuMatchDialog(context);
+                            if (!context.mounted) return;
+                            if (applied == true) {
+                              ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                                const SnackBar(content: Text('已应用手动匹配')),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.manage_search),
+                          label: const Text('手动匹配…'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: state.status == DanmakuLoadStatus.loading
+                              ? null
+                              : () => ref.read(danmakuProvider.notifier).reload(),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('重新加载'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: state.match?.source == 'manual'
+                              ? () async {
+                                  await ref
+                                      .read(danmakuProvider.notifier)
+                                      .clearManualMatch();
+                                  if (!context.mounted) return;
+                                  ScaffoldMessenger.maybeOf(context)
+                                      ?.showSnackBar(
+                                    const SnackBar(content: Text('已清除手动匹配')),
+                                  );
+                                }
+                              : null,
+                          icon: const Icon(Icons.link_off),
+                          label: const Text('清除匹配'),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     Text(
