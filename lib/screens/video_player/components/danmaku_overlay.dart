@@ -95,10 +95,8 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
         _loadFrom(ref.read(playBackModel));
         return;
       }
-      // 地址/凭证是边输入边保存的，防抖后再重载，避免每敲一个字符发一次请求。
-      final connectionChanged = previous.appId != next.appId ||
-          previous.appSecret != next.appSecret ||
-          previous.apiBase != next.apiBase;
+      // API 地址是边输入边保存的，防抖后再重载，避免每敲一个字符发一次请求。
+      final connectionChanged = previous.apiBase != next.apiBase;
       if (connectionChanged) {
         _scheduleReload();
         return;
@@ -107,12 +105,10 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
       // 这些设置会改变解析结果（时间轴/文本/条数），需要重算；
       // 来源与类型开关只影响绘制，由 painter 实时判断。
       final parseChanged = previous.offsetSeconds != next.offsetSeconds ||
-          previous.chConvert != next.chConvert ||
           previous.cacheDays != next.cacheDays ||
           previous.maxComments != next.maxComments ||
           previous.mergeDuplicates != next.mergeDuplicates ||
           previous.autoMatch != next.autoMatch ||
-          previous.hashMatch != next.hashMatch ||
           previous.localFile != next.localFile ||
           !listEquals(previous.blockWords, next.blockWords) ||
           !listEquals(previous.blockUsers, next.blockUsers);
@@ -174,7 +170,6 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
     );
   }
 }
-
 
 class _LaneLayout {
   const _LaneLayout({

@@ -12,12 +12,12 @@
 | 旧 MPV Shim 实现 | 丢失 | 本地/远程均不可恢复；不再作为基座 |
 | Fladder 源码 | 已导入 | PR #735 head 基线；最新 develop 待合并 |
 | Flutter 工具链 | 完成 | 3.35.7；analyze 0 issue |
-| 构建/单测 | 完成 | Windows release/启动冒烟（10-20）；121 tests（10-20） |
-| 弹幕 | 核心功能已接入；真实联调未做 | DDP/自建 danmu_api/自动+手动匹配/合并去重/本地导入/缓存/叠加层/设置/DPAPI（AppId 高级可选）；真实联调未做 |
+| 构建/单测 | 完成 | Windows release/启动冒烟（10-20 23:38，弹幕迁移后）；137 tests |
+| 弹幕 | 核心功能已接入；播放器内真实 E2E 未做 | danmu_api（默认公共实例，可自建）/match 自动匹配/URL 拉取/合并去重/本地导入/URL 哈希缓存/叠加层/设置；API 已实测，播放器内未验证 |
 | 超分 | 核心已接入；未验收 | Anime4K Fast/Quality；画质/性能未测 |
 | SyncPlay | 代码+单测；真实双端未做 | PR #735 head；见 PARTY |
 | Bangumi 时间表/图片/评论 | 未开始 | 条件功能；见 BANGUMI/KAZUMI |
-| 打包/品牌 | 便携包已出；安装器未做 | JellyMaku.exe/窗口/资源；zip 90.6MB |
+| 打包/品牌 | 便携包已出；安装器未做 | JellyMaku.exe/窗口/资源；zip 90,712,816 bytes |
 
 ## 2. 里程碑
 
@@ -25,7 +25,7 @@
 |---|---|---|
 | M0 | 文档/AGENTS/资产约定 | 本次 |
 | M1 | Fladder + PR #735 可构建、可登录/播放 | Stage A0 |
-| M2 | 弹幕可用（Mock/本地导入 + 真实凭证可选） | Stage A1/A2 |
+| M2 | 弹幕可用（danmu_api/本地导入 + 播放器内 E2E） | Stage A1/A2 |
 | M3 | shader 超分可切换、有性能证据 | Stage A3 |
 | M4 | SyncPlay 双客户端通过 | Stage A4 |
 | M5 | 安装器/便携包 + Stage A 验收 | Stage A5 |
@@ -39,18 +39,18 @@
 1. **已推送**：main 已推送到 origin（e2b3ca7）；后续变更需确认后再 push。
 2. **基线不含最新 develop**：当前为 PR #735 head；Phase A0 仍需 merge/rebase 最新 develop 并解决冲突。
 3. **真实 Jellyfin E2E 未做**：未下载/启动 Jellyfin 12.2；登录/播放/字幕/seek/切集未验证。
-4. **DDP 凭证缺失**：真实弹幕联调需 AppId/AppSecret；当前只有本地 mock/单测。手动匹配/来源过滤已实现，但 p[3] 来源语义与真实响应仍需凭证确认。
+4. **弹幕播放器内 E2E 未做**：danmu_api 的 search/match/comment 已用 PowerShell 实测 200（6,898 条弹幕），但未在真实 Jellyfin 播放器中验证加载/切集/暂停。
 5. **SyncPlay 真实双端未做**：单测通过；Jellyfin 12.2 WebSocket/时钟误差未验证。
 6. **超分未验收**：无画质/性能截图；ANGLE/OpenGL 下 shader 可能被拒绝。
 7. **Bangumi 网络**：官方不可达；评论/搜索镜像 401；需用户代理/自建 Worker。
-8. **安装器/中文 ARB 未做**：当前 portable zip；弹幕设置文案硬编码英文。
+8. **安装器/中文 ARB 未做**：当前 portable zip；弹幕设置文案硬编码中文，未走 ARB。
 
 ## 4. 下一步（建议顺序）
 
 1. 推送 main 到 origin，确认远程可构建。
 2. 补最新 develop 合并，重新跑 analyze/test/build。
 3. 下载/启动 Jellyfin 12.2 + .NET 10 + 测试媒体；做登录/播放/seek/切集/字幕 E2E。
-4. 申请 DDP AppId/AppSecret；真实弹幕联调（含 p[3] 来源语义）；本地导入已可用。
+4. 在播放器内做真实弹幕 E2E（自动/手动匹配、切集、暂停、本地导入）；重新构建 Windows 包。
 5. SyncPlay 双端联调；超分画质/性能验收；安装器/中文 ARB。
 6. Stage B Bangumi 数据层/Mock；再决定真实评论联调。
 

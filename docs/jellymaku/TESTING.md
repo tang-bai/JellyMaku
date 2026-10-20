@@ -1,7 +1,7 @@
 
 # 测试策略与验收
 
-> 状态：部分执行。2026-10-20 已完成 analyze 0、121 tests；Windows release 重新构建、portable zip 重打、启动冒烟通过；真实 Jellyfin/DDP/SyncPlay 联调仍未执行。
+> 状态：部分执行。2026-10-20 已完成 analyze 0、137 tests；Windows release 已重新构建/冒烟通过（含弹幕迁移后重建）；danmu_api search/match/comment 已实测 200；真实 Jellyfin/播放器内弹幕/SyncPlay 联调仍未执行。
 >
 > 已执行证据见 [STAGE_A_REPORT.md](STAGE_A_REPORT.md) 与 artifacts/logs/（本地，不入库）。
 
@@ -9,9 +9,9 @@
 
 | 层级 | 范围 | 工具/方式 |
 |---|---|---|
-| 单元 | DDP 签名/解析/匹配/缓存；Bangumi client/映射；BBCode；shader profile | Dart test / flutter test |
+| 单元 | danmu_api 客户端/解析/匹配/缓存；Bangumi client/映射；BBCode；shader profile | Dart test / flutter test |
 | Widget | 弹幕开关/设置/手动匹配；时间表；图片搜索；评论 Tab/Sheet；无网 | flutter test / widget test |
-| Mock 集成 | Mock DDP、Mock Bangumi、Mock trace.moe | tool/ 下的 Dart HTTP server |
+| Mock 集成 | danmu_api（MockClient/本地 HttpServer）、Mock Bangumi、Mock trace.moe | Dart HttpServer / MockClient |
 | 本地 Jellyfin | 登录/库/播放/字幕/弹幕/seek/切集/设置持久化 | Jellyfin 12.2 + 测试媒体 |
 | SyncPlay | 双客户端矩阵 | JellyMaku + Jellyfin Web / 双实例 |
 | 超分 | profile 切换/关闭/持久化/性能 | 截图 + mpv 属性/掉帧 |
@@ -22,7 +22,7 @@
 - Windows 10/11 x64；VS 2022 BuildTools；Developer Mode；Flutter 3.35.7（已安装）。
 - Jellyfin 12.2 + .NET 10；本地 127.0.0.1:8096（尚未下载/启动）。
 - ffmpeg 9.0.1；测试媒体在 testdata/media。
-- DDP：无凭证时 Mock/本地 XML；真实凭证可选。
+- danmu_api：默认公共实例可直接请求；离线/限流时用本地 XML 或缓存。自建 TOKEN 写在地址路径。
 - Bangumi：无网络路径时 Mock；真实联调需用户代理/Worker。
 - trace.moe：Mock 或真实（quota 100/day，concurrency 1）。
 
@@ -113,6 +113,6 @@ dart analyze lib test                 # 0 issue
 ## 9. 不做的测试
 
 - 不做真实 Bangumi 生产压力/批量抓取。
-- 不做 DDP 大规模抓取/绕过配额。
+- 不做 danmu_api 大规模抓取/绕过配额。
 - 不上传真实用户截图到 trace.moe 做批量测试。
 - 不把未授权媒体/账号写入仓库。

@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:fladder/danmaku/danmaku_api_client.dart';
 import 'package:fladder/danmaku/danmaku_models.dart';
-import 'package:fladder/danmaku/ddp_client.dart';
 import 'package:fladder/models/settings/danmaku_settings_model.dart';
 
 final _controlCharacters = RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]');
@@ -11,12 +11,13 @@ final _mergeSymbols = RegExp(
   unicode: true,
 );
 final _repeatedRun = RegExp(r'(.)\1{2,}');
+final _sourceTag = RegExp(r'^\[(.+)\]$');
 
 /// Kazumi 的合并窗口：5 秒内相同文本折叠成一条。
 const double danmakuMergeWindowSeconds = 5;
 
 List<DanmakuComment> parseDanmakuComments(
-  Iterable<DdpComment> raw,
+  Iterable<DanmakuApiComment> raw,
   DanmakuSettingsModel settings, {
   double shift = 0,
 }) {
@@ -40,8 +41,13 @@ List<DanmakuComment> parseDanmakuComments(
     final mode = int.tryParse(fields[1].trim());
     final color = int.tryParse(fields[2].trim());
     final rawField = fields[3].trim();
+    // danmu_api 的 p[3] 是 `[bilibili1]` 这类来源标签，不是用户 id。
+    // 把它当 uid 会让“屏蔽用户”误伤整个来源，所以只有非标签值才当 uid。
+    final sourceTag = _sourceTag.firstMatch(rawField);
+    final provider = sourceTag?.group(1)?.trim() ?? '';
+    final uid = sourceTag == null ? rawField : '';
     if (time == null || time.isNaN || !time.isFinite) continue;
-    if (rawField.isNotEmpty && blockUsers.contains(rawField)) continue;
+    if (uid.isNotEmpty && blockUsers.contains(uid)) continue;
 
     final text = _sanitize(entry.m, blockWords);
     if (text.isEmpty) continue;
@@ -56,8 +62,9 @@ List<DanmakuComment> parseDanmakuComments(
       time: adjusted,
       mode: _mode(mode),
       color: _color(color),
-      uid: rawField,
+      uid: uid,
       text: text,
+      provider: provider,
     ));
   }
 
@@ -65,8 +72,7 @@ List<DanmakuComment> parseDanmakuComments(
 
   // 去重合并只改变展示密度，不改变"哪些来源/类型可见"；后者交给
   // isDanmakuVisible 在绘制时实时判断，切换开关无需重新请求。
-  final merged =
-      settings.mergeDuplicates ? _mergeRepeated(parsed) : parsed;
+  final merged = settings.mergeDuplicates ? _mergeRepeated(parsed) : parsed;
 
   final maxComments = settings.maxComments;
   if (maxComments > 0 && merged.length > maxComments) {
@@ -93,7 +99,8 @@ bool isDanmakuVisible(
     DanmakuMode.bottom => settings.showBottom,
   };
   if (!modeVisible) return false;
-  // 在线弹幕无法按站过滤（DDP 不提供来源标签），只保留本地导入开关。
+  // 在线弹幕由 danmu_api 聚合，来源标签只用于展示/诊断；
+  // 客户端目前只提供本地导入开关。
   return comment.source == DanmakuSource.local
       ? settings.showLocalSource
       : true;

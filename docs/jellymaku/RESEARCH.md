@@ -1,13 +1,14 @@
 
 # 开源项目与 API 调研（2026-10-19）
 
+> 历史说明（2026-10-20）：弹幕数据源已改为 danmu_api；下文旧弹幕调研仅作历史记录。
 > 目的：为 JellyMaku 的 Fladder 基座、弹幕、超分、SyncPlay、Bangumi 模块提供选型依据。本文区分“实测事实”和“计划/假设”。
 
 ## 1. 结论
 
 - **基座**：DonutWare/Fladder（Flutter/Dart，GPL-3.0）。已有 Jellyfin 客户端、现代 UI、media_kit/libmpv、下载/同步、Trickplay、媒体段跳过。
 - **SyncPlay**：复用 Fladder PR #735（Jellyfin SyncPlay，WebSocket + REST + 时间同步 + UI + 文档），不重写。
-- **弹幕**：Dart DDP 客户端 + Flutter CustomPainter 叠加层；参考 Kazumi 的 DDP 解析/屏蔽/简繁。
+- **弹幕**：Dart 弹幕客户端 + Flutter CustomPainter 叠加层；参考 Kazumi 的弹幕解析/屏蔽/简繁。
 - **超分**：media_kit/libmpv 的 glsl-shaders；复用 default-shader-pack/Kazumi 的 Anime4K 资产；RTX VSR 不作为 v1 验收。
 - **Bangumi 增值**：Kazumi 的时间表/图片识别/评论实现可参考/移植；评论依赖 Bangumi Next p1，当前网络不可达，必须用户代理/自建镜像。
 - **不选**：Kazumi 作为基座（无 Jellyfin 集成、公共 SyncPlay 不兼容）、jellyfin-desktop（Qt/C++ 扩展成本高）、mpv.net（无 Jellyfin）、服务端弹幕插件（不符合客户端自带需求）。
@@ -60,7 +61,7 @@
 | 技术栈 | Flutter/Dart，flutter_modular + MobX，media_kit，Hive，Dio |
 | 定位 | 自定义 XPath 规则的番剧采集/在线观看，不是 Jellyfin 客户端 |
 | 规模 | 约 3.8 万 stars，825 个 tracked 文件 |
-| 与目标相关 | 番剧时间表、图片识别、Bangumi 评论、弹弹play 弹幕、Anime4K、公共 SyncPlay |
+| 与目标相关 | 番剧时间表、图片识别、Bangumi 评论、在线弹幕、Anime4K、公共 SyncPlay |
 
 关键代码：
 
@@ -73,13 +74,12 @@
 
 详细分析见 KAZUMI.md。
 
-## 5. DanDanPlay Open API
+## 5. 旧弹幕开放 API（历史）
 
-- 官方文档：https://doc.dandanplay.com/open/
-- 必须有 AppId + AppSecret；签名模式：X-Signature = base64(sha256(AppId + Timestamp + Path + AppSecret))；Path 不含 query。
-- 公开接口（match/search/comment）不需要用户 JWT，但仍需应用身份头；无头请求实测 403。
-- 2026-06-25 起应用分层/额度管理；403 带 X-Error-Message；必须缓存、避免批量抓取。
-- 合规：标注“弹弹play开放弹幕网络 www.dandanplay.com”；弹幕功能免费；禁止未授权商用；AppSecret 不入库。
+- 旧方案需要应用凭证与身份头；签名与配额规则已不再采用。
+- 公开接口（match/search/comment）曾需要应用身份头；无头请求实测 403。
+- 旧服务曾按应用分层/额度管理；403 带 X-Error-Message；必须缓存、避免批量抓取。
+- 合规：弹幕功能免费，禁止未授权商用；凭据不入库。
 
 ## 6. Bangumi API 与网络实测
 
@@ -123,8 +123,8 @@
 |---|---|
 | jellyfin-desktop | Qt/C++/QML 扩展弹幕成本高；不选 |
 | mpv.net | 无 Jellyfin/SyncPlay；不选 |
-| cxfksword/jellyfin-plugin-danmu | 服务端插件，DDP 已移除；不选 |
-| Kosette/danmaku | 旧 DDP 签名，Rust cplugin；仅参考 |
+| cxfksword/jellyfin-plugin-danmu | 服务端插件，旧弹幕协议已移除；不选 |
+| Kosette/danmaku | 旧弹幕签名，Rust cplugin；仅参考 |
 | Kazumi 作为基座 | 无 Jellyfin 集成、公共 SyncPlay；不选 |
 | 自建同步服务器 | 端口/NAT/鉴权成本高；用 Jellyfin SyncPlay |
 

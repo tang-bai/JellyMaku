@@ -1,6 +1,7 @@
 
 # Kazumi 三项能力专项分析：番剧时间表、图片识别、Bangumi 评论
 
+> 历史说明（2026-10-20）：弹幕数据源已改为 danmu_api；文中弹幕对比仅作历史记录。
 > 状态：调研/可行性分析（2026-10-19）。
 > 结论：三项都可以做，但都依赖 Bangumi 网络可达性；当前网络下评论不能开箱即用。
 
@@ -11,7 +12,7 @@
 | 番剧时间表 | Bangumi Next `/p1/calendar` + 官方搜索补季 | **高**：数据/排序/过滤逻辑清晰，UI 重写 | Bangumi 不可达；标题↔Jellyfin 映射 |
 | 图片识别 | trace.moe `/search?anilistInfo=2` → AniList 标题 → 站内搜索 | **高**：trace.moe 可用；Jellyfin 本地匹配容易 | 无直接 Bangumi ID；隐私/配额 |
 | Bangumi 评论 | Next `/p1/subjects/{id}/comments`、`/p1/episodes/{id}/comments` | **中**：模型/交互可移植；接口非官方 OpenAPI | 当前网络不可达；镜像评论 401；映射/SP |
-| 弹幕/超分（附加） | DDP + canvas_danmaku；Anime4K + glsl-shaders | **高**：可直接参考/复用 | GPL 署名；media_kit 渲染差异 |
+| 弹幕/超分（附加） | 在线弹幕 + canvas_danmaku；Anime4K + glsl-shaders | **高**：可直接参考/复用 | GPL 署名；media_kit 渲染差异 |
 
 **不建议把 Kazumi 作为基座**：它没有 Jellyfin 登录/库/播放上报，且“一起看”使用公共 SyncPlay 服务器，与 Jellyfin SyncPlay 不兼容；改成 Jellyfin 客户端约 3–4 周且风险高。
 
@@ -22,7 +23,7 @@
 - 技术：Flutter/Dart，flutter_modular + MobX，media_kit，Hive，Dio
 - 定位：基于自定义 XPath 规则的番剧采集/在线观看，不是 Jellyfin 客户端。
 - 规模：约 3.8 万 stars，825 个 tracked 文件。
-- 相关能力：番剧时间表、图片识别、Bangumi 元数据/评论、弹弹play 弹幕、Anime4K、公共 SyncPlay、下载、投屏。
+- 相关能力：番剧时间表、图片识别、Bangumi 元数据/评论、在线弹幕、Anime4K、公共 SyncPlay、下载、投屏。
 
 ## 2. 番剧时间表
 
@@ -137,7 +138,7 @@
 | 时间表数据/排序/过滤 | 移植逻辑，重写 Riverpod/UI | 保留 API 参数/日期算法 |
 | 图片识别 API/模型 | 移植 Dart 模型/请求 | trace.moe 配额/隐私 |
 | 评论模型/UI 结构 | 移植模型/交互，重写组件 | Next API 不稳定；BBCode 简化 |
-| 弹幕 DDP/解析/屏蔽 | 已移植（2026-10-20）：合并去重、手动匹配；渲染仍用 CustomPainter | 实测 DDP p[3] 是 uid，Kazumi 的来源标签假设不成立，未移植按站过滤 |
+| 弹幕解析/屏蔽 | 已移植（2026-10-20）：合并去重、手动匹配；渲染仍用 CustomPainter | 实测旧弹幕 p[3] 是 uid，Kazumi 的来源标签假设不成立，未移植按站过滤 |
 | Anime4K shader/服务 | 复用资产/加载思路 | GPL/Anime4K 许可；渲染验证 |
 | 一起看 | 不复用 | Kazumi 公共 SyncPlay，Jellyfin 用 PR #735 |
 | 图标/字体/美术 | 不复制 | Kazumi 有单独版权限制 |

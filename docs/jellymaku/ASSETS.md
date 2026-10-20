@@ -18,7 +18,7 @@ third_party/dotnet/             .NET 10 runtime
 third_party/shader-pack/        default-shader-pack v3.0.0 原始文件
 third_party/upstream/           Fladder 固定源码/补丁（可选）
 testdata/media/                 测试视频
-testdata/fixtures/              DDP/Bangumi/trace.moe JSON
+testdata/fixtures/              danmu_api/Bangumi/trace.moe JSON
 testdata/jellyfin/              本地 Jellyfin 数据/配置
 testdata/runtime/               应用测试配置/日志
 artifacts/screenshots/          截图
@@ -43,7 +43,7 @@ artifacts/build/                便携包/安装器
 | .NET runtime | 10.0 win-x64 | third_party/dotnet/ | 尚未下载 |
 | Inno Setup | 6.x | tools/inno/ | 尚未下载；当前 portable zip |
 | 测试视频 | ffmpeg 生成 + 可选 BBB | testdata/media/ | 尚未生成 |
-| Mock DDP | test/danmaku/ddp_client_test.dart | 源码 | 本地 HttpServer mock |
+| Mock danmu_api | test/danmaku/danmaku_api_client_test.dart | 源码 | 本地 HttpServer mock |
 | Mock Bangumi/trace.moe | tool/mock_* | 源码 | 未开始 |
 
 ## 3. 下载 URL 参考
@@ -101,7 +101,7 @@ URL 可能变化；bootstrap 脚本需校验状态码/SHA256，并写 manifest�
 
 - .flutter/、.pub-cache/、.pip-cache/、build/、tools/downloads/、tools/inno/、third_party/、testdata/、artifacts/、*.log、mpv-2.dll 等。
 - 仓库只保留脚本、fixtures（小）、shader 源文件（按许可）、文档、截图（小）。
-- 不提交 Jellyfin 数据、账号、DDP/Bangumi 密钥、真实媒体。
+- 不提交 Jellyfin 数据、账号、danmu_api TOKEN/Bangumi 密钥、真实媒体。
 
 ## 9. 磁盘/网络
 

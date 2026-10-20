@@ -1,7 +1,7 @@
 
 # JellyMaku 项目文档
 
-> 状态：Stage A 核心已构建并验证（见 [STAGE_A_REPORT.md](STAGE_A_REPORT.md)）；弹幕手动匹配/来源过滤已补齐（2026-10-20）；最新 develop、真实 Jellyfin/DDP/SyncPlay 联调未完成。
+> 状态：Stage A 核心已构建并验证（见 [STAGE_A_REPORT.md](STAGE_A_REPORT.md)）；弹幕已迁移到 danmu_api（2026-10-20）；最新 develop、播放器内真实弹幕/E2E、SyncPlay 双端联调未完成。
 > 日期：2026-10-20
 > 基座：DonutWare/Fladder（Flutter/Dart，GPL-3.0）+ SyncPlay PR #735
 > 说明：除明确标注“已验证”的内容外，所有功能、测试、截图、性能均为计划，不代表已实现。
@@ -10,10 +10,11 @@
 
 - 本地 main 已包含 Fladder + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 文档。
 - origin https://github.com/tang-bai/JellyMaku 已推送 main（e2b3ca7）。
-- Flutter 3.35.7 已安装；analyze 0 issue；121 tests passed；Windows release 已重新构建（10-20）并通过启动冒烟。
-- 基线仍是 PR #735 head；最新 develop 未合并。真实 Jellyfin 12.2、DDP 凭证、SyncPlay 双端均未联调。
+- Flutter 3.35.7 已安装；analyze 0 issue；137 tests passed；Windows release 已重新构建（10-20）并通过启动冒烟（含弹幕重构后重建）。
+- 基线仍是 PR #735 head；最新 develop 未合并。真实 Jellyfin 12.2、播放器内真实弹幕、SyncPlay 双端均未联调。
+- 弹幕默认走 danmu_api 公共实例（https://danmu.api.tangbai.cc）；搜索/match/评论接口已实测 200，播放器内 E2E 未做。
 - 旧 MPV Shim 实现/旧文档/旧 git 历史已丢失，不可恢复；新方案不再以它为基座。
-- 下一步：合并最新 develop → 真实 Jellyfin/DDP/SyncPlay 联调 → 安装器/中文文案。
+- 下一步：合并最新 develop → 真实 Jellyfin/弹幕/SyncPlay 联调 → 安装器/中文文案。
 
 ## 1. 文档索引
 
@@ -25,7 +26,7 @@
 | [PLAN.md](PLAN.md) | 总实施计划、阶段门、工期、交付物 |
 | [KAZUMI.md](KAZUMI.md) | Kazumi 的番剧时间表、图片识别、Bangumi 评论专项分析 |
 | [BANGUMI.md](BANGUMI.md) | Bangumi 时间表/图片识别/评论的详细设计与网络方案 |
-| [DANMAKU.md](DANMAKU.md) | 弹弹play 弹幕客户端、匹配、渲染、设置、缓存、合规 |
+| [DANMAKU.md](DANMAKU.md) | danmu_api 弹幕客户端、匹配、渲染、设置、缓存、合规 |
 | [SR.md](SR.md) | Anime4K/FSRCNNX/ArtCNN shader 超分；RTX VSR 限制 |
 | [PARTY.md](PARTY.md) | Jellyfin SyncPlay（复用 PR #735）设计与测试矩阵 |
 | [TESTING.md](TESTING.md) | 测试策略、Mock、验收清单、证据目录 |
@@ -53,7 +54,7 @@
 - **PR #735**：Fladder 社区提交的 Jellyfin SyncPlay 支持，当前 open，未合并。
 - **Stage A**：核心播放器阶段：Fladder 导入、弹幕、shader 超分、Jellyfin SyncPlay、打包。
 - **Stage B**：Bangumi 增值阶段：番剧时间表、图片识别、Bangumi 评论。
-- **DDP**：弹弹play 开放弹幕网络（api.dandanplay.net）。
+- **danmu_api**：可自建的弹幕聚合 API（https://github.com/huangxd-/danmu_api），默认公共实例 https://danmu.api.tangbai.cc。
 - **Next p1**：Bangumi 新前端接口（next.bgm.tv/p1），非官方 OpenAPI；评论功能依赖。
 - **trace.moe**：以图搜番服务，返回 AniList 结果。
 - **RTX VSR**：NVIDIA 驱动级视频超分；在 media_kit 的 ANGLE/OpenGL 渲染路径下不作为 v1 验收项。
@@ -71,6 +72,6 @@ Stage B 不应阻塞 Stage A；两阶段可独立验收。
 
 - 任何“已完成/已通过/已验证”必须有命令输出、截图、日志或性能 JSON；否则写“计划/待验证”。
 - 架构决策变更时新增 ADR，不直接改写历史结论。
-- 外部 API/网络状态变化（尤其 Bangumi、DDP）需更新 RESEARCH/ROADMAP。
+- 外部 API/网络状态变化（尤其 Bangumi、danmu_api）需更新 RESEARCH/ROADMAP。
 - 不把密钥、Token、真实用户数据、版权媒体写入文档或仓库。
 - 所有下载物与测试文件放在本仓库目录内，路径见 ASSETS.md。

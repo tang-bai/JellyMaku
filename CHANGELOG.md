@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.1.0-beta.3 — 2026-10-21
+
+### 弹幕
+
+- 弹幕数据源改为 danmu_api，默认 `https://danmu.api.tangbai.cc`，可在设置里改为自建实例。
+- 移除旧弹幕服务的应用凭证、签名和密钥存储；旧设置自动迁移，旧密钥清理。
+- 自动匹配优先 `POST /api/v2/match`，评论按分集 URL 拉取；缓存 key 改为服务器 + URL 哈希，避免 episodeId 跨服务器串数据。
+- 移除简繁转换开关（danmu_api 由服务端 `DANMU_SIMPLIFIED_TRADITIONAL` 控制）。
+- 修正 `p[3]` 来源标签解析；来源标签不再被当作 uid 屏蔽。
+
 ## v0.1.0-beta.2 — 2026-10-20
 
 ### 改进
@@ -21,7 +31,7 @@
 ### 新增
 
 - 基于 Fladder + SyncPlay PR #735 的 Windows 桌面客户端。
-- 弹弹play 弹幕：自动匹配、滚动/顶部/底部、简繁转换、字体/透明度/速度/显示区域/时间偏移。
+- 弹幕：自动匹配、滚动/顶部/底部、简繁转换、字体/透明度/速度/显示区域/时间偏移。
 - 弹幕设置界面完整简体中文化。
 - Anime4K 超分档位：Fast 2x、Balanced 2x、Strong 2x、4x；中文菜单说明。
 - 播放器体验修复：点击画面暂停、暂停时弹幕冻结、恢复播放不拉扯、弹幕匀速与轨道/文本布局缓存。
@@ -30,12 +40,12 @@
 
 1. 解压 `JellyMaku-v0.1.0-beta.1-windows-x64-portable.zip`。
 2. 运行 `JellyMaku.exe`。
-3. 添加 Jellyfin 服务器；在播放器底栏的弹幕设置中填写弹弹play AppId/AppSecret。
+3. 添加 Jellyfin 服务器；在播放器底栏的弹幕设置中配置弹幕源。
 
 ### 已知限制
 
 - 首个 Beta，仅提供 Windows x64 便携包。
-- 真实 Jellyfin 12.2 E2E、真实弹弹play凭证、SyncPlay 双客户端未完成完整验收。
+- 真实 Jellyfin 12.2 E2E、真实弹幕凭证、SyncPlay 双客户端未完成完整验收。
 - 手动匹配弹幕、本地 XML 弹幕、安装器/自动更新尚未完成。
 - RTX VSR 不支持（media_kit ANGLE/OpenGL 限制）。
 - Anime4K 4x 为两次 2x 推理，GPU 开销较高；掉帧时请使用 Balanced/Strong。

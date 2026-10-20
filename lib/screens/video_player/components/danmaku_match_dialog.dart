@@ -66,7 +66,8 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
       _selectedAnime = null;
     });
     try {
-      final animes = await ref.read(danmakuProvider.notifier).searchAnime(keyword);
+      final animes =
+          await ref.read(danmakuProvider.notifier).searchAnime(keyword);
       if (!mounted) return;
       setState(() {
         _loading = false;
@@ -92,12 +93,10 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
       _step = _MatchStep.episode;
     });
     try {
-      // danmu_api 的搜索结果已带分集；官方 DDP 才需要再查 /bangumi/{id}。
+      // danmu_api 的搜索结果已带分集；旧服务/异常响应才需要按番名重搜。
       final episodes = anime.episodes.isNotEmpty
           ? anime.episodes
-          : await ref
-              .read(danmakuProvider.notifier)
-              .episodesForAnime(anime.animeId);
+          : await ref.read(danmakuProvider.notifier).episodesForAnime(anime);
       if (!mounted) return;
       setState(() {
         _loading = false;
@@ -126,6 +125,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
             animeTitle: anime.animeTitle,
             episodeTitle: episode.episodeTitle,
             url: episode.url,
+            provider: episode.provider,
           );
       if (!mounted) return;
       Navigator.of(context).pop(true);
@@ -154,6 +154,12 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
         _MatchStep.anime => '选择番剧',
         _MatchStep.episode => '选择分集',
       };
+
+  String _episodeSubtitle(DanmakuEpisodeRef episode) {
+    final host = Uri.tryParse(episode.url)?.host ?? '';
+    if (host.isEmpty) return '无原始链接 · episodeId ${episode.episodeId}';
+    return '$host · episodeId ${episode.episodeId}';
+  }
 
   String? get _subtitle => switch (_step) {
         _MatchStep.search => null,
@@ -201,7 +207,8 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
                     ),
                   ),
                   IconButton(
-                    onPressed: busy ? null : () => Navigator.of(context).pop(false),
+                    onPressed:
+                        busy ? null : () => Navigator.of(context).pop(false),
                     icon: const Icon(Icons.close),
                   ),
                 ],
@@ -264,7 +271,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
         ),
         const Spacer(),
         Text(
-          '弹幕数据由弹弹play开放弹幕网络提供（www.dandanplay.com）。',
+          '弹幕由 danmu_api 聚合；选择分集后会以该分集的原始页面拉取弹幕。',
           style: theme.textTheme.bodySmall,
         ),
       ],
@@ -336,7 +343,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
               return ListTile(
                 dense: true,
                 title: Text(episode.episodeTitle),
-                subtitle: Text('episodeId ${episode.episodeId}'),
+                subtitle: Text(_episodeSubtitle(episode)),
                 trailing: const Icon(Icons.check_circle_outline, size: 18),
                 onTap: _applying ? null : () => _apply(episode),
               );

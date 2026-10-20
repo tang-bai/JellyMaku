@@ -1,7 +1,25 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fladder/danmaku/ddp_client.dart';
+import 'package:crypto/crypto.dart';
+
+import 'package:fladder/danmaku/danmaku_api_client.dart';
+
+/// 评论缓存的稳定 key。
+///
+/// danmu_api 的 episodeId 只在其服务端内存映射里有意义，跨服务器/重启不稳定；
+/// 以“服务器 + 原始页面 URL”的哈希做 key，换服务器不会串数据。
+String danmakuCommentCacheKey({
+  required String baseUrl,
+  String url = '',
+  int episodeId = 0,
+}) {
+  final normalizedUrl = url.trim();
+  final raw = normalizedUrl.isNotEmpty
+      ? '$baseUrl|$normalizedUrl'
+      : '$baseUrl|id:$episodeId';
+  return sha1.convert(utf8.encode(raw)).toString();
+}
 
 class DanmakuCache {
   DanmakuCache(this.root);
@@ -13,13 +31,12 @@ class DanmakuCache {
     return File('${root.path}${Platform.pathSeparator}$name');
   }
 
-  Future<List<DdpComment>?> readComments(
-    int episodeId,
-    int chConvert,
+  Future<List<DanmakuApiComment>?> readComments(
+    String key,
     int ttlDays,
   ) async {
     if (ttlDays <= 0) return null;
-    final file = await _file('comments-$episodeId-$chConvert.json');
+    final file = await _file('comments-$key.json');
     if (!await file.exists()) return null;
     final stat = await file.stat();
     if (DateTime.now().difference(stat.modified) > Duration(days: ttlDays)) {
@@ -30,7 +47,8 @@ class DanmakuCache {
       if (decoded is! List) return null;
       return decoded
           .whereType<Map>()
-          .map((entry) => DdpComment.fromJson(Map<String, dynamic>.from(entry)))
+          .map((entry) =>
+              DanmakuApiComment.fromJson(Map<String, dynamic>.from(entry)))
           .toList(growable: false);
     } catch (_) {
       return null;
@@ -38,11 +56,10 @@ class DanmakuCache {
   }
 
   Future<void> writeComments(
-    int episodeId,
-    int chConvert,
-    List<DdpComment> comments,
+    String key,
+    List<DanmakuApiComment> comments,
   ) async {
-    final file = await _file('comments-$episodeId-$chConvert.json');
+    final file = await _file('comments-$key.json');
     await _writeAtomic(
         file, jsonEncode(comments.map((e) => e.toJson()).toList()));
   }

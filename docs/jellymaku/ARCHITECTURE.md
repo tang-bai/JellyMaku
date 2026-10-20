@@ -17,11 +17,11 @@ Flutter UI（Fladder 页面 / Riverpod）
         ├─ LibMPV（media_kit Player + VideoController）
         │    ├─ libmpv：视频/音频/字幕/hwdec/glsl-shaders
         │    └─ Flutter texture（DXGI/ANGLE）
-        ├─ DanmakuController（DDP + 缓存 + 布局）
+        ├─ DanmakuController（danmu_api + 缓存 + 布局）
         ├─ SyncPlayController（WebSocket + REST + 时间同步）
         └─ BangumiService（v0 + Next p1 + 缓存/代理）
               │
-        Jellyfin 12.2        DanDanPlay        Bangumi        trace.moe
+        Jellyfin 12.2        danmu_api         Bangumi        trace.moe
 ~~~
 
 ## 2. 模块职责
@@ -29,7 +29,7 @@ Flutter UI（Fladder 页面 / Riverpod）
 | 模块 | 职责 | 计划位置 |
 |---|---|---|
 | Fladder 核心 | Jellyfin 登录/库/播放/下载/设置 | 原 Fladder lib/、windows/ |
-| 弹幕 | DDP 签名、匹配、解析、缓存、叠加层、手动匹配/本地导入 | lib/danmaku/、lib/providers/danmaku_provider.dart、lib/screens/video_player/components/danmaku_* |
+| 弹幕 | danmu_api 客户端、匹配、解析、缓存、叠加层、手动匹配/本地导入 | lib/danmaku/、lib/providers/danmaku_provider.dart、lib/screens/video_player/components/danmaku_* |
 | 超分 | profile、shader 资产、glsl-shaders 应用、诊断 | lib/video/enhancement.dart、lib/wrappers/players/lib_mpv.dart、assets/shaders/ |
 | 一起看 | SyncPlay WebSocket/REST/时间同步/命令调度/组 UI | PR #735 的 lib/providers/syncplay/*、lib/providers/websocket/* |
 | Bangumi | 时间表、图片识别、评论、映射、缓存、网络代理 | lib/bangumi/、lib/screens/schedule/、lib/screens/search/image_search_*、lib/screens/details/... |
@@ -42,9 +42,9 @@ Flutter UI（Fladder 页面 / Riverpod）
 2. LibMPV 初始化 media_kit Player + VideoController；加载视频/字幕。
 3. VideoPlayer 监听 playBackModel 变化 → DanmakuService.start(item)。
 4. DanmakuService：
-   - 读取 DanmakuSettings；无 AppId/Secret 且无本地文件 → disabled/no_credentials。
-   - 匹配：手动映射 → TMDB/ProviderIds → 标题+集号 → 可选 hash。
-   - 获取评论（DDP 或本地 XML/JSON）→ 解析/过滤/偏移/采样 → 缓存。
+   - 读取 DanmakuSettings；关闭 → disabled；本地文件优先。
+   - 匹配：本地文件 → mapping → danmu_api `/match` → 标题+集号搜索打分 → 手动匹配。
+   - 获取评论（`comment?url=...&format=json` 或本地 XML/JSON）→ 解析/过滤/偏移/采样 → URL 哈希缓存。
    - 生成 DanmakuTrack（内存列表）→ DanmakuController。
 5. DanmakuOverlay：
    - 读取 mediaPlaybackProvider 的 position/playing/rate。
@@ -139,8 +139,8 @@ tools/
 
 - 弹幕只叠加，不拦截指针；不覆盖 Jellyfin 主字幕。
 - 弹幕/超分/SyncPlay/Bangumi 失败不影响基础播放。
-- DDP 请求不带 Jellyfin token/服务器地址；AppSecret 不入日志。
-- AppSecret 在 Windows 用 DPAPI；其他平台回退并警告。
+- danmu_api 请求不带 Jellyfin token/服务器地址；自建 TOKEN 不入日志。
+- 不再保存弹幕凭证；旧密钥存储在设置加载时清理。
 - 不修改 media_kit 渲染器；超分只改 libmpv 属性。
 - 不修改 Jellyfin SyncPlay 协议；只做客户端。
 - Bangumi 映射低置信度必须人工确认；不静默绑定。
@@ -148,7 +148,7 @@ tools/
 
 ## 9. 设置与存储
 
-- 弹幕设置：SharedPreferences（AppSecret 单独 DPAPI blob）。
+- 弹幕设置：SharedPreferences（API 地址/样式/本地文件；无凭证）。
 - 超分 profile：VideoPlayerSettingsModel（freezed/g）。
 - Bangumi 设置：SharedPreferences；API Base/代理；缓存路径。
 - 缓存：应用支持目录下 danmaku/、bangumi/；原子写；TTL；清缓存入口。
@@ -158,8 +158,8 @@ tools/
 
 | 场景 | 行为 |
 |---|---|
-| 无 DDP 凭证 | 弹幕 disabled/no_credentials；设置页提示；不请求 |
-| DDP 401/403/429 | 显示凭证/配额错误；使用缓存（若有）；短退避 |
+| danmu_api 不可达 | 显示错误；使用缓存（若有）；不影响播放 |
+| danmu_api 401/403/429 | 提示 TOKEN 路径/配额错误；使用缓存；不自动重试 |
 | 无匹配 | 提示手动匹配；不影响播放 |
 | 本地 XML 解析失败 | 提示；保留原状态 |
 | shader 加载失败 | 回退 off/上一个 profile；提示 |

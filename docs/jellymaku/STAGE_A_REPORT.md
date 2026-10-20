@@ -1,8 +1,9 @@
 
 # Stage A 构建与验证报告
 
+> 历史说明（2026-10-20）：弹幕数据源已改为 danmu_api，本报告中的旧弹幕/密钥代码、测试与联调项均已删除/不再适用，仅作历史记录。
 > 日期：2026-10-19
-> 结论：Stage A 核心已可构建、可启动；弹幕/超分/SyncPlay 代码已接入。真实 Jellyfin、DDP、SyncPlay 双端联调尚未完成。
+> 结论：Stage A 核心已可构建、可启动；弹幕/超分/SyncPlay 代码已接入。真实 Jellyfin、在线弹幕、SyncPlay 双端联调尚未完成。
 
 ## 1. 环境
 
@@ -20,8 +21,8 @@
 - 可执行文件版本资源：ProductName/FileDescription = JellyMaku；OriginalFilename = JellyMaku.exe。
 - 冒烟：进程启动成功，窗口标题 `JellyMaku`，12 秒后正常关闭（`CloseMainWindow`）。
 - 便携包：`artifacts/JellyMaku-0.1.0-windows-x64-portable.zip`
-  - 大小：90,687,845 bytes（v0.1.0-beta.2 侧栏动画/搜索页修复）
-  - SHA256：`DBFDC8CC2004A9CCCA139A54C70087002B56D2A6B284CF4314CC1DEEA8256714`
+  - 大小：90,713,113 bytes（v0.1.0-beta.3 弹幕迁移 danmu_api）
+  - SHA256：`A1B42E23C12254EA47C003088FB40D49B258D716B9F0DBB39E44D7671DC3FE2A`
   - 结构：`JellyMaku/JellyMaku.exe` + DLL + `data/` + README/LICENSE/AGENTS。
 
 ## 3. 验证结果
@@ -29,25 +30,25 @@
 | 项目 | 结果 | 证据 |
 |---|---|---|
 | `dart analyze lib test` | 通过，0 issue | `artifacts/logs/analyze-clean.txt` |
-| `flutter test --no-pub` | 103 passed | `artifacts/logs/test-anime4k-profiles.txt` |
+| `flutter test --no-pub` | 137 tests（1 个手动联网探针跳过） | 本次发布前运行输出 |
 | `flutter build windows --release --no-pub` | 成功 | `artifacts/logs` / 上述 exe |
 | 应用启动冒烟 | 窗口标题 JellyMaku；正常关闭 | 本报告第 2 节 |
-| DPAPI 密钥往返 | 通过（Windows） | `test/danmaku/secret_store_test.dart` |
-| DDP 客户端签名/搜索/评论 | 通过（本地 HTTP mock） | `test/danmaku/ddp_client_test.dart` |
+| 旧密钥存储往返 | 通过（Windows，历史） | 旧测试已删除 |
+| 旧弹幕客户端签名/搜索/评论 | 通过（本地 HTTP mock，历史） | 旧测试已删除 |
 | 弹幕解析/过滤/偏移 | 通过 | `test/danmaku/danmaku_test.dart` |
 | SyncPlay 协议/队列/生命周期 | 通过（现有 PR #735 单测） | `test/providers/syncplay/*` |
 
 ## 4. 已接入功能
 
-### 弹弹play 弹幕
+### 在线弹幕（旧实现）
 
-- `lib/danmaku/ddp_client.dart`：`X-AppId/X-Timestamp/X-Signature` 签名，搜索集数、拉取评论。
+- 旧弹幕客户端：应用身份头签名，搜索集数、拉取评论。
 - `lib/danmaku/matcher.dart`：按剧名 + 集数自动匹配；手动映射数据层已预留（UI 未完成）。
 - `lib/danmaku/comment_parser.dart`：模式/颜色/偏移/屏蔽词/屏蔽用户/去重/采样。
 - `lib/danmaku/cache.dart`：评论与映射缓存（7 天默认）。
 - `lib/screens/video_player/components/danmaku_overlay.dart`：Flutter `CustomPainter` 叠加层，滚动/顶部/底部，跟随播放/暂停/倍速/seek。
-- 播放器控制栏入口 + 设置弹窗：开关、AppId/AppSecret、字号、透明度、速度、显示区域、偏移、简繁转换、显示模式。
-- AppSecret 在 Windows 通过 DPAPI（CryptProtectData）保存；非 Windows 回退 SharedPreferences（Web stub）。
+- 播放器控制栏入口 + 设置弹窗：开关、字号、透明度、速度、显示区域、偏移、简繁转换、显示模式。
+- 旧版本使用系统密钥存储保存凭据；现已移除。
 - 未完成：手动匹配 UI、本地 XML/JSON 导入、弹幕发送/点赞。
 
 ### GLSL 超分
@@ -73,10 +74,10 @@
 
 1. **未合并最新 Fladder develop**：基线仍是 PR #735 head（`79e249e`）。
 2. **未做真实 Jellyfin E2E**：未下载/启动 Jellyfin 12.2；登录、播放、字幕、seek、切集未在真实服务器验证。
-3. **未做真实 DDP 联调**：没有 AppId/AppSecret；DDP 行为仅由本地 mock 测试覆盖。
+3. **未做真实旧弹幕联调**：旧版本需要应用凭证；旧行为仅由本地 mock 测试覆盖。
 4. **未做 SyncPlay 双端联调**：只有单测；Jellyfin 12.2 WebSocket/时钟误差未验证。
 5. **超分未做画质/性能验收**：未截图、未测掉帧；ANGLE/OpenGL 下部分 shader 可能被 libmpv 拒绝。
-6. **弹幕设置文案未走 ARB**：当前为英文硬编码；中文 i18n 待补。
+6. **弹幕设置文案未走 ARB**：当前为中文硬编码；i18n 待补。
 7. **已推送 GitHub**：main 已推送 origin（e2b3ca7）；后续变更需重新推送。
 
 ## 6. 复现提示

@@ -24,7 +24,7 @@
 
 - 状态：Proposed。
 - 背景：media_kit 的 libass/字幕层与 external ASS secondary-sid 复杂。
-- 决策：DDP 解析 + CustomPainter 叠加；只绘制活跃评论。
+- 决策：弹幕 JSON 解析 + CustomPainter 叠加；只绘制活跃评论。
 - 后果：实时样式/开关；不能点击/高级 ASS；截图需外部。
 - 备选：libmpv secondary-sid（后续可选）。
 
@@ -72,3 +72,11 @@
 - 决策：Flutter/Jellyfin/.NET/shader/Inno/测试媒体放仓库目录；大文件 gitignore；manifest 校验。
 - 后果：可复现；仓库体积大但不入库；需下载脚本。
 - 备选：系统级安装（不选）。
+
+## ADR-010：弹幕数据源改为 danmu_api
+
+- 状态：**Accepted**（用户指定，2026-10-20）。
+- 背景：旧弹幕 API 需要应用凭证/签名，且响应 `p[3]` 语义不稳定；danmu_api 可直接部署并提供搜索/匹配/评论接口。
+- 决策：在线弹幕只调用 danmu_api（默认 `https://danmu.api.tangbai.cc`，可自建）；移除旧签名/凭证/密钥存储；自动匹配优先 `/api/v2/match`，评论按分集 URL 拉取；渲染仍用 Flutter CustomPainter（ADR-003 的渲染部分不变，数据源部分由本 ADR 取代）。
+- 后果：无凭证门槛；依赖 danmu_api 服务可用性；来源由服务端聚合；episodeId 不稳定，缓存按 `sha1(baseUrl|url)`。
+- 备选：继续旧签名方案（不选）；只用本地导入（功能过窄）。

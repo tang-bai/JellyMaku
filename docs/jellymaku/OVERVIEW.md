@@ -5,7 +5,7 @@
 
 JellyMaku 是面向 Windows 10/11 的 Jellyfin 桌面播放器，基于 **DonutWare/Fladder** 二次开发。它保留 Fladder 的现代 Flutter UI、Jellyfin 客户端能力、下载/同步、Trickplay、媒体段跳过，并新增：
 
-- 弹弹play 弹幕（自动/手动匹配、Flutter 叠加层、样式/过滤/偏移）。
+- danmu_api 弹幕（自动/手动匹配、Flutter 叠加层、样式/过滤/偏移；默认 https://danmu.api.tangbai.cc）。
 - 视频超分（Anime4K / FSRCNNX / ArtCNN 等 GLSL shader）。
 - 一起看（Jellyfin SyncPlay，复用社区 PR #735）。
 - 番剧时间表、以图搜番、Bangumi 评论（Stage B，条件功能）。
@@ -15,7 +15,7 @@ JellyMaku 是面向 Windows 10/11 的 Jellyfin 桌面播放器，基于 **DonutW
 ## 2. 目标用户
 
 - 有自建 Jellyfin 服务器、主要在 Windows 桌面看番/看电影的用户。
-- 希望像弹弹play 一样自动匹配弹幕，并能在播放器里开关/调样式。
+- 希望自动匹配弹幕（danmu_api 聚合多站来源），并能在播放器里开关/调样式。
 - 有独立显卡、希望用 Anime4K/FSRCNNX 实时提升画质的用户。
 - 想和朋友在同一 Jellyfin 服务器上同步观看的用户。
 - 有 Bangumi 使用习惯、希望看到放送表/评论/以图搜番的用户（Stage B）。
@@ -28,8 +28,8 @@ JellyMaku 是面向 Windows 10/11 的 Jellyfin 桌面播放器，基于 **DonutW
 |---|---|---|
 | Jellyfin 登录/库/详情/播放 | 复用 Fladder | Jellyfin 服务器 |
 | 直连/转码/离线 | 复用 Fladder | - |
-| 弹幕 | DDP 客户端 + Flutter CustomPainter | DDP AppId/Secret 或本地 XML |
-| 弹幕设置 | 字体/字号/透明度/速度/区域/偏移/过滤/简繁/手动匹配 | - |
+| 弹幕 | danmu_api 客户端 + Flutter CustomPainter | 网络（默认公共实例，可自建）或本地 XML/JSON |
+| 弹幕设置 | 字体/字号/透明度/速度/区域/偏移/过滤/手动匹配/API 地址 | - |
 | 超分 | libmpv glsl-shaders | 支持 GLSL 的 GPU/驱动 |
 | 一起看 | Jellyfin SyncPlay（PR #735） | 同一服务器、各自账号 |
 | 品牌/安装器/便携包 | Flutter build + Inno Setup | Windows 工具链 |
@@ -59,7 +59,7 @@ JellyMaku 是面向 Windows 10/11 的 Jellyfin 桌面播放器，基于 **DonutW
 2. **条件功能**：Bangumi 模块在不可达时隐藏/提示，不影响核心。
 3. **可验证**：每个功能有单测、Mock 或截图/日志；不虚报。
 4. **本地资产**：所有下载/测试文件在仓库目录，manifest 可校验。
-5. **合规**：GPL-3.0、DDP/Bangumi 署名、trace.moe 隐私、不内置密钥。
+5. **合规**：GPL-3.0、danmu_api/Bangumi 署名、trace.moe 隐私、不内置密钥。
 
 ## 6. 成功标准
 

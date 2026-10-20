@@ -4,10 +4,10 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:fladder/danmaku/secret_store.dart';
 import 'package:fladder/models/settings/danmaku_settings_model.dart';
 
 const _settingsKey = 'jellymaku.danmaku.settings.v1';
+const _legacySecretKey = 'jellymaku.danmaku.secret.v1';
 
 final danmakuSettingsProvider =
     StateNotifierProvider<DanmakuSettingsNotifier, DanmakuSettingsModel>((ref) {
@@ -20,23 +20,18 @@ class DanmakuSettingsNotifier extends StateNotifier<DanmakuSettingsModel> {
   }
 
   SharedPreferences? _prefs;
-  final _secretStore = DanmakuSecretStore();
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     _prefs = prefs;
-    final secret = await _secretStore.read();
+    // 旧版本用系统密钥存储保存弹幕凭证；现在没有凭证了，顺手清掉。
+    await prefs.remove(_legacySecretKey);
     final raw = prefs.getString(_settingsKey);
-    if (raw == null || raw.isEmpty) {
-      if (secret.isNotEmpty) {
-        state = state.copyWith(appSecret: secret);
-      }
-      return;
-    }
+    if (raw == null || raw.isEmpty) return;
     try {
       final decoded = jsonDecode(raw);
       if (decoded is Map<String, dynamic>) {
-        state = DanmakuSettingsModel.fromJson(decoded, appSecret: secret);
+        state = DanmakuSettingsModel.fromJson(decoded);
       }
     } catch (_) {
       // Keep defaults on malformed settings.
@@ -48,17 +43,9 @@ class DanmakuSettingsNotifier extends StateNotifier<DanmakuSettingsModel> {
     final prefs = _prefs;
     if (prefs == null) return;
     prefs.setString(_settingsKey, jsonEncode(next.toJson()));
-    unawaited(_secretStore.write(next.appSecret));
   }
 
   void setEnabled(bool value) => _apply(state.copyWith(enabled: value));
-
-  void setCredentials({String? appId, String? appSecret}) {
-    _apply(state.copyWith(
-      appId: appId?.trim(),
-      appSecret: appSecret?.trim(),
-    ));
-  }
 
   void setApiBase(String value) =>
       _apply(state.copyWith(apiBase: value.trim()));
@@ -80,9 +67,6 @@ class DanmakuSettingsNotifier extends StateNotifier<DanmakuSettingsModel> {
   void setOffset(double value) =>
       _apply(state.copyWith(offsetSeconds: value.clamp(-180, 180)));
 
-  void setChConvert(int value) =>
-      _apply(state.copyWith(chConvert: value.clamp(0, 2)));
-
   void setMaxComments(int value) =>
       _apply(state.copyWith(maxComments: value.clamp(100, 100000)));
 
@@ -96,8 +80,6 @@ class DanmakuSettingsNotifier extends StateNotifier<DanmakuSettingsModel> {
       _apply(state.copyWith(blockUsers: value));
 
   void setAutoMatch(bool value) => _apply(state.copyWith(autoMatch: value));
-
-  void setHashMatch(bool value) => _apply(state.copyWith(hashMatch: value));
 
   void setShowScroll(bool value) => _apply(state.copyWith(showScroll: value));
 

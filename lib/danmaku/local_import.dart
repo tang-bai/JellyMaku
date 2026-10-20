@@ -14,10 +14,10 @@ class LocalDanmakuFormatException implements Exception {
 
 /// 解析本地弹幕文件，支持：
 /// - Bilibili XML：`<d p="time,mode,fontsize,color,...">text</d>`
-/// - DDP JSON：`{"comments":[{"p":"time,mode,color,uid","m":"text"}]}`
+/// - danmu_api 兼容 JSON：`{"comments":[{"p":"time,mode,color,uid","m":"text"}]}`
 ///   也接受裸数组，或本项目缓存里的 `{"danmakus":[...]}`。
 ///
-/// 本地导入不依赖 DDP 凭证，只用于离线/演示；所有条目来源标记为 local。
+/// 本地导入不依赖网络/凭证，只用于离线/演示；所有条目来源标记为 local。
 List<DanmakuComment> parseLocalDanmakuFile(
   String content, {
   String fileName = '',

@@ -2,17 +2,17 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：**v0.1.0-beta.2** Windows Beta 已发布（analyze 0 issue；121 tests passed）；GitHub main 持续更新；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入；弹幕手动匹配/本地导入/自建 danmu_api 已接入；DDP 无来源标签；AppId 高级可选。
-> 日期：2026-10-20。
+> 状态：**v0.1.0-beta.3** Windows Beta（弹幕迁移 danmu_api；analyze 0 issue；137 tests）；GitHub main 持续更新；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入；danmu_api 默认 https://danmu.api.tangbai.cc，无需凭证；支持自建/本地导入。
+> 日期：2026-10-21。
 
 ## 0. 当前仓库状态（必须先理解）
 
 - 本地 git 已初始化，main 为工作分支；origin https://github.com/tang-bai/JellyMaku 已推送（Stage A 基线 `dc1f8d5c`）。
 - main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 项目文档/AGENTS。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
-- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、121 tests passed；Windows release 重新构建/启动冒烟通过（2026-10-20）**。
+- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、137 tests passed；Windows release 重新构建/启动冒烟通过（2026-10-20，含弹幕重构后重建）**。
 - 基线说明：为尽快拿到可运行起点，main 以 PR #735 head 为基线（包含 Fladder + SyncPlay），**尚未合并最新 develop**；Phase A0 仍需补这次合并。
-- 未验证：真实 Jellyfin 12.2 E2E、真实 DDP 凭证、SyncPlay 双客户端、超分画质/性能。
+- 未验证：真实 Jellyfin 12.2 E2E、播放器内真实弹幕加载/切集、SyncPlay 双客户端、超分画质/性能。
 - 因此：
   - 不要把“计划”当成“已实现”；
   - 不要把单测/构建通过当成真实 E2E 通过；
@@ -22,7 +22,7 @@
 
 构建 Windows 10/11 的 Jellyfin 桌面播放器 JellyMaku，基于 **DonutWare/Fladder**（Flutter/Dart，GPL-3.0），新增：
 
-1. 弹弹play 弹幕（自动/手动匹配、Flutter 叠加层、样式/过滤/偏移）。
+1. danmu_api 弹幕（自动/手动匹配、Flutter 叠加层、样式/过滤/偏移）。
 2. GLSL shader 视频超分（Anime4K/FSRCNNX/ArtCNN）。
 3. Jellyfin SyncPlay 一起看（复用 Fladder PR #735）。
 4. Stage B：Bangumi 番剧时间表、以图搜番、Bangumi 评论（条件功能）。
@@ -43,13 +43,13 @@
 ~~~text
 docs/jellymaku/          计划/调研/架构/测试/许可
 docs/archive/mpv-shim/   旧方案占位说明（不可恢复）
-lib/danmaku/             DDP/解析/匹配/缓存/叠加层
+lib/danmaku/             danmu_api/解析/匹配/缓存/叠加层
 lib/bangumi/             Bangumi 数据层/映射/缓存
 lib/video/               超分
 lib/providers/            Riverpod providers
 lib/screens/             播放器/设置/时间表/图片/评论
 assets/shaders/          Anime4K/FSRCNNX/ArtCNN
-tool/                    mock_ddp/mock_bangumi/mock_trace
+tool/                    mock_bangumi/mock_trace
 tools/                   bootstrap/setup/test/pack/worker
 test/                    单测/widget
 third_party/             Jellyfin/.NET/shader pack 等下载物（gitignore）
@@ -100,18 +100,18 @@ dart analyze lib test
 
 ## 7. 测试与证据
 
-- 单元测试优先：DDP 签名/解析/匹配/缓存/布局；Bangumi client/映射/BBCode；shader profile。
+- 单元测试优先：danmu_api 客户端/解析/匹配/缓存/布局；Bangumi client/映射/BBCode；shader profile。
 - Widget 测试：设置/弹窗/无网状态。
-- Mock：tool/mock_ddp.dart、mock_bangumi.dart、mock_trace.dart；fixtures 在 testdata/fixtures。
+- Mock：danmu_api 用 http MockClient/本地 HttpServer；Bangumi/trace.moe fixtures 在 testdata/fixtures。
 - 本地 Jellyfin 12.2 E2E；SyncPlay 用 Jellyfin Web/双实例。
 - 每个“已通过”附命令/输出/截图路径；没有证据就写“未验证”。
 - 不把 lint/analyze 通过等同于功能通过。
 
 ## 8. 安全/合规
 
-- 不提交 DDP AppSecret、Jellyfin token、Bangumi token、真实用户数据、版权媒体。
-- AppSecret 在 Windows 用 DPAPI；日志脱敏。
-- DDP 请求不带 Jellyfin token/服务器地址。
+- 不提交自建 danmu_api TOKEN、Jellyfin token、Bangumi token、真实用户数据、版权媒体。
+- danmu_api TOKEN 只放在 API 地址里，不写日志；日志脱敏。
+- danmu_api 请求不带 Jellyfin token/服务器地址。
 - Bangumi User-Agent 明确；1 req/s；缓存；不批量抓取。
 - trace.moe 仅用户主动上传；首次同意；串行/缓存。
 - 不逆向/复用 Kazumi 镜像签名凭证。
@@ -124,10 +124,10 @@ dart analyze lib test
 |---|---|
 | 文档/AGENTS | 完成；Stage A 报告/BUILD_WINDOWS 已补 |
 | Fladder 源码导入 | 完成（PR #735 head 基线） |
-| Flutter/构建 | 完成：analyze 0、121 tests、Windows release 成功、启动冒烟 |
+| Flutter/构建 | 完成：analyze 0、137 tests、Windows release 成功、启动冒烟（含弹幕重构后重建） |
 | SyncPlay | 代码已导入；单测通过；真实双端未联调 |
-| 弹幕 | DDP/自建 danmu_api/自动+手动匹配/合并去重/本地导入/缓存/叠加层/设置/DPAPI（AppId 高级可选）已接入；DDP 无来源标签；真实联调未完成 |
-| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；121 tests；画质/性能未验收 |
+| 弹幕 | danmu_api（默认公共实例，可自建）/自动+手动匹配/URL 拉取/合并去重/本地导入/缓存/叠加层/设置已接入；播放器内真实 E2E 未完成 |
+| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；137 tests；画质/性能未验收 |
 | 品牌/打包 | JellyMaku exe/窗口/资源；portable zip；安装器/中文 ARB 未完成 |
 | Bangumi 时间表/图片/评论 | 未开始 |
 | 推送 GitHub | 完成（基线 dc1f8d5c） |
@@ -149,10 +149,10 @@ dart analyze lib test
 13. **桌面点击暂停不能重复切换**：不要同时监听 `onHorizontalDragDown` 和 `onTap` 调用 `playOrPause`/`userPlayOrPause`；一次点击会切换两次，表现为点中间不暂停。
 14. **弹幕要用独立显示时钟**：暂停/缓冲时冻结显示时间；恢复播放从冻结值继续，不要直接跳回 provider 的 raw position（会产生回拉）。不要逐帧做漂移校正（会让速度忽快忽慢）；provider 位置只用于大 seek 对齐。
 15. **弹幕渲染要缓存**：轨道分配与带颜色的 TextPainter 必须缓存；每帧重排全部评论/重新 layout 文本会造成帧时间不稳，看起来像弹幕在跳动。
-16. **DDP 来源字段语义（已实测）**：`withRelated=true` 的响应里 `p[3]` 是十六进制用户 id，不是 BiliBili/Gamer 标签；第三方弹幕已被聚合进同一列表。不要再做“按站过滤”或“关闭弹弹play 就只剩 B 站/巴哈”的 UI。
+16. **danmu_api 来源字段语义（已实测）**：`p[3]` 是 `[bilibili1]` 这类来源标签，不是用户 id；解析时存 `provider`，`uid` 置空，`blockUsers` 不得把来源标签当用户。当前不做按站过滤 UI，来源由服务端聚合策略决定。
 17. **弹幕设置分两类**：时间偏移/屏蔽词/合并/条数会改变解析结果，必须防抖重载（300ms）；字号/颜色/描边/类型与本地开关只影响绘制，直接重绘，不要触发网络或解析。
-18. **本地导入的边界**：`localFile` 优先于 DDP 与手动映射，且不需要凭证；AppId/AppSecret 默认折叠在「高级」里，普通用户无需填写；不提供发送弹幕（DDP 无发送 API）。
-19. **自建 danmu_api 的坑**：它必须走 `/api/v2/comment?url=<分集页面>`（`/comment/{id}` 常为空/404）；没有 `/bangumi/{id}`，手动匹配用搜索结果内嵌的 episodes；其 episodeId 不跨服务器稳定，URL 型结果不要写数值缓存；HTTPS 证书 hostname mismatch 会 `HandshakeException`，用 `http://` 或修证书；遇到 `Invalid url format` 要回退到 id 路由，再失败就按标题+集号重搜选 http(s) 候选。
+18. **本地导入的边界**：`localFile` 优先于在线 API 与手动映射，且不需要任何凭证；不提供发送弹幕（danmu_api 只读）。
+19. **danmu_api 的坑（2026-10-20 实测）**：自动匹配优先 `POST /api/v2/match`（body `{"fileName":"标题 S01E01"}`）；搜索用 `search/episodes`（内嵌 episodes），不要用 `/bangumi/{id}`（404）；`标题 (2026)` 这类带空格年份的查询会 0 结果，客户端会去尾部年份/季集重试；URL 型来源用 `comment?url=<分集页面>&format=json`；非 http 的复合 ID（renren/hanjutv，如 `59377-431845`）必须用 `POST /api/v2/segmentcomment` body `{"type":"renren","url":"59377-431845","segment_start":0,"segment_end":86400000}`，公共 EdgeOne 实例的 `/comment/{id}` 依赖进程内搜索缓存，跨请求会 404；episodeId 不跨服务器稳定，缓存 key 用 `sha1(baseUrl|url)`；自建 TOKEN 放在 `/{TOKEN}` 路径；HTTPS 证书当前公共实例正常；`chConvert` 不受支持（服务端 `DANMU_SIMPLIFIED_TRADITIONAL`）。
 
 ## 11. 文档索引
 

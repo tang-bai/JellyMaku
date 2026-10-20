@@ -38,7 +38,7 @@ void main() {
   });
 
   group('parseLocalDanmakuFile JSON', () {
-    test('parses DDP comments array', () {
+    test('parses danmu_api comments array', () {
       const json = '''
 {
   "comments": [

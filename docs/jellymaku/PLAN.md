@@ -1,7 +1,7 @@
 
 # 实施总计划（Stage A / Stage B）
 
-> 状态：Stage A 核心已构建/验证（Windows release + 121 tests + 启动冒烟）；弹幕手动匹配/来源过滤已补齐；真实 E2E/最新 develop/安装器未完成。
+> 状态：Stage A 核心已构建/验证（Windows release + 137 tests + 启动冒烟）；弹幕已迁移到 danmu_api（手动匹配/本地导入）；真实 E2E/最新 develop/安装器未完成。
 > 日期：2026-10-19。
 > 基座：DonutWare/Fladder develop de7b5a2a23f16f5f3bb164ec0baedf50941e4808 + PR #735。
 > 原则：先交付可用的 Jellyfin 播放器，再叠加 Bangumi；每阶段有可运行产物与证据。
@@ -22,7 +22,7 @@
 - Windows 10/11 x64 为主要平台；Flutter/VS 工具链可用。
 - Fladder 固定 commit 可构建；PR #735 可合并/适配。
 - SyncPlay 参与者使用同一 Jellyfin 服务器、各自有账号。
-- DDP 真实联调需要用户 AppId/AppSecret；无则 Mock/本地 XML。
+- danmu_api 默认公共实例可直接联调；离线/限流时用本地 XML 或缓存。
 - Bangumi 真实联调需要用户代理/自建镜像；无则 Mock/条件功能。
 - 接受 GPL-3.0 与 Fladder/Kazumi/PR #735 署名。
 - 不把密钥、真实用户数据、版权媒体写入仓库。
@@ -61,16 +61,16 @@ Gate：
 
 任务：
 
-1. lib/danmaku/：models、ddp_client、comment_parser、matcher、cache、service、secret_store。
-2. DDP 签名/错误/限流/缓存；手动映射；本地 XML/JSON。
+1. lib/danmaku/：models、danmaku_api_client、comment_parser、matcher、cache、provider。
+2. danmu_api match/search/comment、错误/限流/缓存；手动映射；本地 XML/JSON。
 3. Flutter DanmakuOverlay：Ticker、活跃评论二分、lane、滚动/顶部/底部、样式。
-4. 设置模型/provider；AppSecret DPAPI。
-5. 单元测试：签名、解析、匹配、缓存、布局、5000 条性能。
+4. 设置模型/provider；API 地址；无凭证。
+5. 单元测试：match/search/comment、解析、匹配、缓存 key、布局、5000 条性能。
 
 Gate：
 
 - 29 个等效测试全绿（新实现重新计数）。
-- Mock DDP 端到端加载；无匹配/无凭证/401/403/429 降级。
+- Mock danmu_api 端到端加载；无匹配/401/403/429/超时降级。
 - 5000 条解析 <200ms 或记录实际。
 
 ### Phase A2：弹幕 UI/手动匹配/本地导入（1.5–2 天）
@@ -216,7 +216,7 @@ Gate：
 | Flutter/VS 构建失败 | 固定版本；subst；检查 Windows SDK；记录错误 |
 | media_kit shader 不生效 | 先用 mpv 属性诊断；回退 off；不承诺 RTX VSR |
 | Bangumi 不可达 | 用户代理/Worker；Mock；条件功能 |
-| DDP 无凭证 | Mock/本地 XML；真实凭证后补 |
+| danmu_api 不可达 | 使用缓存/本地 XML；提示错误；不影响播放 |
 | 映射错误 | 人工确认；低置信度不绑定 |
 | 安装器工具缺失 | 先交付 portable zip；保留 pack 脚本 |
 

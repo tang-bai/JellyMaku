@@ -30,7 +30,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets('danmaku settings dialog renders credentials and toggles',
+  testWidgets('danmaku settings dialog renders the API address section',
       (tester) async {
     await tester.pumpWidget(_host(showDanmakuSettings));
     await tester.tap(find.text('open'));
@@ -38,12 +38,13 @@ void main() {
 
     expect(find.text('弹幕设置'), findsOneWidget);
     expect(find.text('启用弹幕'), findsOneWidget);
-    // AppId 默认折叠在“高级”里，普通用户不需要填写。
-    expect(find.text('弹弹play AppId'), findsNothing);
-    await tester.tap(find.text('高级：弹弹play AppId（可选）'));
+    // 地址折叠在“高级”里，普通用户无需配置。
+    expect(find.text('danmu_api 地址'), findsNothing);
+    await tester.tap(find.text('高级：弹幕 API 地址'));
     await tester.pumpAndSettle();
-    expect(find.text('弹弹play AppId'), findsOneWidget);
+    expect(find.text('danmu_api 地址'), findsOneWidget);
     expect(find.text('测试连接'), findsOneWidget);
+    expect(find.text('简繁转换'), findsNothing);
   });
 
   testWidgets('manual match dialog starts at the search step', (tester) async {

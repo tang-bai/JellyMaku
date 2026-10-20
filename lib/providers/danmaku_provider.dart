@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,21 +5,17 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:fladder/danmaku/cache.dart';
 import 'package:fladder/danmaku/comment_parser.dart';
+import 'package:fladder/danmaku/danmaku_api_client.dart';
 import 'package:fladder/danmaku/danmaku_models.dart';
-import 'package:fladder/danmaku/ddp_client.dart';
 import 'package:fladder/danmaku/local_import.dart';
 import 'package:fladder/danmaku/matcher.dart';
-import 'package:fladder/models/settings/danmaku_settings_model.dart';
 import 'package:fladder/providers/settings/danmaku_settings_provider.dart';
-
-const _officialApiBase = 'https://api.dandanplay.net';
 
 enum DanmakuLoadStatus {
   idle,
   disabled,
   loading,
   ready,
-  noCredentials,
   noMatch,
   error,
 }
@@ -94,7 +89,7 @@ class DanmakuController extends StateNotifier<DanmakuState> {
       return;
     }
 
-    // 本地文件优先于 DDP：无凭证也能播放/演示，且不回源到弹弹play。
+    // 本地文件优先于在线 API：不依赖网络，也不写评论缓存。
     final localFile = settings.localFile?.trim() ?? '';
     if (localFile.isNotEmpty) {
       _media = media;
@@ -138,16 +133,6 @@ class DanmakuController extends StateNotifier<DanmakuState> {
       return;
     }
 
-    final customServer = _isCustomServer(settings);
-    if (!settings.hasCredentials && !customServer) {
-      _media = media;
-      state = DanmakuState(
-        status: DanmakuLoadStatus.noCredentials,
-        itemId: media.itemId,
-      );
-      return;
-    }
-
     if (!force &&
         _media?.itemId == media.itemId &&
         state.status == DanmakuLoadStatus.ready) {
@@ -161,82 +146,63 @@ class DanmakuController extends StateNotifier<DanmakuState> {
       itemId: media.itemId,
     );
 
-    DdpClient? client;
+    DanmakuApiClient? client;
     try {
       final cache = await _cache();
-      final manual = await cache.readMapping(media.itemId);
-      client = DdpClient(
-        baseUrl: settings.apiBase,
-        appId: settings.appId,
-        appSecret: settings.appSecret,
-      );
+      final mapping = await cache.readMapping(media.itemId);
+      client = DanmakuApiClient(baseUrl: settings.effectiveApiBase);
 
       var match = await matchDanmaku(
         client,
         media,
-        manual: manual,
+        mapping: mapping,
         settings: settings,
       );
       if (generation != _generation) return;
 
-      // 旧 mapping 可能只有 episodeId 没有 url（官方 DDP 时代写入），
-      // 自建服务器上 id 路由常 404；重新搜索一次，拿带 http(s) 的分集。
-      if (customServer &&
-          !match.url.trim().startsWith('http') &&
-          media.searchTitle.trim().isNotEmpty) {
-        final candidates = await client.searchEpisodes(
-          media.searchTitle,
-          media.episodeNumber,
-        );
-        final withUrl = candidates.where(
-          (candidate) => candidate.url.trim().startsWith('http'),
-        );
-        if (withUrl.isNotEmpty) {
-          final candidate = withUrl.first;
-          match = DanmakuMatch(
-            episodeId: candidate.episodeId,
-            animeTitle: candidate.animeTitle,
-            episodeTitle: candidate.episodeTitle,
-            shift: candidate.shift,
-            source: 'search',
-            url: candidate.url,
-          );
-        }
+      // 旧 mapping 可能只有 episodeId 没有 url（旧版本写入），而 danmu_api
+      // 的 id 路由常 404；重新搜索一次，拿带 http(s) 的分集并更新匹配。
+      if (match.url.isEmpty && media.searchTitle.isNotEmpty) {
+        match = await _reSearchMatch(client, media, match);
+        if (generation != _generation) return;
       }
-      if (generation != _generation) return;
 
-      // URL 型结果（danmu_api）的 episodeId 只在该服务器内有意义，
-      // 不写数值 key 的缓存，避免换服务器后串数据。
-      var raw = match.url.isEmpty
-          ? await cache.readComments(
-              match.episodeId,
-              settings.chConvert,
-              settings.cacheDays,
-            )
-          : null;
+      final cacheKey = danmakuCommentCacheKey(
+        baseUrl: client.baseUrl,
+        url: match.url,
+        episodeId: match.episodeId,
+      );
+      var raw = await cache.readComments(cacheKey, settings.cacheDays);
       if (raw == null) {
-        raw = await _fetchCommentsWithFallback(
-          client,
-          media,
-          match,
-          settings,
-          customServer,
-        );
+        raw = await _fetchCommentsWithFallback(client, media, match);
+        if (generation != _generation) return;
         if (raw.isNotEmpty) {
-          if (match.url.isEmpty) {
-            await cache.writeComments(match.episodeId, settings.chConvert, raw);
-          }
-          await cache.writeMapping(media.itemId, {
-            'episodeId': match.episodeId,
-            'animeTitle': match.animeTitle,
-            'episodeTitle': match.episodeTitle,
-            'shift': match.shift,
-            'source': match.source,
-            'url': match.url,
-            'updatedAt': DateTime.now().toIso8601String(),
-          });
+          await cache.writeComments(cacheKey, raw);
         }
       }
+
+      if (raw.isEmpty) {
+        final sourceLabel = match.provider.isEmpty ? '' : '在 ${match.provider} 源';
+        state = DanmakuState(
+          status: DanmakuLoadStatus.noMatch,
+          itemId: media.itemId,
+          title: match.animeTitle,
+          match: match,
+          error: '该分集$sourceLabel暂无可用弹幕，可尝试换一集或手动匹配其他来源',
+        );
+        return;
+      }
+
+      await cache.writeMapping(media.itemId, {
+        'episodeId': match.episodeId,
+        'animeTitle': match.animeTitle,
+        'episodeTitle': match.episodeTitle,
+        'shift': match.shift,
+        'source': match.source,
+        'url': match.url,
+        'provider': match.provider,
+        'updatedAt': DateTime.now().toIso8601String(),
+      });
       if (generation != _generation) return;
 
       final comments = parseDanmakuComments(raw, settings, shift: match.shift);
@@ -273,43 +239,70 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     }
   }
 
-  /// 先试匹配到的地址；自建服务器上若源不可用/404，就按标题+集号换源重试。
-  Future<List<DdpComment>> _fetchCommentsWithFallback(
-    DdpClient client,
+  /// 旧 mapping 没有 url 时，按标题+集号重搜，优先选带 http(s) 的分集。
+  Future<DanmakuMatch> _reSearchMatch(
+    DanmakuApiClient client,
     DanmakuMediaInfo media,
     DanmakuMatch match,
-    DanmakuSettingsModel settings,
-    bool customServer,
   ) async {
-    try {
-      final raw = await client.getComments(
-        match.episodeId,
-        chConvert: settings.chConvert,
-        url: match.url,
-      );
-      if (raw.isNotEmpty || !customServer) return raw;
-    } on DanmakuException {
-      if (!customServer) rethrow;
-    }
-
-    if (media.searchTitle.trim().isEmpty) return const [];
-    final candidates = await client.searchEpisodes(
+    final candidates = await _searchEpisodes(
+      client,
       media.searchTitle,
-      media.episodeNumber,
+      media.isMovie ? null : media.episodeNumber,
     );
     final ordered = candidates
         .where((candidate) =>
-            candidate.url.trim().startsWith('http') &&
-            candidate.episodeId != match.episodeId)
+            candidate.url.trim().isNotEmpty &&
+            candidate.url.trim() != match.url.trim())
+        .toList()
+      ..sort((a, b) => _sourceRank(b.url).compareTo(_sourceRank(a.url)));
+    if (ordered.isEmpty) return match;
+
+    final candidate = ordered.first;
+    return DanmakuMatch(
+      episodeId: candidate.episodeId,
+      animeTitle: candidate.animeTitle,
+      episodeTitle: candidate.episodeTitle,
+      shift: candidate.shift,
+      source: 'search',
+      url: candidate.url,
+      provider: candidate.provider,
+    );
+  }
+
+  /// 先试匹配到的地址；0 条/源不可用时按标题+集号换源重试。
+  Future<List<DanmakuApiComment>> _fetchCommentsWithFallback(
+    DanmakuApiClient client,
+    DanmakuMediaInfo media,
+    DanmakuMatch match,
+  ) async {
+    final primary = await client.getComments(
+      url: match.url,
+      episodeId: match.episodeId,
+      provider: match.provider,
+    );
+    if (primary.isNotEmpty) return primary;
+
+    final title = media.searchTitle.trim();
+    if (title.isEmpty) return const [];
+
+    final candidates = await _searchEpisodes(
+      client,
+      title,
+      media.isMovie ? null : media.episodeNumber,
+    );
+    final ordered = candidates
+        .where((candidate) =>
+            candidate.url.trim().isNotEmpty &&
+            candidate.url.trim() != match.url.trim())
         .toList()
       ..sort((a, b) => _sourceRank(b.url).compareTo(_sourceRank(a.url)));
 
     for (final candidate in ordered.take(5)) {
       try {
         final raw = await client.getComments(
-          candidate.episodeId,
-          chConvert: settings.chConvert,
           url: candidate.url,
+          provider: candidate.provider,
         );
         if (raw.isNotEmpty) return raw;
       } on DanmakuException {
@@ -319,10 +312,25 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     return const [];
   }
 
+  /// 搜索标题变体；`标题 (2026)` 这类写法公共实例搜不到，去掉尾部年份/季集再试。
+  Future<List<DanmakuCandidate>> _searchEpisodes(
+    DanmakuApiClient client,
+    String title,
+    int? episode,
+  ) async {
+    for (final query in danmakuSearchQueries(title)) {
+      final candidates = await client.searchEpisodes(query, episode);
+      if (candidates.isNotEmpty) return candidates;
+    }
+    return const [];
+  }
+
   int _sourceRank(String url) {
     final value = url.toLowerCase();
     if (value.contains('bilibili.com')) return 3;
-    if (value.contains('gamer.com.tw')) return 2;
+    if (value.contains('gamer.com.tw') || value.contains('bahamut.com.tw')) {
+      return 2;
+    }
     return 1;
   }
 
@@ -333,21 +341,34 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     await load(media, force: true);
   }
 
-  /// 手动匹配第一步：搜索番剧。调用方负责错误提示。
+  /// 手动匹配第一步：搜索番剧（分集内嵌在结果里）。调用方负责错误提示。
   Future<List<DanmakuAnime>> searchAnime(String keyword) async {
     final client = _requireClient();
     try {
-      return await client.searchAnime(keyword.trim());
+      for (final query in danmakuSearchQueries(keyword)) {
+        final animes = await client.searchAnime(query);
+        if (animes.isNotEmpty) return animes;
+      }
+      return const [];
     } finally {
       client.dispose();
     }
   }
 
-  /// 手动匹配第二步：拉取某个番剧的分集列表。
-  Future<List<DanmakuEpisodeRef>> episodesForAnime(int animeId) async {
+  /// 手动匹配第二步：拿某个番剧的分集。
+  ///
+  /// 正常情况下搜索结果已带分集；只有旧服务/异常响应才需要按番名重搜。
+  Future<List<DanmakuEpisodeRef>> episodesForAnime(DanmakuAnime anime) async {
+    if (anime.episodes.isNotEmpty) return anime.episodes;
     final client = _requireClient();
     try {
-      return await client.getEpisodes(animeId);
+      final animes = await client.searchAnime(anime.animeTitle);
+      for (final entry in animes) {
+        if (entry.animeId == anime.animeId && entry.episodes.isNotEmpty) {
+          return entry.episodes;
+        }
+      }
+      return const [];
     } finally {
       client.dispose();
     }
@@ -360,6 +381,7 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     required String episodeTitle,
     double shift = 0,
     String url = '',
+    String provider = '',
   }) async {
     final media = _media;
     if (media == null) {
@@ -373,13 +395,14 @@ class DanmakuController extends StateNotifier<DanmakuState> {
       'shift': shift,
       'source': 'manual',
       'url': url,
+      'provider': provider,
       'updatedAt': DateTime.now().toIso8601String(),
     });
     state = const DanmakuState();
     await load(media, force: true);
   }
 
-  /// 删除当前条目的手动映射，回退到自动匹配。
+  /// 删除当前条目的匹配（自动/手动均可），回退到自动匹配。
   Future<void> clearManualMatch() async {
     final media = _media;
     if (media == null) return;
@@ -389,22 +412,9 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     await load(media, force: true);
   }
 
-  DdpClient _requireClient() {
+  DanmakuApiClient _requireClient() {
     final settings = ref.read(danmakuSettingsProvider);
-    if (!settings.hasCredentials && !_isCustomServer(settings)) {
-      throw const DanmakuException(
-          '请展开“高级”填写弹弹play AppId，或填写自建服务器地址/使用本地导入');
-    }
-    return DdpClient(
-      baseUrl: settings.apiBase,
-      appId: settings.appId,
-      appSecret: settings.appSecret,
-    );
-  }
-
-  bool _isCustomServer(DanmakuSettingsModel settings) {
-    final base = settings.apiBase.trim().replaceAll(RegExp(r'/+$'), '');
-    return base.isNotEmpty && base != _officialApiBase;
+    return DanmakuApiClient(baseUrl: settings.effectiveApiBase);
   }
 
   void stop() {
@@ -413,8 +423,7 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     state = const DanmakuState();
   }
 
-  String _localFileName(String path) =>
-      path.split(RegExp(r'[\\/]')).last;
+  String _localFileName(String path) => path.split(RegExp(r'[\\/]')).last;
 
   Future<DanmakuCache> _cache() async {
     final existing = _cacheInstance;

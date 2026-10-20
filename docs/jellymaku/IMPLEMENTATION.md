@@ -1,9 +1,9 @@
 
 # 实施检查清单与证据模板
 
-> 状态：Stage A 核心已构建/验证：Flutter 3.35.7、analyze 0、121 tests（2026-10-20）；Windows release + 启动冒烟、portable zip 于 2026-10-20 重新构建。
-> 弹幕在 2026-10-20 增加了 Kazumi 对齐能力：手动匹配三步 UI、来源过滤、合并去重、实时类型/来源开关、描边/颜色开关。
-> 真实 Jellyfin/DDP/SyncPlay E2E 仍未完成；弹幕未做真实凭证联调。
+> 状态：Stage A 核心已构建/验证：Flutter 3.35.7、analyze 0、137 tests（2026-10-20）；Windows release + 启动冒烟、portable zip 于 2026-10-20 重新构建（含弹幕迁移后重建）。
+> 弹幕在 2026-10-20 迁移到 danmu_api：默认公共实例、`/api/v2/match` 自动匹配、URL 拉取、来源标签解析、URL 哈希缓存、移除旧凭证/签名/密钥存储。
+> 真实 Jellyfin/SyncPlay E2E 仍未完成；播放器内真实弹幕加载/切集未验证。
 > 用途：让后续 agent 按清单推进，避免“文档写了但没做”。
 
 ## 1. Stage A 检查清单
@@ -17,25 +17,25 @@
 - [ ] 补最新 develop 合并（仍为 PR #735 head）。
 - [x] Flutter 3.35.7 到 .flutter；PUB_CACHE 本地。
 - [x] VS BuildTools/Windows SDK/Developer Mode 检查通过。
-- [x] flutter analyze/test 通过（0 issue；121 tests）。
+- [x] flutter analyze/test 通过（0 issue；137 tests）。
 - [x] flutter build windows --release 成功；启动冒烟通过。
 - [ ] 本地 Jellyfin 12.2 + .NET 10 启动；登录/播放测试片。
 - [ ] third_party/manifest.json 生成；verify-assets 通过。
 
 ### A1/A2 弹幕
 
-- [x] lib/danmaku 核心；DDP 签名/错误/缓存。
-- [x] 自动匹配（标题+集号→search/episodes 第一条候选）。
-- [x] 手动匹配：三步对话框（搜索番剧→分集→应用），mapping.json 持久化，可清除。
-- [x] 移除错误的三分支来源过滤：实测 p[3] 是 uid，DDP 不提供来源标签；只保留本地导入开关。
-- [x] 自建 DDP 兼容服务器（danmu_api）：可填服务器地址、免 AppId、URL 拉弹幕、手动匹配用搜索内分集。
+- [x] lib/danmaku 核心；danmu_api 客户端/错误/URL 哈希缓存。
+- [x] 自动匹配：`POST /api/v2/match` 优先，`search/episodes` 打分回退。
+- [x] 手动匹配：搜索番剧→内嵌分集→应用，mapping.json 持久化，可清除（自动 mapping 也可清）。
+- [x] 来源标签：`p[3]` 解析为 provider，不作为 uid；只保留本地导入开关。
+- [x] danmu_api：默认 `https://danmu.api.tangbai.cc`、可自建（TOKEN 写在地址路径）、URL 拉弹幕、手动匹配用搜索内分集。
 - [x] 合并重复弹幕：归一化（全角/空白/符号/重复字符）+5 秒窗口 +「xN」顶部白字。
 - [x] 实时过滤：类型/来源开关无需重载；解析类设置 300ms 防抖重载。
 - [x] 样式：颜色开关、描边（独立 stroke TextPainter）、显示区域/透明度/字号/速度/偏移。
-- [x] 本地 XML/JSON 导入（Bilibili XML / DDP JSON，`source=local`，优先于在线匹配）。
-- [x] 发送弹幕入口已移除（DDP 无发送 API；不提供本地回显）。
+- [x] 本地 XML/JSON 导入（Bilibili XML / danmu_api 兼容 JSON，`source=local`，优先于在线匹配）。
+- [x] 发送弹幕入口已移除（danmu_api 只读；不提供本地回显）。
 - [x] Flutter 叠加层；设置弹窗；播放器入口。
-- [x] 单测/Mock（DDP HTTP mock、解析/来源/合并、手动匹配请求、DPAPI）。
+- [x] 单测/Mock（danmu_api HTTP mock/本地 HttpServer、解析/来源/合并、匹配请求、设置迁移）。
 - [ ] 本地 Jellyfin E2E：主字幕共存/seek/pause/切集。
 - [ ] 截图/性能日志（5000 条未压测）。
 
@@ -115,9 +115,9 @@
 - 日期：2026-10-20
 - commit：feat(danmaku): add source filters, manual match and duplicate merge；feat(danmaku): add local import and local echo（2026-10-20）
 - 命令：
-  - `.\.flutter\bin\flutter.bat test --no-pub` → 121 tests passed
+  - `.\.flutter\bin\flutter.bat test --no-pub` → 121 tests passed（迁移前历史记录；迁移后 137）
   - `.\.flutter\bin\dart.bat analyze lib test` → No issues found
-- 结果：通过（单元/静态）；未做真实 DDP/Jellyfin E2E、未重新构建 Windows 包。
+- 结果：通过（单元/静态）；未做真实弹幕/Jellyfin E2E、未重新构建 Windows 包。
 - 截图：artifacts/screenshots/danmaku-*（未生成）
 - 性能：5000 条未压测
 - 已知问题：p[3] 来源语义待真实凭证确认；自动匹配仍取第一条候选；本地 XML 用正则解析。
@@ -132,17 +132,31 @@
 - 证据：`data\app.so` 时间 2026-10-20 22:25；zip 22:26。
 - 注意：`JellyMaku.exe` 本体未变（runner 未改），新 Dart 代码在 `data\app.so`；只替换 exe 不会更新界面。
 
-### 自建 danmu_api 接入（2026-10-20）
+### danmu_api 迁移（2026-10-20）
 
-- 服务器：`http://danmu.api.tangbai.cc`（HTTPS 证书 hostname mismatch，Dart `HandshakeException`）。
-- 实测：`search/episodes?anime=孤独摇滚&v2=true` → 9 条候选；`/api/v2/comment?url=<分集 url>` → 759 条，解析 759 条。
-- 代码：免签名（AppId 为空不发认证头）、搜索内嵌分集、URL 拉弹幕、URL 结果不写缓存。
-- 错误恢复：URL 路由 4xx/异常 → 回退 `/comment/{id}`；id 仍 400/404 → 按标题+集号重搜并选 http(s) 候选；协议相对 URL 自动补 `https:`。
-- 旧 mapping（只有 episodeId、没有 url）在自建服务器上会 404；加载时若 url 为空会重新搜索并刷新映射。
-- 多源回退：首选源 404/0 条时，按标题+集号重搜，优先 B 站→巴哈→其他，最多试 5 个候选；全失败才显示空。
-- DDP 错误信息现在带请求路径（如 `（/api/v2/comment/10021）`），便于定位。
-- 命令：临时 `flutter test` live probe（已删除）→ 1 passed。
-- 未验证：播放器内真实切集/暂停；巴哈来源（danmu_api 服务端支持，未单独验证）。
+- 服务器：`https://danmu.api.tangbai.cc`（HTTPS 证书有效，PowerShell 200；旧文档的 hostname mismatch 已过时）。
+- 实测：
+  - `GET /api/v2/search/episodes?anime=孤独摇滚` → 200，9 条番剧、内嵌 episodes。
+  - `POST /api/v2/match` body `{"fileName":"孤独摇滚！ S01E01"}` → `isMatched=true`；电影片名也能命中。
+  - `GET /api/v2/comment?url=<bilibili 页面>&format=json` → 200，6,898 条；`p` 例 `2.69,1,16777215,[bilibili1]`。
+  - Dart `DanmakuApiClient` live probe（临时测试，已删除）：`matchFile('孤独摇滚！ S01E01')` → episodeId 10022；`getComments(url)` → 6,899 条，中文正常；耗时约 9s。
+  - `searchAnime('FX战士久留美')` → 3 个 renren 分集（url 为 `59377-431223` 等复合 ID）；`getComments(url: 59377-431845, provider: renren)` → 4 条；第 01 集 → 0 条（源站本身无弹幕）。
+  - `GET /api/v2/comment/10004?format=json` → 404；`GET /api/v2/bangumi/4780191` → 404。
+- 代码：
+  - 删除旧弹幕客户端/签名/凭证与密钥存储；新增 `DanmakuApiClient`（match/search/comment）。
+  - 自动匹配 `/match` 优先、`search/episodes` 回退；评论 `url + format=json`；id 路由仅兜底。
+  - `p[3]` 解析为 `provider`；缓存 key `sha1(baseUrl|url)`；设置 `apiBase` 迁移并清理旧 secret。
+  - 旧 mapping 无 url 时重搜；最多 5 个候选；协议相对 URL 补 `https:`。
+  - 搜索标题自动去尾部年份/季集（如 `X (2026)` → `X`）重试；非 http 复合 ID 走 `segmentcomment`。
+- 命令：
+  - `.\\.flutter\\bin\\dart.bat analyze lib test` → No issues found。
+  - `.\\.flutter\\bin\\flutter.bat test --no-pub` → 137 tests passed。
+  - `.\\.flutter\\bin\\flutter.bat test --no-pub test\\danmaku` → 40 tests passed。
+- 构建/打包（2026-10-20 23:38）：
+  - ASCII 路径 `L:\\JellyMaku`：`flutter build windows --release --no-pub` → √ Built，107.5s；`data\\app.so` 23:38:02。
+  - `tools\\pack.ps1 -Version 0.1.0` → `artifacts\\JellyMaku-0.1.0-windows-x64-portable.zip`，90,712,816 bytes，SHA256 `5FFC849F33D8E7216EE93AEC17192EBE7EEDAEEC8A47D97452FA891564B61237`。
+  - 启动冒烟：Release exe 运行 8s 正常后手动结束。
+- 未验证：播放器内真实加载/切集/暂停；真实 Jellyfin 媒体；真实混合来源弹幕表现。
 
 ## 4. 禁止事项
 
@@ -150,14 +164,14 @@
 - 不把 lint/analyze 通过当成功能通过。
 - 不提交密钥/真实账号/版权媒体。
 - 不使用 Kazumi 受限图标/字体/美术。
-- 不做未授权的 Bangumi/DDP 批量抓取。
+- 不做未授权的 Bangumi/danmu_api 批量抓取。
 - 不在无代理情况下宣称 Bangumi 评论可用。
 
 ## 5. 当前进度
 
-- 文档：完成；本次更新 DANMAKU/IMPLEMENTATION/ROADMAP/AGENTS。
-- 代码：Fladder + PR #735 head 已导入；弹幕（自动+手动匹配/来源/合并/本地导入/叠加层）、超分（Anime4K）已接入；Bangumi Stage B 未开始。
-- 构建：Windows release 重新构建成功、启动冒烟通过（2026-10-20）；portable zip 已重打。
-- 测试：121 tests passed（2026-10-20）；`dart analyze lib test` → No issues found。
+- 文档：完成；本次更新 DANMAKU/IMPLEMENTATION/ROADMAP/AGENTS/README/CHANGELOG。
+- 代码：Fladder + PR #735 head 已导入；弹幕已迁移到 danmu_api（自动+手动匹配/URL 拉取/合并/本地导入/叠加层）、超分（Anime4K）已接入；Bangumi Stage B 未开始。
+- 构建：Windows release 于 2026-10-20 23:38 重新构建/冒烟通过；portable zip 已按新代码重打（90,712,816 bytes，SHA256 `5FFC849F33D8E7216EE93AEC17192EBE7EEDAEEC8A47D97452FA891564B61237`）。
+- 测试：137 tests passed（2026-10-20）；`dart analyze lib test` → No issues found。
 - 发布：portable zip 已出；安装器/中文 ARB 未做。
-- 未验证：真实 DDP 凭证、真实 Jellyfin 播放、SyncPlay 双端、超分画质/性能、弹幕 p[3] 来源语义。
+- 未验证：播放器内真实弹幕加载/切集、真实 Jellyfin 播放、SyncPlay 双端、超分画质/性能。

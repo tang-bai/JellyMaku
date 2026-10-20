@@ -23,7 +23,7 @@
 | Anime4K | MIT | shader | 保留许可/来源 |
 | default-shader-pack | GPL-3.0 | shader 集合 | 源码/许可 |
 | FSRCNNX/ArtCNN | 各自许可（以仓库为准） | shader | 保留许可/来源 |
-| DanDanPlay 开放弹幕网络 | 服务条款 | 弹幕数据 | 署名、免费、禁止未授权商用、缓存/限流 |
+| danmu_api（huangxd-/danmu_api） | 项目许可/部署者条款 | 弹幕聚合 API（仅 HTTP 调用，不打包其代码） | 署名、免费、禁止未授权商用、缓存/限流 |
 | Bangumi | 服务条款/用户内容 | 元数据/评论 | User-Agent、缓存/限流、署名、不二次分发/商用 |
 | trace.moe | 服务条款 | 图片识别 | 署名、隐私、配额、不批量 |
 | Inno Setup | 自由使用 | 安装器 | 保留许可 |
@@ -38,19 +38,20 @@
 
 - “JellyMaku is based on Fladder (https://github.com/DonutWare/Fladder), licensed under GPL-3.0.”
 - “SyncPlay support adapted from Fladder PR #735 by irican-f and contributors.”
-- “Danmaku data provided by 弹弹play开放弹幕网络 (https://www.dandanplay.com/).”
+- “Danmaku data aggregated by danmu_api (https://github.com/huangxd-/danmu_api), default instance https://danmu.api.tangbai.cc.”
 - “Anime metadata/comments from Bangumi (https://bgm.tv/).”
 - “Image recognition by trace.moe (https://trace.moe).”
 - “Video super-resolution shaders from Anime4K/default-shader-pack; see licenses.”
-- “Not affiliated with Jellyfin, Bangumi, DanDanPlay, or Fladder.”
+- “Not affiliated with Jellyfin, Bangumi, danmu_api, or Fladder.”
 
-## 5. 弹弹play 合规
+## 5. danmu_api 合规
 
-- UI/README/关于页标注“弹弹play开放弹幕网络”和官网。
+- UI/README 标注 danmu_api 项目与默认实例；自建实例由部署者负责其服务条款。
 - 弹幕功能免费，不设付费墙/增值收费。
 - 不批量抓取、不下载数据库、不绕过配额。
-- AppSecret 用户自备；不硬编码/不入库/不日志。
+- 自建 TOKEN 只放在 API 地址路径里；不硬编码/不入库/不日志。
 - 缓存有限；按需请求；遵守 429/Retry-After。
+- 弹幕来源由 danmu_api 服务端聚合；客户端不二次分发源站数据。
 
 ## 6. Bangumi 合规
 
@@ -70,8 +71,8 @@
 ## 8. 隐私
 
 - 不收集遥测；不内置分析 SDK。
-- 日志不记录 token/AppSecret/图片内容/用户密码。
-- DDP 请求不含 Jellyfin token/服务器地址。
+- 日志不记录 token/图片内容/用户密码。
+- danmu_api 请求不含 Jellyfin token/服务器地址。
 - Bangumi 请求不含 Jellyfin token；仅公开元数据/评论。
 - 本地缓存可清除；卸载/清缓存说明。
 
@@ -81,5 +82,5 @@
 - [ ] 第三方许可/署名齐全。
 - [ ] 无受限图标/字体/美术。
 - [ ] 无密钥/真实用户数据/版权媒体。
-- [ ] DDP/Bangumi/trace.moe 署名与限制说明。
+- [ ] danmu_api/Bangumi/trace.moe 署名与限制说明。
 - [ ] 非官方声明。

@@ -2,7 +2,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:fladder/danmaku/ddp_client.dart';
+import 'package:fladder/danmaku/danmaku_api_client.dart';
+import 'package:fladder/danmaku/danmaku_models.dart';
 import 'package:fladder/providers/danmaku_provider.dart';
 import 'package:fladder/providers/settings/danmaku_settings_provider.dart';
 import 'package:fladder/screens/video_player/components/danmaku_match_dialog.dart';
@@ -25,8 +26,6 @@ class _DanmakuSettingsDialog extends ConsumerStatefulWidget {
 class _DanmakuSettingsDialogState
     extends ConsumerState<_DanmakuSettingsDialog> {
   late final TextEditingController _apiBase;
-  late final TextEditingController _appId;
-  late final TextEditingController _appSecret;
   bool _testing = false;
   bool _pickingFile = false;
   String? _testResult;
@@ -36,15 +35,11 @@ class _DanmakuSettingsDialogState
     super.initState();
     final settings = ref.read(danmakuSettingsProvider);
     _apiBase = TextEditingController(text: settings.apiBase);
-    _appId = TextEditingController(text: settings.appId);
-    _appSecret = TextEditingController(text: settings.appSecret);
   }
 
   @override
   void dispose() {
     _apiBase.dispose();
-    _appId.dispose();
-    _appSecret.dispose();
     super.dispose();
   }
 
@@ -69,20 +64,11 @@ class _DanmakuSettingsDialogState
   }
 
   Future<void> _testConnection() async {
-    final settings = ref.read(danmakuSettingsProvider);
-    if (!settings.hasCredentials) {
-      setState(() => _testResult = '请先填写 AppId / AppSecret');
-      return;
-    }
     setState(() {
       _testing = true;
       _testResult = null;
     });
-    final client = DdpClient(
-      baseUrl: settings.apiBase,
-      appId: settings.appId,
-      appSecret: settings.appSecret,
-    );
+    final client = DanmakuApiClient(baseUrl: _apiBase.text);
     try {
       await client.testConnection();
       if (mounted) setState(() => _testResult = '连接成功');
@@ -99,7 +85,6 @@ class _DanmakuSettingsDialogState
         DanmakuLoadStatus.disabled => '已禁用',
         DanmakuLoadStatus.loading => '加载中',
         DanmakuLoadStatus.ready => '已就绪',
-        DanmakuLoadStatus.noCredentials => '未配置凭证（可本地导入）',
         DanmakuLoadStatus.noMatch => '未匹配到弹幕',
         DanmakuLoadStatus.error => '错误',
       };
@@ -132,7 +117,7 @@ class _DanmakuSettingsDialogState
                 ],
               ),
               const SizedBox(height: 8),
-              Text('弹弹play · 状态：${_statusLabel(state.status)}',
+              Text('danmu_api · 状态：${_statusLabel(state.status)}',
                   style: theme.textTheme.bodySmall),
               if (state.match != null)
                 Text(
@@ -171,11 +156,9 @@ class _DanmakuSettingsDialogState
                     ExpansionTile(
                       tilePadding: EdgeInsets.zero,
                       childrenPadding: EdgeInsets.zero,
-                      title: const Text('高级：弹弹play AppId（可选）'),
+                      title: const Text('高级：弹幕 API 地址'),
                       subtitle: Text(
-                        settings.hasCredentials
-                            ? '已配置，可使用在线匹配'
-                            : '不填也能用本地导入；在线匹配才需要',
+                        '默认 $kDefaultDanmuApiBase；可填自建 danmu_api',
                         style: theme.textTheme.bodySmall,
                       ),
                       children: [
@@ -187,38 +170,16 @@ class _DanmakuSettingsDialogState
                               TextField(
                                 controller: _apiBase,
                                 decoration: const InputDecoration(
-                                  labelText: '弹幕服务器地址',
-                                  hintText: 'https://api.dandanplay.net',
-                                  helperText: '可填自建 DDP 兼容服务器（如 '
-                                      'http://danmu.api.tangbai.cc），'
-                                      '此时 AppId 可留空。'
-                                      'HTTPS 证书与域名不匹配时请改用 http://',
+                                  labelText: 'danmu_api 地址',
+                                  hintText: kDefaultDanmuApiBase,
+                                  helperText: '默认公共实例无需配置。自建服务若设置了 '
+                                      'TOKEN，请把 /{TOKEN} 加在地址末尾，例如 '
+                                      'http://192.168.1.10:9321/87654321；'
+                                      '地址需以 http(s):// 开头。',
                                   border: OutlineInputBorder(),
                                 ),
                                 onChanged: (value) =>
                                     notifier.setApiBase(value),
-                              ),
-                              const SizedBox(height: 10),
-                              TextField(
-                                controller: _appId,
-                                decoration: const InputDecoration(
-                                  labelText: '弹弹play AppId',
-                                  hintText: '在 dev.dandanplay.com 申请',
-                                  border: OutlineInputBorder(),
-                                ),
-                                onChanged: (value) =>
-                                    notifier.setCredentials(appId: value),
-                              ),
-                              const SizedBox(height: 10),
-                              TextField(
-                                controller: _appSecret,
-                                obscureText: true,
-                                decoration: const InputDecoration(
-                                  labelText: '弹弹play AppSecret',
-                                  border: OutlineInputBorder(),
-                                ),
-                                onChanged: (value) =>
-                                    notifier.setCredentials(appSecret: value),
                               ),
                               const SizedBox(height: 10),
                               Row(
@@ -257,8 +218,8 @@ class _DanmakuSettingsDialogState
                     const SizedBox(height: 4),
                     Text(
                       (settings.localFile ?? '').isEmpty
-                          ? '未选择。支持 Bilibili XML / DDP JSON；'
-                              '选择后优先于在线匹配，且不需要 AppId。'
+                          ? '未选择。支持 Bilibili XML / danmu_api 兼容 JSON；'
+                              '选择后优先于在线匹配。'
                           : '当前：${_fileName(settings.localFile!)}',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -276,8 +237,7 @@ class _DanmakuSettingsDialogState
                         ),
                         if ((settings.localFile ?? '').isNotEmpty)
                           OutlinedButton.icon(
-                            onPressed: () =>
-                                notifier.setLocalFile(null),
+                            onPressed: () => notifier.setLocalFile(null),
                             icon: const Icon(Icons.close),
                             label: const Text('清除本地文件'),
                           ),
@@ -326,30 +286,9 @@ class _DanmakuSettingsDialogState
                       min: -60,
                       max: 60,
                       divisions: 120,
-                      display:
-                          '${settings.offsetSeconds > 0 ? '+' : ''}'
+                      display: '${settings.offsetSeconds > 0 ? '+' : ''}'
                           '${settings.offsetSeconds.toStringAsFixed(1)} 秒',
                       onChanged: notifier.setOffset,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        const Text('简繁转换'),
-                        const Spacer(),
-                        DropdownButton<int>(
-                          value: settings.chConvert,
-                          items: const [
-                            DropdownMenuItem(value: 0, child: Text('关闭')),
-                            DropdownMenuItem(
-                                value: 1, child: Text('简体')),
-                            DropdownMenuItem(
-                                value: 2, child: Text('繁体')),
-                          ],
-                          onChanged: (value) {
-                            if (value != null) notifier.setChConvert(value);
-                          },
-                        ),
-                      ],
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
@@ -396,8 +335,9 @@ class _DanmakuSettingsDialogState
                     Text('弹幕来源', style: theme.textTheme.titleSmall),
                     const SizedBox(height: 4),
                     Text(
-                      'BiliBili / 巴哈等第三方弹幕由弹弹play 在 withRelated 响应里'
-                      '聚合返回，客户端无法按站单独开关；这里只控制本地导入。',
+                      'danmu_api 会聚合 BiliBili、巴哈、爱优腾等来源，并用'
+                      '「[来源]」标签标记；弹幕以同一列表返回。'
+                      '这里只控制本地导入是否显示。',
                       style: theme.textTheme.bodySmall,
                     ),
                     SwitchListTile(
@@ -416,27 +356,30 @@ class _DanmakuSettingsDialogState
                           onPressed: (settings.localFile ?? '').isNotEmpty
                               ? null
                               : () async {
-                            final applied =
-                                await showDanmakuMatchDialog(context);
-                            if (!context.mounted) return;
-                            if (applied == true) {
-                              ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-                                const SnackBar(content: Text('已应用手动匹配')),
-                              );
-                            }
-                          },
+                                  final applied =
+                                      await showDanmakuMatchDialog(context);
+                                  if (!context.mounted) return;
+                                  if (applied == true) {
+                                    ScaffoldMessenger.maybeOf(context)
+                                        ?.showSnackBar(
+                                      const SnackBar(content: Text('已应用手动匹配')),
+                                    );
+                                  }
+                                },
                           icon: const Icon(Icons.manage_search),
                           label: const Text('手动匹配…'),
                         ),
                         OutlinedButton.icon(
                           onPressed: state.status == DanmakuLoadStatus.loading
                               ? null
-                              : () => ref.read(danmakuProvider.notifier).reload(),
+                              : () =>
+                                  ref.read(danmakuProvider.notifier).reload(),
                           icon: const Icon(Icons.refresh),
                           label: const Text('重新加载'),
                         ),
                         OutlinedButton.icon(
-                          onPressed: state.match?.source == 'manual'
+                          onPressed: state.match != null &&
+                                  state.match!.source != 'local'
                               ? () async {
                                   await ref
                                       .read(danmakuProvider.notifier)
@@ -444,7 +387,7 @@ class _DanmakuSettingsDialogState
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.maybeOf(context)
                                       ?.showSnackBar(
-                                    const SnackBar(content: Text('已清除手动匹配')),
+                                    const SnackBar(content: Text('已清除匹配')),
                                   );
                                 }
                               : null,
@@ -455,8 +398,9 @@ class _DanmakuSettingsDialogState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '弹幕数据由弹弹play开放弹幕网络提供（www.dandanplay.com）。'
-                      'AppSecret 仅保存在本地，请勿分享。',
+                      '弹幕由 danmu_api 聚合（https://github.com/huangxd-/danmu_api）；'
+                      '默认公共实例：$kDefaultDanmuApiBase。'
+                      '弹幕功能免费，禁止未授权商用。',
                       style: theme.textTheme.bodySmall,
                     ),
                   ],
