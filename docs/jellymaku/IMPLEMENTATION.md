@@ -20,7 +20,7 @@
 - [x] flutter analyze/test 通过（0 issue；137 tests）。
 - [x] flutter build windows --release 成功；启动冒烟通过。
 - [x] 真实 Jellyfin 12.2（NAS `192.168.8.137:8096`）登录/播放测试片；未在本地启动 Jellyfin/.NET。
-- [ ] third_party/manifest.json 生成；verify-assets 通过。
+- [x] third_party/manifest.json 生成；`tools/verify-assets.ps1` 通过（8 items）。
 
 ### A1/A2 弹幕
 
@@ -61,7 +61,7 @@
 - [x] 更新检查指向 `tang-bai/JellyMaku`（含 Windows zip 资产识别与 UA）。
 - [x] i18n ARB en/zh；gen-l10n（弹幕设置/手动匹配/按钮提示已迁移，中文 UI 测试通过）。
 - [x] portable zip；Anime4K/Fladder 许可保留；Inno 脚本 `installer/jellymaku.iss` + `tools/build-installer.ps1` 已加。
-- [ ] Inno 安装器实际编译与干净目录安装验证（当前机器未装 Inno Setup）。
+- [x] Inno 安装器实际编译；静默安装/启动/卸载冒烟通过（Inno 6.7.3 → tools/inno）。
 - [ ] 干净目录完整功能验证；Stage A 真实 E2E 验收。
 
 ## 2. Stage B 检查清单
@@ -169,6 +169,15 @@
   - `artifacts/screenshots/sr-off.png`、`sr-fast.png`、`sr-balanced.png`、`sr-strong.png`
   - 历史对比：`sr-off-bright.png`、`sr-fast-bright.png`、`sr-quality-bright.png`、`sr-diff-off-quality.png`
 - 性能粗测：GPU 总利用率约 23%，JellyMaku 进程约 4.3%（Strong）；**未采集 FPS/掉帧**，A3 性能项暂不勾选。
+
+### v0.1.0-beta.4 发布（2026-10-21）
+
+- Release: https://github.com/tang-bai/JellyMaku/releases/tag/v0.1.0-beta.4
+- 资产:
+  - `JellyMaku-0.1.0-beta.4-windows-x64-setup.exe` 66,321,323 bytes，SHA256 `B31CB7BA225B4477E87CDAB6F41403408CC173AF831B5359664430DA9DF1A7E2`
+  - `JellyMaku-0.1.0-beta.4-windows-x64-portable.zip` 90,884,125 bytes，SHA256 `9438CD22E95E3CB73746C8CF3EC803103918C4EB72B7AD1D698D2280764691AF`
+- 安装器验证：静默安装到 `artifacts/install-test` → 启动窗口标题 JellyMaku → 静默卸载成功；未做安装后完整功能 E2E。
+- 资产校验：`third_party/manifest.json` 8 项，`tools/verify-assets.ps1` 全部 OK。
 
 ### 本地 Jellyfin E2E（NAS，2026-10-21）
 

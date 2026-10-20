@@ -8,7 +8,7 @@
 | 项目 | 状态 | 说明 |
 |---|---|---|
 | 文档集 + AGENTS.md | 完成；Stage A 报告/构建说明已补 | 见 STAGE_A_REPORT/BUILD_WINDOWS |
-| 本地 git 仓库 | 完成 | main 已推送到 origin（e2b3ca7） |
+| 本地 git 仓库 | 完成 | main 已推送 origin（v0.1.0-beta.4 发布） |
 | 旧 MPV Shim 实现 | 丢失 | 本地/远程均不可恢复；不再作为基座 |
 | Fladder 源码 | 已导入 + 已合并 develop | PR #735 head + Fladder develop `de7b5a2a`（2026-10-21 合并；见 IMPLEMENTATION） |
 | Flutter 工具链 | 完成 | 3.35.7；analyze 0 issue |
@@ -17,7 +17,7 @@
 | 超分 | 核心已接入；部分验收 | Anime4K Fast/Balanced/Strong/4x；截图已采，性能仅 GPU 粗测，缺 FPS/掉帧 |
 | SyncPlay | 代码+单测；真实双端未做 | PR #735 head；见 PARTY |
 | Bangumi 时间表/图片/评论 | 未开始 | 条件功能；见 BANGUMI/KAZUMI |
-| 打包/品牌 | 便携包已出；安装器脚本未编译 | JellyMaku.exe/窗口/资源；zip 90,878,704 bytes；`installer/jellymaku.iss`；更新检查/关于页/窗口标题已品牌化 |
+| 打包/品牌 | 完成 | 安装器 + 便携包已发布到 GitHub v0.1.0-beta.4；品牌/更新检查/关于页/窗口标题完成 |
 
 ## 2. 里程碑
 
@@ -36,22 +36,19 @@
 
 ## 3. 当前阻塞
 
-1. **未推送**：main 领先 origin 31+ 提交，推送需用户确认。
-2. **SyncPlay 真实双端未做**：单测通过；Jellyfin 12.2 WebSocket/时钟误差未验证；中文组面板未完善。
-3. **超分性能未验收**：截图已有，缺 FPS/掉帧记录（仅 GPU 利用率粗测）。
-4. **安装器未编译**：Inno Setup 6 未安装；脚本已加，需装好 ISCC 后构建 setup.exe 并做干净目录安装验证。
-5. **资产清单缺失**：third_party/manifest.json 与 tools/verify-assets.ps1 未生成/未实现。
-6. **Stage A 报告过期**：STAGE_A_REPORT.md 仍是旧弹幕实现的历史版本，验收前需重写。
-7. **Bangumi 网络（Stage B）**：官方不可达；评论/搜索镜像 401；需用户代理/自建 Worker。
+1. **SyncPlay 真实双端未做**：单测通过；Jellyfin 12.2 WebSocket/时钟误差未验证；中文组面板未完善。
+2. **超分性能未验收**：截图已有，缺 FPS/掉帧记录（仅 GPU 利用率粗测）。
+3. **安装后完整功能未验证**：安装器/启动/卸载冒烟通过，但未在安装目录做登录/播放/弹幕 E2E。
+4. **Stage A 报告过期**：STAGE_A_REPORT.md 仍是旧弹幕实现的历史版本，验收前需重写。
+5. **Bangumi 网络（Stage B）**：官方不可达；评论/搜索镜像 401；需用户代理/自建 Worker。
 
 ## 4. 下一步（建议顺序）
 
 1. **SyncPlay 双端联调**：JellyMaku + Jellyfin Web / 双实例，验证播放/暂停/seek/切集/重连，记录误差与截图。
 2. **超分性能验收**：用 PresentMon/CapFrameX 采各档 FPS/掉帧，补进 A3 证据。
-3. **安装器**：安装 Inno Setup 6 后运行 `tools/build-installer.ps1`，做干净目录安装/卸载验证。
-4. **资产清单**：生成 `third_party/manifest.json`，实现 `tools/verify-assets.ps1`。
-5. **Stage A 收尾**：重写 `STAGE_A_REPORT.md`，确认无密钥/大文件入库，推送 main。
-6. **Stage B**：Bangumi 数据层/Mock；再决定真实评论代理方案。
+3. **安装目录完整 E2E**：在安装版上做登录/播放/字幕/弹幕验收。
+4. **Stage A 收尾**：重写 `STAGE_A_REPORT.md`，确认许可/署名完整，准备 Stage A 验收。
+5. **Stage B**：Bangumi 数据层/Mock；再决定真实评论代理方案。
 
 ## 5. 决策待确认
 
