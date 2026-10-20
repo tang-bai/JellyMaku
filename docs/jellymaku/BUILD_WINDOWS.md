@@ -15,6 +15,31 @@ subst L: "F:\DeepSeek Harness项目"   # 仓库父目录
 cd L:\JellyMaku
 ~~~
 
+## 1.1 非交互/空环境下的必备变量（2026-10-21 实测）
+
+在无用户桌面环境（或从 CI/agent 启动、`process.env` 为空）时，Flutter 构建会误报“找不到 Visual Studio”或 MSBuild `FileTracker` 抛 `MSB4018`。必须显式提供：
+
+```powershell
+$env:ProgramData = "C:\ProgramData"                 # vswhere 依赖；缺失会得到空 VS 列表
+$env:ALLUSERSPROFILE = "C:\ProgramData"
+$env:ProgramFiles = "C:\Program Files"
+${env:ProgramFiles(x86)} = "C:\Program Files (x86)"
+$env:CommonProgramFiles = "C:\Program Files\Common Files"
+${env:CommonProgramFiles(x86)} = "C:\Program Files (x86)\Common Files"
+$env:CommonProgramW6432 = "C:\Program Files\Common Files"
+$env:USERPROFILE = "C:\Users\<user>"
+$env:APPDATA = "$env:USERPROFILE\AppData\Roaming"
+$env:LOCALAPPDATA = "$env:USERPROFILE\AppData\Local"
+$env:TEMP = "$env:LOCALAPPDATA\Temp"
+$env:TMP = "$env:TEMP"
+$env:SystemDrive = "C:"
+$env:Path = "C:\Windows\System32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;E:\Program Files\Git\cmd;" + $env:Path
+```
+
+- GitHub 走 git 协议可能被 reset：给 pub / git 用 `http.version=HTTP/1.1`
+  （`$env:GIT_CONFIG_COUNT=1; $env:GIT_CONFIG_KEY_0="http.version"; $env:GIT_CONFIG_VALUE_0="HTTP/1.1"`）。
+- `dart format` 需要 PowerShell 在 PATH；本仓库按 120 列排版，默认 80 列格式化会产生大面积无关 diff，不要全库重排。
+
 ## 2. 预置原生依赖
 
 | 依赖 | 文件/位置 | 说明 |

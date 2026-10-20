@@ -17,7 +17,7 @@
 | 超分 | 核心已接入；未验收 | Anime4K Fast/Quality；画质/性能未测 |
 | SyncPlay | 代码+单测；真实双端未做 | PR #735 head；见 PARTY |
 | Bangumi 时间表/图片/评论 | 未开始 | 条件功能；见 BANGUMI/KAZUMI |
-| 打包/品牌 | 便携包已出；安装器未做 | JellyMaku.exe/窗口/资源；zip 90,712,816 bytes |
+| 打包/品牌 | 便携包已出；安装器未做 | JellyMaku.exe/窗口/资源；zip 90,878,704 bytes（2026-10-21） |
 
 ## 2. 里程碑
 

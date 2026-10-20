@@ -173,6 +173,8 @@
   - `.flutter\bin\dart.bat analyze lib test` → No issues found!
   - `.flutter\bin\flutter.bat test --no-pub` → **137 tests passed**
   - `.flutter\bin\flutter.bat build windows --release --no-pub` → √ Built `build\windows\x64\runner\Release\JellyMaku.exe`（71.5s；app.so 2026-10-21 02:24）
+  - 启动冒烟：Release exe 运行 8s 未退出（手动结束）
+  - `tools\pack.ps1 -Version 0.1.0` → `artifacts\JellyMaku-0.1.0-windows-x64-portable.zip`，90,878,704 bytes，SHA256 `2E3850FCFC3DDD3BA42E234EB0C677016F605CBD4BBE20EF14ACCFF28D59944D`
 - 结果：通过（静态/单测/构建）；**未做**真实 Jellyfin/播放器内弹幕/SyncPlay 双端 E2E。
 - 已知问题：`dart run build_runner build` 会对全部生成文件产生纯格式化重排（dart_style 差异，170 个文件），本次已回退，仅保留上游自带的生成文件；后续如需再生成需单独评审。
 - 未验证项：上游多窗口媒体会话、深链（app_links）、照片同步 UI 在真实 Jellyfin 下的行为；弹幕/超分/SyncPlay 与上游改动的交互。
