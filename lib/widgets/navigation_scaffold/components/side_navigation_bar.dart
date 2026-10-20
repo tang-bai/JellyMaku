@@ -6,6 +6,7 @@ import 'package:iconsax_plus/iconsax_plus.dart';
 
 import 'package:fladder/models/settings/client_settings_model.dart';
 import 'package:fladder/providers/settings/client_settings_provider.dart';
+import 'package:fladder/providers/syncplay/syncplay_provider.dart';
 import 'package:fladder/routes/auto_router.dart';
 import 'package:fladder/routes/auto_router.gr.dart';
 import 'package:fladder/screens/shared/animated_fade_size.dart';
@@ -20,6 +21,7 @@ import 'package:fladder/widgets/navigation_scaffold/components/navigation_button
 import 'package:fladder/widgets/navigation_scaffold/components/settings_user_icon.dart';
 import 'package:fladder/widgets/navigation_scaffold/components/side_navigation_buttons.dart';
 import 'package:fladder/widgets/shared/custom_tooltip.dart';
+import 'package:fladder/widgets/syncplay/syncplay_utils.dart';
 
 final navBarNode = FocusNode();
 
@@ -44,6 +46,7 @@ class SideNavigationRail extends ConsumerWidget {
     final isRtl = textDirection == TextDirection.rtl;
     final expandedSideBar = ref
         .watch(clientSettingsProvider.select((value) => value.expandSideBar));
+    final isSyncPlayActive = ref.watch(isSyncPlayActiveProvider);
 
     final expandedWidth = 200.0;
 
@@ -224,15 +227,35 @@ class SideNavigationRail extends ConsumerWidget {
                                             horizontal: 4)
                                         .copyWith(
                                             bottom: expandedSideBar ? 10 : 0),
-                                    child: hasCustomFab
-                                        ? actionButtonWidget(
-                                            context, shouldExpand)
-                                        : AnimatedFadeSize(
-                                            duration: const Duration(
-                                                milliseconds: 250),
-                                            child: actionButtonWidget(
-                                                context, shouldExpand),
-                                          ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      spacing: 8,
+                                      children: [
+                                        hasCustomFab
+                                            ? actionButtonWidget(
+                                                context, shouldExpand)
+                                            : AnimatedFadeSize(
+                                                duration: const Duration(
+                                                    milliseconds: 250),
+                                                child: actionButtonWidget(
+                                                    context, shouldExpand),
+                                              ),
+                                        NavigationButton(
+                                          label: context.localized.syncPlay,
+                                          selected: isSyncPlayActive,
+                                          selectedIcon: const Icon(
+                                              IconsaxPlusBold.people),
+                                          icon: const Icon(
+                                              IconsaxPlusLinear.people),
+                                          horizontal: true,
+                                          expanded: shouldExpand,
+                                          onPressed: () =>
+                                              showSyncPlaySheet(context),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                                 Expanded(

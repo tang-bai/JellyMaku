@@ -5,24 +5,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax_plus/iconsax_plus.dart';
 
 import 'package:fladder/providers/settings/client_settings_provider.dart';
-import 'package:fladder/providers/syncplay/syncplay_provider.dart';
 import 'package:fladder/routes/auto_router.gr.dart';
 import 'package:fladder/util/adaptive_layout/adaptive_layout.dart';
 import 'package:fladder/util/localization_helper.dart';
 import 'package:fladder/widgets/navigation_scaffold/components/adaptive_fab.dart';
-import 'package:fladder/widgets/navigation_scaffold/components/navigation_button.dart';
-import 'package:fladder/widgets/syncplay/syncplay_utils.dart';
 
-/// Dashboard actions above the main navigation list.
+/// Search action above the main navigation list.
 ///
-/// Search expands into a full-width icon + text button; SyncPlay uses the
-/// same NavigationButton as the rest of the sidebar so it matches 控制台/媒体库.
+/// SyncPlay is rendered globally by [SideNavigationRail] so it stays visible
+/// on search and library routes as well.
 class DashboardFabs extends ConsumerWidget {
   const DashboardFabs({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isActive = ref.watch(isSyncPlayActiveProvider);
     final isLargeBar =
         AdaptiveLayout.layoutModeOf(context) != LayoutMode.single;
     final expanded = isLargeBar &&
@@ -37,25 +33,8 @@ class DashboardFabs extends ConsumerWidget {
       child: const Icon(IconsaxPlusLinear.search_normal_1),
     );
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 8,
-      children: [
-        if (expanded)
-          search.extended
-        else
-          Align(alignment: Alignment.center, child: search.normal),
-        NavigationButton(
-          label: context.localized.syncPlay,
-          selected: isActive,
-          selectedIcon: const Icon(IconsaxPlusBold.people),
-          icon: const Icon(IconsaxPlusLinear.people),
-          horizontal: true,
-          expanded: expanded,
-          onPressed: () => showSyncPlaySheet(context),
-        ),
-      ],
-    );
+    return expanded
+        ? search.extended
+        : Align(alignment: Alignment.center, child: search.normal);
   }
 }
