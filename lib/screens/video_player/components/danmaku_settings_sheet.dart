@@ -45,7 +45,7 @@ class _DanmakuSettingsDialogState
   Future<void> _testConnection() async {
     final settings = ref.read(danmakuSettingsProvider);
     if (!settings.hasCredentials) {
-      setState(() => _testResult = 'AppId / AppSecret required');
+      setState(() => _testResult = '请先填写 AppId / AppSecret');
       return;
     }
     setState(() {
@@ -59,7 +59,7 @@ class _DanmakuSettingsDialogState
     );
     try {
       await client.testConnection();
-      if (mounted) setState(() => _testResult = 'Connection OK');
+      if (mounted) setState(() => _testResult = '连接成功');
     } catch (error) {
       if (mounted) setState(() => _testResult = error.toString());
     } finally {
@@ -67,6 +67,16 @@ class _DanmakuSettingsDialogState
       if (mounted) setState(() => _testing = false);
     }
   }
+
+  String _statusLabel(DanmakuLoadStatus status) => switch (status) {
+        DanmakuLoadStatus.idle => '空闲',
+        DanmakuLoadStatus.disabled => '已禁用',
+        DanmakuLoadStatus.loading => '加载中',
+        DanmakuLoadStatus.ready => '已就绪',
+        DanmakuLoadStatus.noCredentials => '未配置凭证',
+        DanmakuLoadStatus.noMatch => '未匹配到弹幕',
+        DanmakuLoadStatus.error => '错误',
+      };
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +97,7 @@ class _DanmakuSettingsDialogState
                 children: [
                   const Icon(Icons.chat_bubble_outline_rounded),
                   const SizedBox(width: 8),
-                  Text('Danmaku', style: theme.textTheme.titleLarge),
+                  Text('弹幕设置', style: theme.textTheme.titleLarge),
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
@@ -96,7 +106,7 @@ class _DanmakuSettingsDialogState
                 ],
               ),
               const SizedBox(height: 8),
-              Text('DanDanPlay (弹弹play) · status: ${state.status.name}',
+              Text('弹弹play · 状态：${_statusLabel(state.status)}',
                   style: theme.textTheme.bodySmall),
               if (state.error != null)
                 Padding(
@@ -110,7 +120,7 @@ class _DanmakuSettingsDialogState
                   children: [
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Enable danmaku'),
+                      title: const Text('启用弹幕'),
                       value: settings.enabled,
                       onChanged: (value) {
                         notifier.setEnabled(value);
@@ -122,8 +132,8 @@ class _DanmakuSettingsDialogState
                     TextField(
                       controller: _appId,
                       decoration: const InputDecoration(
-                        labelText: 'DanDanPlay AppId',
-                        hintText: 'Apply at dev.dandanplay.com',
+                        labelText: '弹弹play AppId',
+                        hintText: '在 dev.dandanplay.com 申请',
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (value) =>
@@ -134,7 +144,7 @@ class _DanmakuSettingsDialogState
                       controller: _appSecret,
                       obscureText: true,
                       decoration: const InputDecoration(
-                        labelText: 'DanDanPlay AppSecret',
+                        labelText: '弹弹play AppSecret',
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (value) =>
@@ -152,7 +162,7 @@ class _DanmakuSettingsDialogState
                                       CircularProgressIndicator(strokeWidth: 2),
                                 )
                               : const Icon(Icons.wifi_tethering),
-                          label: const Text('Test connection'),
+                          label: const Text('测试连接'),
                         ),
                         const SizedBox(width: 12),
                         if (_testResult != null)
@@ -168,7 +178,7 @@ class _DanmakuSettingsDialogState
                     ),
                     const Divider(height: 28),
                     _SliderTile(
-                      label: 'Font size',
+                      label: '字体大小',
                       value: settings.fontSize,
                       min: 16,
                       max: 72,
@@ -177,7 +187,7 @@ class _DanmakuSettingsDialogState
                       onChanged: notifier.setFontSize,
                     ),
                     _SliderTile(
-                      label: 'Opacity',
+                      label: '透明度',
                       value: settings.opacity,
                       min: 0.1,
                       max: 1,
@@ -186,16 +196,16 @@ class _DanmakuSettingsDialogState
                       onChanged: notifier.setOpacity,
                     ),
                     _SliderTile(
-                      label: 'Scroll duration',
+                      label: '滚动时长',
                       value: settings.speedSeconds,
                       min: 3,
                       max: 20,
                       divisions: 17,
-                      display: '${settings.speedSeconds.toStringAsFixed(0)}s',
+                      display: '${settings.speedSeconds.toStringAsFixed(0)} 秒',
                       onChanged: notifier.setSpeed,
                     ),
                     _SliderTile(
-                      label: 'Display area',
+                      label: '显示区域',
                       value: settings.displayArea,
                       min: 0.2,
                       max: 1,
@@ -204,27 +214,27 @@ class _DanmakuSettingsDialogState
                       onChanged: notifier.setDisplayArea,
                     ),
                     _SliderTile(
-                      label: 'Time offset',
+                      label: '时间偏移',
                       value: settings.offsetSeconds,
                       min: -15,
                       max: 15,
                       divisions: 60,
-                      display: '${settings.offsetSeconds.toStringAsFixed(1)}s',
+                      display: '${settings.offsetSeconds.toStringAsFixed(1)} 秒',
                       onChanged: notifier.setOffset,
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Text('Chinese conversion'),
+                        const Text('简繁转换'),
                         const Spacer(),
                         DropdownButton<int>(
                           value: settings.chConvert,
                           items: const [
-                            DropdownMenuItem(value: 0, child: Text('Off')),
+                            DropdownMenuItem(value: 0, child: Text('关闭')),
                             DropdownMenuItem(
-                                value: 1, child: Text('Simplified')),
+                                value: 1, child: Text('简体')),
                             DropdownMenuItem(
-                                value: 2, child: Text('Traditional')),
+                                value: 2, child: Text('繁体')),
                           ],
                           onChanged: (value) {
                             if (value != null) notifier.setChConvert(value);
@@ -234,26 +244,26 @@ class _DanmakuSettingsDialogState
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Show scrolling'),
+                      title: const Text('显示滚动弹幕'),
                       value: settings.showScroll,
                       onChanged: notifier.setShowScroll,
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Show top'),
+                      title: const Text('显示顶部弹幕'),
                       value: settings.showTop,
                       onChanged: notifier.setShowTop,
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('Show bottom'),
+                      title: const Text('显示底部弹幕'),
                       value: settings.showBottom,
                       onChanged: notifier.setShowBottom,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Danmaku data provided by 弹弹play开放弹幕网络 (www.dandanplay.com). '
-                      'AppSecret is stored locally; do not share it.',
+                      '弹幕数据由弹弹play开放弹幕网络提供（www.dandanplay.com）。'
+                      'AppSecret 仅保存在本地，请勿分享。',
                       style: theme.textTheme.bodySmall,
                     ),
                   ],
