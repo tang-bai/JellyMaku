@@ -112,6 +112,7 @@ build/
 Thumbs.db
 
 # Logs / temp
+.flutter_tool_state
 *.log
 *.tmp
 

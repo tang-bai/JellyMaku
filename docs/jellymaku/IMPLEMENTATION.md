@@ -1,7 +1,7 @@
 
 # 实施检查清单与证据模板
 
-> 状态：Stage A 核心已构建/验证：Flutter 3.35.7、analyze 0、137 tests（2026-10-20）；Windows release + 启动冒烟、portable zip 于 2026-10-20 重新构建（含弹幕迁移后重建）。
+> 状态：Stage A 核心已构建/验证：Flutter 3.35.7、analyze 0、137 tests（2026-10-21，Fladder develop 合并后）；Windows release 于 2026-10-21 重新构建；portable zip 最近一次为 2026-10-20。
 > 弹幕在 2026-10-20 迁移到 danmu_api：默认公共实例、`/api/v2/match` 自动匹配、URL 拉取、来源标签解析、URL 哈希缓存、移除旧凭证/签名/密钥存储。
 > 真实 Jellyfin/SyncPlay E2E 仍未完成；播放器内真实弹幕加载/切集未验证。
 > 用途：让后续 agent 按清单推进，避免“文档写了但没做”。
@@ -14,7 +14,7 @@
 - [x] 固定 Fladder commit de7b5a2；记录 PR #735 head。
 - [x] 以 PR #735 head 导入 Fladder + SyncPlay，并 merge 文档。
 - [x] 解决 README/.gitignore 冲突；main 已快进到导入提交。
-- [ ] 补最新 develop 合并（仍为 PR #735 head）。
+- [x] 合并最新 develop `de7b5a2a`（分支 `merge/develop-20261021`；冲突：desktop_platform_wrapper/media_control_wrapper/pubspec.lock）。
 - [x] Flutter 3.35.7 到 .flutter；PUB_CACHE 本地。
 - [x] VS BuildTools/Windows SDK/Developer Mode 检查通过。
 - [x] flutter analyze/test 通过（0 issue；137 tests）。
@@ -157,6 +157,25 @@
   - `tools\\pack.ps1 -Version 0.1.0` → `artifacts\\JellyMaku-0.1.0-windows-x64-portable.zip`，90,712,816 bytes，SHA256 `5FFC849F33D8E7216EE93AEC17192EBE7EEDAEEC8A47D97452FA891564B61237`。
   - 启动冒烟：Release exe 运行 8s 正常后手动结束。
 - 未验证：播放器内真实加载/切集/暂停；真实 Jellyfin 媒体；真实混合来源弹幕表现。
+
+### 上游 Fladder develop 合并（2026-10-21）
+
+- 日期：2026-10-21
+- 合并目标：`fladder/develop` = `de7b5a2a23f16f5f3bb164ec0baedf50941e4808`（上游最新，领先基线 18 个提交）
+- 分支：`merge/develop-20261021`（基于 main `06da5e30`，本地；未推送）
+- 冲突解决：
+  - `lib/bootstrap/platform/desktop_platform_wrapper.dart`：保留本地“SMTC 在 bootstrap/runApp 前初始化”，只接收上游的 Windows URL 协议注册（`ensureWindowsProtocolRegistered`）。
+  - `lib/wrappers/media_control_wrapper.dart`：采用上游 `!MultiWindowMediaSession.supported` 判据 + 保留本地 try/catch（SMTC 失败不得中断播放状态订阅）。
+  - `pubspec.lock`：取上游后重新 `flutter pub get`（镜像），锁定新依赖（app_links 等）。
+  - 附带：`multi_window_media_session.dart` 的 SMTC 构造加 try/catch，避免 Hub 初始化被 SMTC 异常打断。
+- 命令（ASCII 路径 `L:\JellyMaku`）：
+  - `.flutter\bin\flutter.bat pub get` → 成功（GitHub 需 `http.version=HTTP/1.1`；见 BUILD_WINDOWS）
+  - `.flutter\bin\dart.bat analyze lib test` → No issues found!
+  - `.flutter\bin\flutter.bat test --no-pub` → **137 tests passed**
+  - `.flutter\bin\flutter.bat build windows --release --no-pub` → √ Built `build\windows\x64\runner\Release\JellyMaku.exe`（71.5s；app.so 2026-10-21 02:24）
+- 结果：通过（静态/单测/构建）；**未做**真实 Jellyfin/播放器内弹幕/SyncPlay 双端 E2E。
+- 已知问题：`dart run build_runner build` 会对全部生成文件产生纯格式化重排（dart_style 差异，170 个文件），本次已回退，仅保留上游自带的生成文件；后续如需再生成需单独评审。
+- 未验证项：上游多窗口媒体会话、深链（app_links）、照片同步 UI 在真实 Jellyfin 下的行为；弹幕/超分/SyncPlay 与上游改动的交互。
 
 ## 4. 禁止事项
 

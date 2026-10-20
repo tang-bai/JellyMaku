@@ -11,7 +11,7 @@
 - main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 项目文档/AGENTS。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
 - Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、137 tests passed；Windows release 重新构建/启动冒烟通过（2026-10-20，含弹幕重构后重建）**。
-- 基线说明：为尽快拿到可运行起点，main 以 PR #735 head 为基线（包含 Fladder + SyncPlay），**尚未合并最新 develop**；Phase A0 仍需补这次合并。
+- 基线说明：main 已含 PR #735 head（Fladder + SyncPlay），并于 2026-10-21 在本地分支 `merge/develop-20261021` 合并 Fladder develop `de7b5a2a`（未推送）。
 - 未验证：真实 Jellyfin 12.2 E2E、播放器内真实弹幕加载/切集、SyncPlay 双客户端、超分画质/性能。
 - 因此：
   - 不要把“计划”当成“已实现”；
@@ -123,7 +123,7 @@ dart analyze lib test
 | 功能 | 状态 |
 |---|---|
 | 文档/AGENTS | 完成；Stage A 报告/BUILD_WINDOWS 已补 |
-| Fladder 源码导入 | 完成（PR #735 head 基线） |
+| Fladder 源码导入 | 完成（PR #735 head + develop de7b5a2a 合并） |
 | Flutter/构建 | 完成：analyze 0、137 tests、Windows release 成功、启动冒烟（含弹幕重构后重建） |
 | SyncPlay | 代码已导入；单测通过；真实双端未联调 |
 | 弹幕 | danmu_api（默认公共实例，可自建）/自动+手动匹配/URL 拉取/合并去重/本地导入/缓存/叠加层/设置已接入；播放器内真实 E2E 未完成 |
@@ -137,7 +137,7 @@ dart analyze lib test
 1. **Bangumi 官方不可达**：api.bgm.tv/next.bgm.tv 超时；api.kazumi.fyi 评论/搜索 401；不要在无代理时宣称评论可用。
 2. **trace.moe 配额**：100/天、并发 1；不要批量/自动上传。
 3. **RTX VSR**：2026-10-20 spike 失败：已加载后切换无变化（0.07/255）；先选 RTX 再重启加载会卡死。media_kit ANGLE/OpenGL 无法直接承载 d3d11vpp；不要把它写成已支持。回退备份：分支 `backup/pre-rtx-vsr`、标签 `backup/pre-rtx-vsr-2026-10-20`。
-4. **PR #735 冲突**：基于旧 develop；合并需解决 settings/player/ARB 冲突。
+4. **PR #735 冲突**：基于旧 develop；2026-10-21 已合并 develop（冲突集中在 desktop_platform_wrapper/media_control_wrapper/pubspec.lock），详见 IMPLEMENTATION。
 5. **中文路径**：Cargokit 生成的 pubspec 会用系统代码页，Dart 无法解析；用 ASCII 路径 + `/utf-8`。
 6. **已推送**：main 已推送 origin（Stage A 基线 `dc1f8d5c`）；RTX 实验分支 `experiment/rtx-vsr` 仅本地保留。后续 push/force-push 仍需用户确认。
 7. **旧实现丢失**：不要从远程“恢复”旧 MPV Shim 代码（远程为空）。

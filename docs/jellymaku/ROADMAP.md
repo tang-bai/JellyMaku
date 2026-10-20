@@ -1,7 +1,7 @@
 
 # 路线图与当前状态
 
-> 更新：2026-10-20。所有状态以实际文件/命令为准；未执行的写“未开始”。
+> 更新：2026-10-21。所有状态以实际文件/命令为准；未执行的写“未开始”。
 
 ## 1. 当前状态
 
@@ -10,9 +10,9 @@
 | 文档集 + AGENTS.md | 完成；Stage A 报告/构建说明已补 | 见 STAGE_A_REPORT/BUILD_WINDOWS |
 | 本地 git 仓库 | 完成 | main 已推送到 origin（e2b3ca7） |
 | 旧 MPV Shim 实现 | 丢失 | 本地/远程均不可恢复；不再作为基座 |
-| Fladder 源码 | 已导入 | PR #735 head 基线；最新 develop 待合并 |
+| Fladder 源码 | 已导入 + 已合并 develop | PR #735 head + Fladder develop `de7b5a2a`（2026-10-21 合并；见 IMPLEMENTATION） |
 | Flutter 工具链 | 完成 | 3.35.7；analyze 0 issue |
-| 构建/单测 | 完成 | Windows release/启动冒烟（10-20 23:38，弹幕迁移后）；137 tests |
+| 构建/单测 | 完成 | Windows release（10-21 02:24，develop 合并后）；137 tests；analyze 0 |
 | 弹幕 | 核心功能已接入；播放器内真实 E2E 未做 | danmu_api（默认公共实例，可自建）/match 自动匹配/URL 拉取/合并去重/本地导入/URL 哈希缓存/叠加层/设置；API 已实测，播放器内未验证 |
 | 超分 | 核心已接入；未验收 | Anime4K Fast/Quality；画质/性能未测 |
 | SyncPlay | 代码+单测；真实双端未做 | PR #735 head；见 PARTY |
@@ -37,7 +37,7 @@
 ## 3. 当前阻塞
 
 1. **已推送**：main 已推送到 origin（e2b3ca7）；后续变更需确认后再 push。
-2. **基线不含最新 develop**：当前为 PR #735 head；Phase A0 仍需 merge/rebase 最新 develop 并解决冲突。
+2. **develop 合并已本地完成**：合并分支 `merge/develop-20261021`，已 analyze/test/build，尚未推送 main；真实 Jellyfin E2E 仍未做。
 3. **真实 Jellyfin E2E 未做**：未下载/启动 Jellyfin 12.2；登录/播放/字幕/seek/切集未验证。
 4. **弹幕播放器内 E2E 未做**：danmu_api 的 search/match/comment 已用 PowerShell 实测 200（6,898 条弹幕），但未在真实 Jellyfin 播放器中验证加载/切集/暂停。
 5. **SyncPlay 真实双端未做**：单测通过；Jellyfin 12.2 WebSocket/时钟误差未验证。
@@ -48,7 +48,7 @@
 ## 4. 下一步（建议顺序）
 
 1. 推送 main 到 origin，确认远程可构建。
-2. 补最新 develop 合并，重新跑 analyze/test/build。
+2. 推送 develop 合并分支前确认；随后做真实 Jellyfin E2E。
 3. 下载/启动 Jellyfin 12.2 + .NET 10 + 测试媒体；做登录/播放/seek/切集/字幕 E2E。
 4. 在播放器内做真实弹幕 E2E（自动/手动匹配、切集、暂停、本地导入）；重新构建 Windows 包。
 5. SyncPlay 双端联调；超分画质/性能验收；安装器/中文 ARB。

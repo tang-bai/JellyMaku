@@ -28,6 +28,7 @@ import 'package:fladder/util/localization_helper.dart';
 import 'package:fladder/wrappers/players/base_player.dart';
 import 'package:fladder/wrappers/players/lib_mdk.dart'
     if (dart.library.html) 'package:fladder/stubs/web/lib_mdk_web.dart';
+import 'package:fladder/wrappers/multi_window_media_session.dart';
 import 'package:fladder/wrappers/players/lib_mpv.dart';
 import 'package:fladder/wrappers/players/native_player.dart';
 import 'package:fladder/wrappers/players/player_states.dart';
@@ -96,20 +97,24 @@ class MediaControlsWrapper extends BaseAudioHandler implements VideoPlayerContro
       if (!kIsWeb && Platform.isAndroid) {
         VideoPlayerControlsCallback.setUp(this);
       }
-      await AudioService.init(
-        builder: () => this,
-        config: const AudioServiceConfig(
-          androidNotificationChannelId: 'nl.jknaapen.fladder.channel.playback',
-          androidNotificationChannelName: 'Media playback',
-          androidNotificationIcon: 'drawable/ic_notification',
-          androidNotificationOngoing: true,
-          androidStopForegroundOnPause: true,
-          rewindInterval: Duration(seconds: 10),
-          fastForwardInterval: Duration(seconds: 15),
-          androidNotificationChannelDescription: "Playback",
-          androidShowNotificationBadge: true,
-        ),
-      );
+      if (MultiWindowMediaSession.supported) {
+        MultiWindowMediaSession.instance.attach(this);
+      } else {
+        await AudioService.init(
+          builder: () => this,
+          config: const AudioServiceConfig(
+            androidNotificationChannelId: 'nl.jknaapen.fladder.channel.playback',
+            androidNotificationChannelName: 'Media playback',
+            androidNotificationIcon: 'drawable/ic_notification',
+            androidNotificationOngoing: true,
+            androidStopForegroundOnPause: true,
+            rewindInterval: Duration(seconds: 10),
+            fastForwardInterval: Duration(seconds: 15),
+            androidNotificationChannelDescription: "Playback",
+            androidShowNotificationBadge: true,
+          ),
+        );
+      }
     }
 
     final player = switch (ref.read(videoPlayerSettingsProvider).wantedPlayer) {
@@ -256,56 +261,59 @@ class MediaControlsWrapper extends BaseAudioHandler implements VideoPlayerContro
   }
 
   void _subscribePlayer() {
+    // MultiWindowMediaSession owns SMTC when it is active; keep the legacy
+    // per-window SMTC only as a fallback, and never let a failure here abort
+    // the playback state subscription below.
     try {
-      if (!kIsWeb && Platform.isWindows) {
-      smtc = SMTCWindows(
-        config: const SMTCConfig(
-          fastForwardEnabled: true,
-          nextEnabled: false,
-          pauseEnabled: true,
-          playEnabled: true,
-          rewindEnabled: true,
-          prevEnabled: false,
-          stopEnabled: true,
-        ),
-      );
-
-      if (smtc != null) {
-        subscriptions.add(
-          smtc!.buttonPressStream.listen((event) {
-            switch (event) {
-              case PressedButton.play:
-                play();
-                break;
-              case PressedButton.pause:
-                pause();
-                break;
-              case PressedButton.fastForward:
-                fastForward();
-                break;
-              case PressedButton.rewind:
-                rewind();
-                break;
-              case PressedButton.stop:
-                stop();
-                break;
-              case PressedButton.previous:
-                skipToPrevious();
-                break;
-              case PressedButton.next:
-                skipToNext();
-                break;
-              case PressedButton.record:
-                break;
-              case PressedButton.channelUp:
-                break;
-              case PressedButton.channelDown:
-                break;
-            }
-          }),
+        if (!kIsWeb && Platform.isWindows && !MultiWindowMediaSession.supported) {
+        smtc = SMTCWindows(
+          config: const SMTCConfig(
+            fastForwardEnabled: true,
+            nextEnabled: false,
+            pauseEnabled: true,
+            playEnabled: true,
+            rewindEnabled: true,
+            prevEnabled: false,
+            stopEnabled: true,
+          ),
         );
-      }
-      }
+
+        if (smtc != null) {
+          subscriptions.add(
+            smtc!.buttonPressStream.listen((event) {
+              switch (event) {
+                case PressedButton.play:
+                  play();
+                  break;
+                case PressedButton.pause:
+                  pause();
+                  break;
+                case PressedButton.fastForward:
+                  fastForward();
+                  break;
+                case PressedButton.rewind:
+                  rewind();
+                  break;
+                case PressedButton.stop:
+                  stop();
+                  break;
+                case PressedButton.previous:
+                  skipToPrevious();
+                  break;
+                case PressedButton.next:
+                  skipToNext();
+                  break;
+                case PressedButton.record:
+                  break;
+                case PressedButton.channelUp:
+                  break;
+                case PressedButton.channelDown:
+                  break;
+              }
+            }),
+          );
+        }
+        }
     } catch (error, stackTrace) {
       smtc = null;
       log('SMTC unavailable: $error\n$stackTrace');
