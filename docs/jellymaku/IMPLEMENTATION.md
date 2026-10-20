@@ -19,7 +19,7 @@
 - [x] VS BuildTools/Windows SDK/Developer Mode 检查通过。
 - [x] flutter analyze/test 通过（0 issue；137 tests）。
 - [x] flutter build windows --release 成功；启动冒烟通过。
-- [ ] 本地 Jellyfin 12.2 + .NET 10 启动；登录/播放测试片。
+- [x] 真实 Jellyfin 12.2（NAS `192.168.8.137:8096`）登录/播放测试片；未在本地启动 Jellyfin/.NET。
 - [ ] third_party/manifest.json 生成；verify-assets 通过。
 
 ### A1/A2 弹幕
@@ -36,7 +36,7 @@
 - [x] 发送弹幕入口已移除（danmu_api 只读；不提供本地回显）。
 - [x] Flutter 叠加层；设置弹窗；播放器入口。
 - [x] 单测/Mock（danmu_api HTTP mock/本地 HttpServer、解析/来源/合并、匹配请求、设置迁移）。
-- [ ] 本地 Jellyfin E2E：主字幕共存/seek/pause/切集。
+- [x] Jellyfin E2E：seek/pause 自动验证；字幕切换/切集/弹幕叠加层由用户手动验证通过（2026-10-21）。
 - [ ] 截图/性能日志（5000 条未压测）。
 
 ### A3 超分
@@ -45,7 +45,7 @@
 - [x] glsl-shaders 应用；失败仅日志回退。
 - [x] 播放器菜单/持久化（独立设置页未做）。
 - [ ] 至少 3 个 profile 截图；性能记录。
-- [ ] RTX VSR spike 结论（可选，不作 v1）。
+- [x] RTX VSR 结论：spike 失败已回退（`backup/pre-rtx-vsr`），v1 不做。
 
 ### A4 SyncPlay
 
