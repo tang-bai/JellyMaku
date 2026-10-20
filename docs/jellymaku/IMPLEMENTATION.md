@@ -27,7 +27,7 @@
 - [x] lib/danmaku 核心；DDP 签名/错误/缓存。
 - [x] 自动匹配（标题+集号→search/episodes 第一条候选）。
 - [x] 手动匹配：三步对话框（搜索番剧→分集→应用），mapping.json 持久化，可清除。
-- [x] 来源过滤：p[3] → BiliBili/Gamer/弹弹play 自有，绘制层实时开关。
+- [x] 移除错误的三分支来源过滤：实测 p[3] 是 uid，DDP 不提供来源标签；只保留本地导入开关。
 - [x] 合并重复弹幕：归一化（全角/空白/符号/重复字符）+5 秒窗口 +「xN」顶部白字。
 - [x] 实时过滤：类型/来源开关无需重载；解析类设置 300ms 防抖重载。
 - [x] 样式：颜色开关、描边（独立 stroke TextPainter）、显示区域/透明度/字号/速度/偏移。
@@ -125,10 +125,10 @@
 ### Windows release 重建（2026-10-20）
 
 - 命令（ASCII 路径 `L:\JellyMaku`）：
-  - `.flutter\bin\flutter.bat build windows --release --no-pub` → √ Built `build\windows\x64\runner\Release\JellyMaku.exe`（111.5s；移除发送入口、折叠 AppId 后重建）
-  - `tools\pack.ps1 -Version 0.1.0` → `artifacts\JellyMaku-0.1.0-windows-x64-portable.zip`（90,722,301 bytes，SHA256 `7DA17389816C212A164E7F2EF400CDA8054FD568B84BED0B270A4B663B907E55`）
+  - `.flutter\bin\flutter.bat build windows --release --no-pub` → √ Built `build\windows\x64\runner\Release\JellyMaku.exe`（119.7s；移除按站来源过滤后重建）
+  - `tools\pack.ps1 -Version 0.1.0` → `artifacts\JellyMaku-0.1.0-windows-x64-portable.zip`（90,723,621 bytes，SHA256 `081FB4FCF0B826FF418EEB16A461CADAEBCF3C7C041B43A21C4FA7D3B6A6110B`）
   - 启动冒烟：portable exe 启动 8 秒未退出，随后手动结束。
-- 证据：`data\app.so` 时间 2026-10-20 20:16；zip 20:17。
+- 证据：`data\app.so` 时间 2026-10-20 20:26；zip 20:28。
 - 注意：`JellyMaku.exe` 本体未变（runner 未改），新 Dart 代码在 `data\app.so`；只替换 exe 不会更新界面。
 
 ## 4. 禁止事项

@@ -19,9 +19,6 @@ class DanmakuSettingsModel {
   final bool showScroll;
   final bool showTop;
   final bool showBottom;
-  final bool showBiliBiliSource;
-  final bool showGamerSource;
-  final bool showDanDanPlaySource;
   final bool showLocalSource;
   final bool mergeDuplicates;
   final bool showColor;
@@ -49,9 +46,6 @@ class DanmakuSettingsModel {
     this.showScroll = true,
     this.showTop = true,
     this.showBottom = true,
-    this.showBiliBiliSource = true,
-    this.showGamerSource = true,
-    this.showDanDanPlaySource = true,
     this.showLocalSource = true,
     this.mergeDuplicates = false,
     this.showColor = true,
@@ -85,9 +79,6 @@ class DanmakuSettingsModel {
     bool? showScroll,
     bool? showTop,
     bool? showBottom,
-    bool? showBiliBiliSource,
-    bool? showGamerSource,
-    bool? showDanDanPlaySource,
     bool? showLocalSource,
     bool? mergeDuplicates,
     bool? showColor,
@@ -116,9 +107,6 @@ class DanmakuSettingsModel {
       showScroll: showScroll ?? this.showScroll,
       showTop: showTop ?? this.showTop,
       showBottom: showBottom ?? this.showBottom,
-      showBiliBiliSource: showBiliBiliSource ?? this.showBiliBiliSource,
-      showGamerSource: showGamerSource ?? this.showGamerSource,
-      showDanDanPlaySource: showDanDanPlaySource ?? this.showDanDanPlaySource,
       showLocalSource: showLocalSource ?? this.showLocalSource,
       mergeDuplicates: mergeDuplicates ?? this.mergeDuplicates,
       showColor: showColor ?? this.showColor,
@@ -148,9 +136,6 @@ class DanmakuSettingsModel {
       'showScroll': showScroll,
       'showTop': showTop,
       'showBottom': showBottom,
-      'showBiliBiliSource': showBiliBiliSource,
-      'showGamerSource': showGamerSource,
-      'showDanDanPlaySource': showDanDanPlaySource,
       'showLocalSource': showLocalSource,
       'mergeDuplicates': mergeDuplicates,
       'showColor': showColor,
@@ -199,9 +184,6 @@ class DanmakuSettingsModel {
       showScroll: json['showScroll'] as bool? ?? true,
       showTop: json['showTop'] as bool? ?? true,
       showBottom: json['showBottom'] as bool? ?? true,
-      showBiliBiliSource: json['showBiliBiliSource'] as bool? ?? true,
-      showGamerSource: json['showGamerSource'] as bool? ?? true,
-      showDanDanPlaySource: json['showDanDanPlaySource'] as bool? ?? true,
       showLocalSource: json['showLocalSource'] as bool? ?? true,
       mergeDuplicates: json['mergeDuplicates'] as bool? ?? false,
       showColor: json['showColor'] as bool? ?? true,

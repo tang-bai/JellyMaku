@@ -105,15 +105,6 @@ class DanmakuSettingsNotifier extends StateNotifier<DanmakuSettingsModel> {
 
   void setShowBottom(bool value) => _apply(state.copyWith(showBottom: value));
 
-  void setShowBiliBiliSource(bool value) =>
-      _apply(state.copyWith(showBiliBiliSource: value));
-
-  void setShowGamerSource(bool value) =>
-      _apply(state.copyWith(showGamerSource: value));
-
-  void setShowDanDanPlaySource(bool value) =>
-      _apply(state.copyWith(showDanDanPlaySource: value));
-
   void setShowLocalSource(bool value) =>
       _apply(state.copyWith(showLocalSource: value));
 

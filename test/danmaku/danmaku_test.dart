@@ -138,29 +138,24 @@ void main() {
       expect(comments.length, 1);
     });
 
-    test('parses related sources from p[3] and filters them live', () {
+    test('treats DDP comments as one aggregated source', () {
+      // 实测 DDP 的 p[3] 是十六进制用户 id，不是 BiliBili/Gamer 标签；
+      // 因此不能在客户端按站过滤，只保留 uid 给屏蔽使用。
       final comments = parseDanmakuComments(
         const [
-          DdpComment(cid: 1, p: '1.0,1,16777215,BiliBili', m: 'from bili'),
-          DdpComment(cid: 2, p: '2.0,1,16777215,Gamer', m: 'from gamer'),
-          DdpComment(cid: 3, p: '3.0,1,16777215,user9', m: 'native'),
+          DdpComment(cid: 1, p: '1.0,1,16777215,8c93d287', m: 'a'),
+          DdpComment(cid: 2, p: '2.0,1,16777215,7eb092f1', m: 'b'),
+          DdpComment(cid: 3, p: '3.0,1,16777215,3bfc25ea', m: 'c'),
         ],
         const DanmakuSettingsModel(),
       );
 
-      expect(comments.map((c) => c.source), [
-        DanmakuSource.biliBili,
-        DanmakuSource.gamer,
-        DanmakuSource.danDanPlay,
-      ]);
+      expect(comments.map((c) => c.source).toSet(), {DanmakuSource.danDanPlay});
+      expect(comments.first.uid, '8c93d287');
 
-      const hiddenBili = DanmakuSettingsModel(showBiliBiliSource: false);
-      expect(isDanmakuVisible(comments[0], hiddenBili), isFalse);
-      expect(isDanmakuVisible(comments[1], hiddenBili), isTrue);
-
-      const onlyRelated = DanmakuSettingsModel(showDanDanPlaySource: false);
-      expect(isDanmakuVisible(comments[2], onlyRelated), isFalse);
-      expect(isDanmakuVisible(comments[0], onlyRelated), isTrue);
+      // 关掉本地导入不会影响在线聚合弹幕。
+      const localHidden = DanmakuSettingsModel(showLocalSource: false);
+      expect(isDanmakuVisible(comments.first, localHidden), isTrue);
     });
 
     test('local import comments follow showLocalSource', () {
@@ -223,8 +218,6 @@ void main() {
 
     test('round-trips source/style options', () {
       const settings = DanmakuSettingsModel(
-        showBiliBiliSource: false,
-        showGamerSource: false,
         showLocalSource: false,
         mergeDuplicates: true,
         showColor: false,
@@ -233,9 +226,6 @@ void main() {
       );
       final restored = DanmakuSettingsModel.fromJson(settings.toJson());
 
-      expect(restored.showBiliBiliSource, isFalse);
-      expect(restored.showGamerSource, isFalse);
-      expect(restored.showDanDanPlaySource, isTrue);
       expect(restored.mergeDuplicates, isTrue);
       expect(restored.showColor, isFalse);
       expect(restored.showLocalSource, isFalse);

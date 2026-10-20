@@ -11,22 +11,12 @@ enum DanmakuMode {
 
 /// 弹幕来源。
 ///
-/// 弹弹play 在 `withRelated=true` 时会把第三方站点的弹幕合并进同一个响应，
-/// 并用 `p` 的第 4 段标记来源（BiliBili / Gamer）；没有标记的条目属于
-/// 弹弹play 自有库。这里按 Kazumi 的口径归一为三类，其余一律算弹弹play。
+/// 实测弹弹play `withRelated=true` 的响应里，`p` 的第 4 段是用户 id（十六进制），
+/// 不是 BiliBili/Gamer 标签；第三方弹幕已经被聚合进同一列表，客户端无法按站过滤。
+/// 因此这里只区分“在线聚合”与“本地导入”。
 enum DanmakuSource {
-  biliBili,
-  gamer,
   danDanPlay,
   local,
-}
-
-DanmakuSource parseDanmakuSource(String raw) {
-  final value = raw.toLowerCase();
-  if (value.contains('bilibili')) return DanmakuSource.biliBili;
-  if (value.contains('gamer')) return DanmakuSource.gamer;
-  if (value.contains('local')) return DanmakuSource.local;
-  return DanmakuSource.danDanPlay;
 }
 
 class DanmakuComment {

@@ -378,28 +378,9 @@ class _DanmakuSettingsDialogState
                     Text('弹幕来源', style: theme.textTheme.titleSmall),
                     const SizedBox(height: 4),
                     Text(
-                      '弹弹play 会把第三方站点弹幕合并进同一条响应，'
-                      '这里只控制显示，不额外发请求。',
+                      'BiliBili / 巴哈等第三方弹幕由弹弹play 在 withRelated 响应里'
+                      '聚合返回，客户端无法按站单独开关；这里只控制本地导入。',
                       style: theme.textTheme.bodySmall,
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('BiliBili'),
-                      value: settings.showBiliBiliSource,
-                      onChanged: notifier.setShowBiliBiliSource,
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Gamer（巴哈动画疯）'),
-                      value: settings.showGamerSource,
-                      onChanged: notifier.setShowGamerSource,
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('弹弹play 自有'),
-                      subtitle: const Text('关闭时只保留 BiliBili / Gamer 来源'),
-                      value: settings.showDanDanPlaySource,
-                      onChanged: notifier.setShowDanDanPlaySource,
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,

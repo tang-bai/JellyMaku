@@ -2,7 +2,7 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：**v0.1.0-beta.2** Windows Beta 已发布（analyze 0 issue；117 tests passed）；GitHub main 持续更新；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入；弹幕手动匹配/来源过滤/本地导入已接入；AppId 高级可选。
+> 状态：**v0.1.0-beta.2** Windows Beta 已发布（analyze 0 issue；117 tests passed）；GitHub main 持续更新；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入；弹幕手动匹配/本地导入已接入；DDP 无来源标签；AppId 高级可选。
 > 日期：2026-10-20。
 
 ## 0. 当前仓库状态（必须先理解）
@@ -126,7 +126,7 @@ dart analyze lib test
 | Fladder 源码导入 | 完成（PR #735 head 基线） |
 | Flutter/构建 | 完成：analyze 0、117 tests、Windows release 成功、启动冒烟 |
 | SyncPlay | 代码已导入；单测通过；真实双端未联调 |
-| 弹幕 | DDP/自动+手动匹配/来源过滤/合并去重/本地 XML·JSON 导入/缓存/叠加层/设置/DPAPI（AppId 高级可选）已接入；真实联调未完成 |
+| 弹幕 | DDP/自动+手动匹配/合并去重/本地 XML·JSON 导入/缓存/叠加层/设置/DPAPI（AppId 高级可选）已接入；DDP 无来源标签；真实联调未完成 |
 | 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；117 tests；画质/性能未验收 |
 | 品牌/打包 | JellyMaku exe/窗口/资源；portable zip；安装器/中文 ARB 未完成 |
 | Bangumi 时间表/图片/评论 | 未开始 |
@@ -149,8 +149,8 @@ dart analyze lib test
 13. **桌面点击暂停不能重复切换**：不要同时监听 `onHorizontalDragDown` 和 `onTap` 调用 `playOrPause`/`userPlayOrPause`；一次点击会切换两次，表现为点中间不暂停。
 14. **弹幕要用独立显示时钟**：暂停/缓冲时冻结显示时间；恢复播放从冻结值继续，不要直接跳回 provider 的 raw position（会产生回拉）。不要逐帧做漂移校正（会让速度忽快忽慢）；provider 位置只用于大 seek 对齐。
 15. **弹幕渲染要缓存**：轨道分配与带颜色的 TextPainter 必须缓存；每帧重排全部评论/重新 layout 文本会造成帧时间不稳，看起来像弹幕在跳动。
-16. **DDP 来源字段语义**：`withRelated=true` 时 `p[3]` 可能是来源标签（BiliBili/Gamer）而非用户 id；解析时两者都保留，来源过滤必须放在绘制层实时判断，否则切换开关要重新请求。真实响应需用凭证再确认一次。
-17. **弹幕设置分两类**：时间偏移/屏蔽词/合并/条数会改变解析结果，必须防抖重载（300ms）；字号/颜色/描边/来源与类型开关只影响绘制，直接重绘，不要触发网络或解析。
+16. **DDP 来源字段语义（已实测）**：`withRelated=true` 的响应里 `p[3]` 是十六进制用户 id，不是 BiliBili/Gamer 标签；第三方弹幕已被聚合进同一列表。不要再做“按站过滤”或“关闭弹弹play 就只剩 B 站/巴哈”的 UI。
+17. **弹幕设置分两类**：时间偏移/屏蔽词/合并/条数会改变解析结果，必须防抖重载（300ms）；字号/颜色/描边/类型与本地开关只影响绘制，直接重绘，不要触发网络或解析。
 18. **本地导入的边界**：`localFile` 优先于 DDP 与手动映射，且不需要凭证；AppId/AppSecret 默认折叠在「高级」里，普通用户无需填写；不提供发送弹幕（DDP 无发送 API）。
 
 ## 11. 文档索引

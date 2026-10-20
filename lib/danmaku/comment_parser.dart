@@ -49,7 +49,6 @@ List<DanmakuComment> parseDanmakuComments(
     final adjusted = time + settings.offsetSeconds + shift;
     if (adjusted < 0) continue;
 
-    final source = parseDanmakuSource(rawField);
     final key = '$rawField|$adjusted|$text';
     if (!seen.add(key)) continue;
 
@@ -59,7 +58,6 @@ List<DanmakuComment> parseDanmakuComments(
       color: _color(color),
       uid: rawField,
       text: text,
-      source: source,
     ));
   }
 
@@ -95,12 +93,10 @@ bool isDanmakuVisible(
     DanmakuMode.bottom => settings.showBottom,
   };
   if (!modeVisible) return false;
-  return switch (comment.source) {
-    DanmakuSource.biliBili => settings.showBiliBiliSource,
-    DanmakuSource.gamer => settings.showGamerSource,
-    DanmakuSource.danDanPlay => settings.showDanDanPlaySource,
-    DanmakuSource.local => settings.showLocalSource,
-  };
+  // 在线弹幕无法按站过滤（DDP 不提供来源标签），只保留本地导入开关。
+  return comment.source == DanmakuSource.local
+      ? settings.showLocalSource
+      : true;
 }
 
 List<DanmakuComment> _mergeRepeated(List<DanmakuComment> comments) {

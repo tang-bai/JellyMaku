@@ -226,9 +226,7 @@ class DanmakuPainter extends CustomPainter {
       settings.showScroll,
       settings.showTop,
       settings.showBottom,
-      settings.showBiliBiliSource,
-      settings.showGamerSource,
-      settings.showDanDanPlaySource,
+      settings.showLocalSource,
     );
     var layout = _laneCache[laneKey];
     if (layout == null) {
