@@ -7,24 +7,28 @@ enum VideoEnhancementProfile {
   off,
   anime4kFast,
   anime4kQuality,
+  anime4kStrong,
+  anime4k4x,
 }
 
 extension VideoEnhancementProfileDetails on VideoEnhancementProfile {
   String get label {
     return switch (this) {
-      VideoEnhancementProfile.off => 'Off',
-      VideoEnhancementProfile.anime4kFast => 'Anime4K Fast (2x)',
-      VideoEnhancementProfile.anime4kQuality => 'Anime4K Quality (2x)',
+      VideoEnhancementProfile.off => 'Off / 关闭',
+      VideoEnhancementProfile.anime4kFast => 'Fast 2x / 快速',
+      VideoEnhancementProfile.anime4kQuality => 'Balanced 2x / 均衡',
+      VideoEnhancementProfile.anime4kStrong => 'Strong 2x / 强修复',
+      VideoEnhancementProfile.anime4k4x => '4x / 极致',
     };
   }
 
   String get description {
     return switch (this) {
-      VideoEnhancementProfile.off => 'Native video output',
-      VideoEnhancementProfile.anime4kFast =>
-        'Clamp + CNN upscale; low GPU cost',
-      VideoEnhancementProfile.anime4kQuality =>
-        'Clamp + restore + CNN upscale; higher GPU cost',
+      VideoEnhancementProfile.off => '原始画面',
+      VideoEnhancementProfile.anime4kFast => '2 倍放大，性能优先',
+      VideoEnhancementProfile.anime4kQuality => '2 倍标准修复，均衡',
+      VideoEnhancementProfile.anime4kStrong => '2 倍强修复，线条更锐',
+      VideoEnhancementProfile.anime4k4x => '4 倍放大，细节最多',
     };
   }
 
@@ -39,6 +43,17 @@ extension VideoEnhancementProfileDetails on VideoEnhancementProfile {
           'assets/shaders/anime4k/Anime4K_Clamp_Highlights.glsl',
           'assets/shaders/anime4k/Anime4K_Restore_CNN_M.glsl',
           'assets/shaders/anime4k/Anime4K_Upscale_CNN_x2_M.glsl',
+        ],
+      VideoEnhancementProfile.anime4kStrong => const [
+          'assets/shaders/anime4k/Anime4K_Clamp_Highlights.glsl',
+          'assets/shaders/anime4k/Anime4K_Restore_CNN_L.glsl',
+          'assets/shaders/anime4k/Anime4K_Upscale_CNN_x2_M.glsl',
+        ],
+      VideoEnhancementProfile.anime4k4x => const [
+          'assets/shaders/anime4k/Anime4K_Clamp_Highlights.glsl',
+          'assets/shaders/anime4k/Anime4K_Restore_CNN_M.glsl',
+          'assets/shaders/anime4k/Anime4K_Upscale_CNN_x2_M.glsl',
+          'assets/shaders/anime4k/Anime4K_Upscale_CNN_x2_M_2.glsl',
         ],
     };
   }

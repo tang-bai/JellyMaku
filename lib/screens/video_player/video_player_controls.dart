@@ -458,7 +458,7 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                     ),
                   ),
                   PopupMenuButton<VideoEnhancementProfile>(
-                    tooltip: 'Super resolution',
+                    tooltip: 'Super resolution / 超分',
                     icon: const Icon(Icons.auto_awesome),
                     onSelected: (profile) {
                       ref.read(videoEnhancementProvider.notifier).setProfile(profile);
