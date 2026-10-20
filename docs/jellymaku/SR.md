@@ -24,11 +24,11 @@
 
 | profile | 菜单文案 | 说明 |
 |---|---|---|
-| off | Off / 关闭 | 原始画面，清空 glsl-shaders |
-| anime4kFast | Fast 2x / 快速 | Clamp + M upscale；性能优先 |
-| anime4kQuality | Balanced 2x / 均衡 | Clamp + M restore + M upscale；画质/性能均衡 |
-| anime4kStrong | Strong 2x / 强修复 | Clamp + L restore + M upscale；线条更锐，GPU 占用更高 |
-| anime4k4x | 4x / 极致 | Clamp + M restore + M upscale + M upscale；两次 2x，GPU 占用最高 |
+| off | Off / 关闭 | 原始画面 · 不使用模型，清空 glsl-shaders |
+| anime4kFast | Fast 2x / 快速 | Anime4K Upscale CNN x2 M |
+| anime4kQuality | Balanced 2x / 均衡 | Anime4K Restore CNN M + Upscale CNN x2 M |
+| anime4kStrong | Strong 2x / 强修复 | Anime4K Restore CNN L + Upscale CNN x2 M |
+| anime4k4x | 4x / 极致 | Anime4K Restore CNN M + Upscale CNN x2 M ×2 |
 
 默认 off。切换即时生效；libmpv 拒绝 shader 时沿用原输出，不阻塞播放。4x 在 1440p/4K 输出上开销很大，低端 GPU 可能掉帧。
 

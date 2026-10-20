@@ -24,11 +24,14 @@ extension VideoEnhancementProfileDetails on VideoEnhancementProfile {
 
   String get description {
     return switch (this) {
-      VideoEnhancementProfile.off => '原始画面',
-      VideoEnhancementProfile.anime4kFast => '2 倍放大，性能优先',
-      VideoEnhancementProfile.anime4kQuality => '2 倍标准修复，均衡',
-      VideoEnhancementProfile.anime4kStrong => '2 倍强修复，线条更锐',
-      VideoEnhancementProfile.anime4k4x => '4 倍放大，细节最多',
+      VideoEnhancementProfile.off => '原始画面 · 不使用模型',
+      VideoEnhancementProfile.anime4kFast => '2 倍放大 · Anime4K Upscale CNN x2 M',
+      VideoEnhancementProfile.anime4kQuality =>
+        '2 倍修复 · Anime4K Restore CNN M + Upscale CNN x2 M',
+      VideoEnhancementProfile.anime4kStrong =>
+        '2 倍强修复 · Anime4K Restore CNN L + Upscale CNN x2 M',
+      VideoEnhancementProfile.anime4k4x =>
+        '4 倍放大 · Anime4K Restore CNN M + Upscale CNN x2 M ×2',
     };
   }
 

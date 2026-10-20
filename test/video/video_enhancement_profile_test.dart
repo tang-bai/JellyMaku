@@ -30,6 +30,10 @@ void main() {
       );
       expect(VideoEnhancementProfile.anime4k4x.label, contains('4x'));
       expect(VideoEnhancementProfile.anime4k4x.description, contains('4 倍'));
+      expect(
+        VideoEnhancementProfile.anime4k4x.description,
+        contains('Restore CNN M + Upscale CNN x2 M ×2'),
+      );
     });
 
     test('user-facing labels and descriptions are present', () {
@@ -39,6 +43,14 @@ void main() {
       }
       expect(VideoEnhancementProfile.anime4kQuality.label, contains('均衡'));
       expect(VideoEnhancementProfile.anime4kStrong.label, contains('强修复'));
+      expect(
+        VideoEnhancementProfile.anime4kStrong.description,
+        contains('Restore CNN L'),
+      );
+      expect(
+        VideoEnhancementProfile.anime4kQuality.description,
+        contains('Restore CNN M'),
+      );
     });
   });
 }
