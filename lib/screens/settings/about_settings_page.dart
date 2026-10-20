@@ -55,6 +55,19 @@ class AboutSettingsPage extends ConsumerWidget {
             Text(context.localized.aboutBuild(applicationInfo.buildNumber)),
             const SizedBox(height: 16),
             Text(context.localized.aboutCreatedBy),
+            const SizedBox(height: 8),
+            Text(
+              context.localized.aboutFladderOrigin,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            TextButton(
+              onPressed: () => launchUrl(
+                context,
+                'https://github.com/DonutWare/Fladder',
+              ),
+              child: Text(context.localized.aboutFladderRepoLabel),
+            ),
           ],
         ),
         const FractionallySizedBox(

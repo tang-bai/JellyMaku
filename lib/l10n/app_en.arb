@@ -971,7 +971,7 @@
   "@settingsBlurredPlaceholderTitle": {},
   "settingsClientDesc": "General, Time-out, Layout, Theme",
   "@settingsClientDesc": {},
-  "settingsClientTitle": "Fladder",
+  "settingsClientTitle": "JellyMaku",
   "@settingsClientTitle": {},
   "settingsContinue": "Continue",
   "@settingsContinue": {},
@@ -1564,7 +1564,7 @@
   "libraryShuffleAndPlayItems": "Shuffle and play items",
   "libraryPlayItems": "Play items",
   "clientSettingsShowAllCollectionsTitle": "Show all collection types",
-  "clientSettingsShowAllCollectionsDesc": "When enabled, show all collection types, including those not supported by Fladder",
+  "clientSettingsShowAllCollectionsDesc": "When enabled, show all collection types, including those not supported by JellyMaku",
   "stop": "Stop",
   "resumeVideo": "Resume video",
   "closeVideo": "Close video",
@@ -1644,9 +1644,9 @@
   "segmentActionSkipOnce": "Skip once",
   "segmentActionSkip": "Skip",
   "loading": "Loading",
-  "exitFladderTitle": "Exit Fladder",
-  "exitFladderDesc": "Are you sure you want to close Fladder?",
-  "quitMultipleWindowsDesc": "You have {count} windows open. Quitting Fladder will close all of them. Do you want to continue?",
+  "exitFladderTitle": "Exit JellyMaku",
+  "exitFladderDesc": "Are you sure you want to close JellyMaku?",
+  "quitMultipleWindowsDesc": "You have {count} windows open. Quitting JellyMaku will close all of them. Do you want to continue?",
   "@quitMultipleWindowsDesc": {
     "placeholders": {
       "count": {
@@ -1877,7 +1877,7 @@
   "playerSettingsScreensaverDesc": "Select screen saver that will be shown after no player activity",
   "settingsLocalUrlTitle": "Local Jellyfin URL",
   "settingsLocalUrlSetTitle": "Configure Local Jellyfin URL",
-  "settingsLocalUrlSetDesc": "Specify the local Jellyfin address. Fladder will automatically use this URL when your device is on the same network.",
+  "settingsLocalUrlSetDesc": "Specify the local Jellyfin address. JellyMaku will automatically use this URL when your device is on the same network.",
   "localNetworkPermissionRequest": "Allow local network access to discover servers.",
   "requestPermission": "Request Permission",
   "localNetworkPermissionDenied": "Local network access is required. Enable devices nearby permission in system settings.",
@@ -2833,7 +2833,7 @@
     }
   },
   "notificationTimerIOSWarning": " iOS decides when/if updates actually run, notifications may be delayed or not show up at all.",
-  "batteryOptimizationDesc": "Battery optimizations may delay background notifications for Fladder.\nTap to open system settings and disable optimizations for Fladder to improve notification reliability.",
+  "batteryOptimizationDesc": "Battery optimizations may delay background notifications for JellyMaku.\nTap to open system settings and disable optimizations for JellyMaku to improve notification reliability.",
   "@batteryOptimizationDesc": {},
   "updateCheckInterval": "Update check interval",
   "updateCheckIntervalDesc": "How often the background task runs",
@@ -3195,4 +3195,9 @@
       "visible": { "type": "int" }
     }
   }
+,
+  "aboutFladderOrigin": "JellyMaku is a derivative work based on Fladder (GPL-3.0) by DonutWare. Upstream project and source:",
+  "@aboutFladderOrigin": {},
+  "aboutFladderRepoLabel": "github.com/DonutWare/Fladder",
+  "@aboutFladderRepoLabel": {}
 }
