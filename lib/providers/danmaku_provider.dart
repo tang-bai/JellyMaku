@@ -171,12 +171,38 @@ class DanmakuController extends StateNotifier<DanmakuState> {
         appSecret: settings.appSecret,
       );
 
-      final match = await matchDanmaku(
+      var match = await matchDanmaku(
         client,
         media,
         manual: manual,
         settings: settings,
       );
+      if (generation != _generation) return;
+
+      // 旧 mapping 可能只有 episodeId 没有 url（官方 DDP 时代写入），
+      // 自建服务器上 id 路由常 404；重新搜索一次，拿带 http(s) 的分集。
+      if (customServer &&
+          !match.url.trim().startsWith('http') &&
+          media.searchTitle.trim().isNotEmpty) {
+        final candidates = await client.searchEpisodes(
+          media.searchTitle,
+          media.episodeNumber,
+        );
+        final withUrl = candidates.where(
+          (candidate) => candidate.url.trim().startsWith('http'),
+        );
+        if (withUrl.isNotEmpty) {
+          final candidate = withUrl.first;
+          match = DanmakuMatch(
+            episodeId: candidate.episodeId,
+            animeTitle: candidate.animeTitle,
+            episodeTitle: candidate.episodeTitle,
+            shift: candidate.shift,
+            source: 'search',
+            url: candidate.url,
+          );
+        }
+      }
       if (generation != _generation) return;
 
       // URL 型结果（danmu_api）的 episodeId 只在该服务器内有意义，

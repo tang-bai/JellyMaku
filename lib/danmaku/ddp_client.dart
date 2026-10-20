@@ -97,10 +97,8 @@ class DdpClient {
       final bodyMessage = data?['errorMessage'] ?? data?['message'];
       final retryAfter = int.tryParse(response.headers['retry-after'] ?? '');
       throw DanmakuException(
-        (headerMessage ??
-                bodyMessage ??
-                'DanDanPlay request failed (${response.statusCode})')
-            .toString(),
+        '${headerMessage ?? bodyMessage ?? 'DanDanPlay request failed (${response.statusCode})'}'
+        '（${uri.path}）',
         statusCode: response.statusCode,
         retryAfterSeconds: retryAfter,
       );
