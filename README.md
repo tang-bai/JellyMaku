@@ -1,9 +1,9 @@
 
 # JellyMaku
 
-> 状态：Stage A 核心已构建（Windows release 可启动；analyze 0 issue；100 tests passed）；已推送 GitHub（2026-10-19）
+> 状态：Stage A 核心已构建（Windows release 可启动；analyze 0 issue；103 tests passed）；已推送 GitHub（2026-10-20）
 > 目标基座：DonutWare/Fladder（Flutter/Dart，GPL-3.0）
-> 当前仓库：main 已包含 Fladder + PR #735 + Stage A 代码；已推送 origin（e2b3ca7）。
+> 当前仓库：main 已包含 Fladder + PR #735 + Stage A 代码；已推送 origin（最新提交见 git log）。
 
 JellyMaku 是面向 Windows 10/11 的 Jellyfin 桌面播放器，基于 Fladder 二次开发，计划提供：
 

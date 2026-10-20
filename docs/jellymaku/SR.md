@@ -1,7 +1,7 @@
 
 # 视频超分设计（GLSL shader）
 
-> 状态：v1 核心已实现（Anime4K Fast/Quality + glsl-shaders + 菜单）；画质/性能验收未做；RTX VSR spike 已测试并回退（2026-10-20）。
+> 状态：v1 核心已实现（Anime4K Fast/Balanced/Strong/4x + glsl-shaders + 菜单）；2026-10-20 增加 Strong/4x 并用 103 个测试验证；完整画质/性能验收未做；RTX VSR spike 已测试并回退。
 > 目标：在 Fladder/media_kit 的 libmpv 上提供可切换的 Anime4K/FSRCNNX/ArtCNN 超分；RTX VSR 不作为 v1 验收。
 
 ## 1. 背景与限制
@@ -15,24 +15,22 @@
 
 - 来源：iwalton3/default-shader-pack v3.0.0（GPL-3.0）与 Anime4K（MIT）/FSRCNNX/ArtCNN 各自许可。
 - 只取需要的文件：
-  - Anime4K high：Clamp_Highlights、Restore/Upscale CNN、AutoDownscalePre 等。
-  - Anime4K fast：fast 版本。
+  - Anime4K：Clamp_Highlights、Restore_CNN_M/L、Upscale_CNN_x2_M（4x 用第二份 M 资产做第二遍 2x）。
   - FSRCNNX：x2 shader。
   - ArtCNN：基础/Sharp/High。
 - 放 assets/shaders/<profile>/；保留 LICENSE/来源；加入 THIRD_PARTY_NOTICES。
 
 ## 3. profile
 
-| profile | 用途 | 说明 |
+| profile | 菜单文案 | 说明 |
 |---|---|---|
-| off | 关闭 | 清空 glsl-shaders |
-| anime4kHighA/B/C | 动画高质量 | A 模糊/压缩，B 模糊/振铃，C 锐利 |
-| anime4kFastA | 动画高性能 | 低功耗 |
-| artcnn | 通用 | 轻量 CNN |
-| fsrcnnx | 真人/通用 | 细节增强 |
-| rtxVsrExperimental | 实验 | 仅 spike；不作为验收 |
+| off | Off / 关闭 | 原始画面，清空 glsl-shaders |
+| anime4kFast | Fast 2x / 快速 | Clamp + M upscale；性能优先 |
+| anime4kQuality | Balanced 2x / 均衡 | Clamp + M restore + M upscale；画质/性能均衡 |
+| anime4kStrong | Strong 2x / 强修复 | Clamp + L restore + M upscale；线条更锐，GPU 占用更高 |
+| anime4k4x | 4x / 极致 | Clamp + M restore + M upscale + M upscale；两次 2x，GPU 占用最高 |
 
-默认：off 或 anime4kHighA（产品决策待定；建议默认 off，设置页推荐）。切换即时生效；失败回退 off。
+默认 off。切换即时生效；libmpv 拒绝 shader 时沿用原输出，不阻塞播放。4x 在 1440p/4K 输出上开销很大，低端 GPU 可能掉帧。
 
 ## 4. 应用方式
 

@@ -2,7 +2,7 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：Stage A 核心已构建（Windows release 可启动；analyze 0 issue；100 tests passed）；已推送 GitHub（Stage A 基线 `dc1f8d5c`；RTX VSR spike 失败已回退）。
+> 状态：Stage A 核心已构建（Windows release 可启动；analyze 0 issue；103 tests passed）；已推送 GitHub（Stage A 基线 `dc1f8d5c`；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入）。
 > 日期：2026-10-19。
 
 ## 0. 当前仓库状态（必须先理解）
@@ -10,7 +10,7 @@
 - 本地 git 已初始化，main 为工作分支；origin https://github.com/tang-bai/JellyMaku 已推送（Stage A 基线 `dc1f8d5c`）。
 - main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 项目文档/AGENTS。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
-- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、100 tests passed、Windows release 构建成功、启动冒烟通过**。
+- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、103 tests passed、Windows release 构建成功、启动冒烟通过**。
 - 基线说明：为尽快拿到可运行起点，main 以 PR #735 head 为基线（包含 Fladder + SyncPlay），**尚未合并最新 develop**；Phase A0 仍需补这次合并。
 - 未验证：真实 Jellyfin 12.2 E2E、真实 DDP 凭证、SyncPlay 双客户端、超分画质/性能。
 - 因此：
@@ -124,10 +124,10 @@ dart analyze lib test
 |---|---|
 | 文档/AGENTS | 完成；Stage A 报告/BUILD_WINDOWS 已补 |
 | Fladder 源码导入 | 完成（PR #735 head 基线） |
-| Flutter/构建 | 完成：analyze 0、100 tests、Windows release 成功、启动冒烟 |
+| Flutter/构建 | 完成：analyze 0、103 tests、Windows release 成功、启动冒烟 |
 | SyncPlay | 代码已导入；单测通过；真实双端未联调 |
 | 弹幕 | DDP 客户端/自动匹配/缓存/叠加层/设置/DPAPI 已接入；手动匹配/本地 XML/真实联调未完成 |
-| 超分 | Anime4K 资产+profile+glsl-shaders+菜单已接入；画质/性能未验收 |
+| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；103 tests；画质/性能未验收 |
 | 品牌/打包 | JellyMaku exe/窗口/资源；portable zip；安装器/中文 ARB 未完成 |
 | Bangumi 时间表/图片/评论 | 未开始 |
 | 推送 GitHub | 完成（基线 dc1f8d5c） |

@@ -20,8 +20,8 @@
 - 可执行文件版本资源：ProductName/FileDescription = JellyMaku；OriginalFilename = JellyMaku.exe。
 - 冒烟：进程启动成功，窗口标题 `JellyMaku`，12 秒后正常关闭（`CloseMainWindow`）。
 - 便携包：`artifacts/JellyMaku-0.1.0-windows-x64-portable.zip`
-  - 大小：90,648,237 bytes（弹幕轨道修复后重打包）
-  - SHA256：`328BF993A2808B71350FDED8CB504DD7DD917F58262C23CA6A7199990B43D0FC`
+  - 大小：90,686,443 bytes（Anime4K Strong/4x 重打包）
+  - SHA256：`4CFF9E228CAF9313A54DB70F215BB1E30F9F5154BAACF749F39F9AB872CB3C9B`
   - 结构：`JellyMaku/JellyMaku.exe` + DLL + `data/` + README/LICENSE/AGENTS。
 
 ## 3. 验证结果
@@ -29,7 +29,7 @@
 | 项目 | 结果 | 证据 |
 |---|---|---|
 | `dart analyze lib test` | 通过，0 issue | `artifacts/logs/analyze-clean.txt` |
-| `flutter test --no-pub` | 100 passed | `artifacts/logs/test-final-2.txt` |
+| `flutter test --no-pub` | 103 passed | `artifacts/logs/test-anime4k-profiles.txt` |
 | `flutter build windows --release --no-pub` | 成功 | `artifacts/logs` / 上述 exe |
 | 应用启动冒烟 | 窗口标题 JellyMaku；正常关闭 | 本报告第 2 节 |
 | DPAPI 密钥往返 | 通过（Windows） | `test/danmaku/secret_store_test.dart` |

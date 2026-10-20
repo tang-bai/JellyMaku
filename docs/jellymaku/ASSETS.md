@@ -38,7 +38,7 @@ artifacts/build/                便携包/安装器
 | MDK SDK | mdk-sdk-windows-x64.7z | third_party/mdk/ | 解压到 FVP pub cache |
 | SQLite | sqlite-autoconf-3520000.tar.gz | third_party/sqlite/ | 本地补丁给 sqlite3_flutter_libs |
 | NuGet | nuget.exe + 3 nupkg | tools/nuget/、third_party/nuget/ | WIL/CppWinRT |
-| Anime4K | Clamp/Restore/Upscale M | assets/shaders/anime4k/ | MIT；已入源码 |
+| Anime4K | Clamp + Restore M/L + Upscale x2 M/L | assets/shaders/anime4k/ | MIT；已入源码；4x 档串联 L+M 两次 2x |
 | Jellyfin | 12.2 amd64 zip | third_party/jellyfin/ | 尚未下载；需要 .NET 10 |
 | .NET runtime | 10.0 win-x64 | third_party/dotnet/ | 尚未下载 |
 | Inno Setup | 6.x | tools/inno/ | 尚未下载；当前 portable zip |
