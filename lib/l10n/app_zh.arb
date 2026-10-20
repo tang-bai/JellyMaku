@@ -1260,6 +1260,7 @@
     "allowMediaConversion": "允许播放需要媒体转换的视频",
     "forceRemoteTranscoding": "强制远程源转码",
     "syncplay": "同步播放",
+    "syncPlay": "一起看",
     "syncplayAccess": "同步播放访问",
     "allowMediaDeletion": "允许删除媒体",
     "allLibraries": "所有媒体库",
