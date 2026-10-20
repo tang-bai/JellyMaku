@@ -147,7 +147,8 @@ dart analyze lib test
 11. **SMTC 初始化竞态**：SMTC 必须在 runApp 前初始化；`_subscribePlayerState` 必须先于可选 SMTC 设置，SMTC 异常不得中断进度订阅。`smtc_windows 1.1.0` 需配 `flutter_rust_bridge 2.11.1`，否则 codegen/runtime 版本检查会失败。
 12. **弹幕轨道必须稳定**：轨道分配要基于完整时间轴，不能每帧只对活动评论重排；否则评论进出窗口时行列会跳动。
 13. **桌面点击暂停不能重复切换**：不要同时监听 `onHorizontalDragDown` 和 `onTap` 调用 `playOrPause`/`userPlayOrPause`；一次点击会切换两次，表现为点中间不暂停。
-14. **弹幕要用独立显示时钟**：暂停/缓冲时冻结显示时间；恢复播放从冻结值继续，不要直接跳回 provider 的 raw position（会产生回拉）。provider 位置只用于漂移的慢速校正 / 大 seek 对齐。
+14. **弹幕要用独立显示时钟**：暂停/缓冲时冻结显示时间；恢复播放从冻结值继续，不要直接跳回 provider 的 raw position（会产生回拉）。不要逐帧做漂移校正（会让速度忽快忽慢）；provider 位置只用于大 seek 对齐。
+15. **弹幕渲染要缓存**：轨道分配与带颜色的 TextPainter 必须缓存；每帧重排全部评论/重新 layout 文本会造成帧时间不稳，看起来像弹幕在跳动。
 
 ## 11. 文档索引
 

@@ -126,26 +126,6 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
         // Resume from the frozen display time; do not count paused time.
         _wasPlaying = true;
       }
-
-      // A normal position update lags the interpolated clock and must not
-      // pull it back. Only correct a genuine forward jump smoothly.
-      final drift = position - _frozenPosition;
-      if (drift > const Duration(milliseconds: 120)) {
-        _frozenPosition += Duration(
-          microseconds: (drift.inMicroseconds * 0.15).round(),
-        );
-      } else if (drift < const Duration(milliseconds: -120)) {
-        if (drift < const Duration(seconds: -2)) {
-          // A real backward seek, not resume lag.
-          _frozenPosition = position;
-        } else {
-          // The provider lags after resume; slow down gently instead of
-          // snapping the comments backwards.
-          _frozenPosition += Duration(
-            microseconds: (drift.inMicroseconds * 0.02).round(),
-          );
-        }
-      }
     } else {
       _wasPlaying = false;
     }
@@ -168,6 +148,19 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
   }
 }
 
+
+class _LaneLayout {
+  const _LaneLayout({
+    required this.scrollLanes,
+    required this.topRows,
+    required this.bottomRows,
+  });
+
+  final List<int> scrollLanes;
+  final List<int> topRows;
+  final List<int> bottomRows;
+}
+
 class DanmakuPainter extends CustomPainter {
   DanmakuPainter({
     required this.comments,
@@ -180,6 +173,7 @@ class DanmakuPainter extends CustomPainter {
   final double time;
 
   static final Map<String, TextPainter> _textCache = {};
+  static final Map<int, _LaneLayout> _laneCache = {};
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -193,9 +187,94 @@ class DanmakuPainter extends CustomPainter {
     final maxDuration = math.max(settings.speedSeconds, 6.0) + 2;
     final startIndex = _lowerBound(comments, time - maxDuration);
 
-    // Assign a stable lane/row to every comment before drawing. Assigning
-    // only the currently visible comments made lanes change whenever an older
-    // comment left the window, which looked like the rows were jumping.
+    // Assign a stable lane/row to every comment before drawing. This is
+    // cached because recomputing thousands of lanes on every frame causes
+    // uneven frame times ("jerky" movement).
+    final laneKey = Object.hash(
+      identityHashCode(comments),
+      comments.length,
+      fontSize,
+      maxLanes,
+      settings.speedSeconds,
+    );
+    var layout = _laneCache[laneKey];
+    if (layout == null) {
+      layout = _buildLaneLayout(comments, settings, maxLanes);
+      if (_laneCache.length > 8) _laneCache.clear();
+      _laneCache[laneKey] = layout;
+    }
+    final scrollLanes = layout.scrollLanes;
+    final topRows = layout.topRows;
+    final bottomRows = layout.bottomRows;
+
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, areaHeight));
+
+    for (var i = startIndex; i < comments.length; i++) {
+      final comment = comments[i];
+      if (comment.time > time) break;
+
+      final duration =
+          comment.mode == DanmakuMode.scroll ? settings.speedSeconds : 4.5;
+      final elapsed = time - comment.time;
+      if (elapsed < 0 || elapsed > duration) continue;
+
+      final textPainter = _layout(comment.text, fontSize, comment.color);
+      final progress = (elapsed / duration).clamp(0.0, 1.0);
+
+      if (comment.mode == DanmakuMode.scroll) {
+        final y = scrollLanes[i] * lineHeight;
+        if (y + lineHeight > areaHeight) continue;
+        final x = size.width - progress * (size.width + textPainter.width);
+        textPainter.paint(canvas, Offset(x, y));
+      } else if (comment.mode == DanmakuMode.top) {
+        final y = topRows[i] * lineHeight;
+        final x = (size.width - textPainter.width) / 2;
+        textPainter.paint(canvas, Offset(x, y));
+      } else {
+        final y = areaHeight - (bottomRows[i] + 1) * lineHeight;
+        if (y < 0) continue;
+        final x = (size.width - textPainter.width) / 2;
+        textPainter.paint(canvas, Offset(x, y));
+      }
+    }
+
+    canvas.restore();
+  }
+
+  TextPainter _layout(String text, double fontSize, int color) {
+    final key =
+        '$text|$fontSize|${settings.fontFamily}|$color|${settings.opacity}';
+    final cached = _textCache[key];
+    if (cached != null) return cached;
+
+    final painter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontFamily: settings.fontFamily,
+          fontWeight: FontWeight.w600,
+          color: Color(color).withValues(alpha: settings.opacity),
+          shadows: const [
+            Shadow(
+                blurRadius: 2.5, color: Colors.black87, offset: Offset(0, 1)),
+          ],
+        ),
+      ),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout();
+    if (_textCache.length > 8000) _textCache.clear();
+    _textCache[key] = painter;
+    return painter;
+  }
+
+  _LaneLayout _buildLaneLayout(
+    List<DanmakuComment> comments,
+    DanmakuSettingsModel settings,
+    int maxLanes,
+  ) {
     final scrollLanes = List<int>.filled(comments.length, 0);
     final topRows = List<int>.filled(comments.length, 0);
     final bottomRows = List<int>.filled(comments.length, 0);
@@ -226,80 +305,11 @@ class DanmakuPainter extends CustomPainter {
       }
     }
 
-    canvas.save();
-    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, areaHeight));
-
-    for (var i = startIndex; i < comments.length; i++) {
-      final comment = comments[i];
-      if (comment.time > time) break;
-
-      final duration =
-          comment.mode == DanmakuMode.scroll ? settings.speedSeconds : 4.5;
-      final elapsed = time - comment.time;
-      if (elapsed < 0 || elapsed > duration) continue;
-
-      final textPainter = _layout(comment.text, fontSize);
-      final progress = (elapsed / duration).clamp(0.0, 1.0);
-
-      if (comment.mode == DanmakuMode.scroll) {
-        final y = scrollLanes[i] * lineHeight;
-        if (y + lineHeight > areaHeight) continue;
-        final x = size.width - progress * (size.width + textPainter.width);
-        _paintText(canvas, textPainter, Offset(x, y), comment.color);
-      } else if (comment.mode == DanmakuMode.top) {
-        final y = topRows[i] * lineHeight;
-        final x = (size.width - textPainter.width) / 2;
-        _paintText(canvas, textPainter, Offset(x, y), comment.color);
-      } else {
-        final y = areaHeight - (bottomRows[i] + 1) * lineHeight;
-        if (y < 0) continue;
-        final x = (size.width - textPainter.width) / 2;
-        _paintText(canvas, textPainter, Offset(x, y), comment.color);
-      }
-    }
-
-    canvas.restore();
-  }
-
-  TextPainter _layout(String text, double fontSize) {
-    final key = '$text|$fontSize|${settings.fontFamily}';
-    final cached = _textCache[key];
-    if (cached != null) return cached;
-
-    final painter = TextPainter(
-      text: TextSpan(
-        text: text,
-        style: TextStyle(
-          fontSize: fontSize,
-          fontFamily: settings.fontFamily,
-          fontWeight: FontWeight.w600,
-          shadows: const [
-            Shadow(
-                blurRadius: 2.5, color: Colors.black87, offset: Offset(0, 1)),
-          ],
-        ),
-      ),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout();
-    if (_textCache.length > 8000) _textCache.clear();
-    _textCache[key] = painter;
-    return painter;
-  }
-
-  void _paintText(
-      Canvas canvas, TextPainter painter, Offset offset, int color) {
-    final paint = TextPainter(
-      text: TextSpan(
-        text: painter.plainText,
-        style: painter.text?.style?.copyWith(
-          color: Color(color).withValues(alpha: settings.opacity),
-        ),
-      ),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout();
-    paint.paint(canvas, offset);
+    return _LaneLayout(
+      scrollLanes: scrollLanes,
+      topRows: topRows,
+      bottomRows: bottomRows,
+    );
   }
 
   int _leastEnd(List<double> ends) {
