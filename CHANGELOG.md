@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.1.0-beta.4 — 2026-10-21
+
+### Stage A 收尾
+
+- 合并 Fladder develop `de7b5a2a`，修复 SMTC/多窗口/深链冲突。
+- NAS Jellyfin 12.2 E2E：登录/播放/暂停/seek 自动验证；字幕切换、切集、弹幕叠加层手动确认。
+- 播放器：弹幕按钮移到播放按钮左侧，顺序为 弹幕→上一集→-30s→播放→+30s→下一集→超分。
+- 弹幕按钮/超分提示改为 ARB 本地化；弹幕设置与手动匹配对话框中英双语。
+- 品牌：窗口标题、更新检查、关于页链接改为 JellyMaku；关于页补充 Fladder 上游说明；移除赞助区块。
+- 打包：新增 Inno Setup 安装器 `JellyMaku-0.1.0-beta.4-windows-x64-setup.exe` 与便携包。
+- 资产校验：新增 `third_party/manifest.json` 与 `tools/verify-assets.ps1`。
+
+### 已知限制
+
+- SyncPlay 双客户端尚未真实联调。
+- 超分只完成截图与 GPU 粗测，缺 FPS/掉帧记录。
+- 安装器未签名，SmartScreen 可能提示。
+- Bangumi Stage B 未开始。
+
 ## v0.1.0-beta.3 — 2026-10-21
 
 ### 弹幕

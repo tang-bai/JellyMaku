@@ -15,6 +15,7 @@ if (-not $iscc) {
         "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
         "C:\Program Files\Inno Setup 6\ISCC.exe",
         (Join-Path $PSScriptRoot "..\tools\inno\ISCC.exe")
+        (Join-Path $PSScriptRoot "..\tools\inno\app\ISCC.exe")
     )) {
         if (Test-Path $candidate) { $iscc = $candidate; break }
     }

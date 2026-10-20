@@ -1,0 +1,92 @@
+{
+  "generatedAt": "2026-10-20T21:28:04.700Z",
+  "generator": "tools/verify-assets.ps1",
+  "items": [
+    {
+      "name": "ANGLE",
+      "version": "1.0.1",
+      "url": "https://github.com/alexmercerind/flutter-windows-ANGLE-OpenGL-ES/releases/download/v1.0.1/ANGLE.7z",
+      "sha256": "CC5911BB15D596FD5A2B362613AD35B7093B427117269A7359054A65746A5F9A",
+      "size": 5035414,
+      "target": "third_party/angle/ANGLE.7z",
+      "extracted": true,
+      "checks": [
+        "build/windows/x64/ANGLE/libEGL.dll"
+      ]
+    },
+    {
+      "name": "MDK SDK",
+      "version": "nightly",
+      "url": "https://sourceforge.net/projects/mdk-sdk/files/nightly/mdk-sdk-windows-x64.7z",
+      "sha256": "953318F2A533AC67B735EA1E5DC76DE46E22039F0B7D1B544EC0D8B529637377",
+      "size": 14947964,
+      "target": "third_party/mdk/mdk-sdk-windows-x64.7z",
+      "extracted": false,
+      "checks": []
+    },
+    {
+      "name": "libmpv",
+      "version": "20260531-git-13a3e3a",
+      "url": "https://github.com/DonutWare/mpv-winbuild-cmake/releases/download/20260531/mpv-dev-x86_64-20260531-git-13a3e3a.7z",
+      "sha256": "3E963F0C8DFD7273470E65FBE34B47DD745BCFAF21CB20CED4ED6A502F392A7B",
+      "size": 30260146,
+      "target": "third_party/mpv/mpv-dev-x86_64-20260531-git-13a3e3a.7z",
+      "extracted": true,
+      "checks": [
+        "build/windows/x64/runner/Release/libmpv-2.dll"
+      ]
+    },
+    {
+      "name": "SQLite",
+      "version": "3.52.0",
+      "url": "https://sqlite.org/2026/sqlite-autoconf-3520000.tar.gz",
+      "sha256": "F6B50B0C103392AF32A8BE15B2B9D25959DE9A00A70C3979128AAFEAA5338B3F",
+      "size": 3258980,
+      "target": "third_party/sqlite/sqlite-autoconf-3520000.tar.gz",
+      "extracted": false,
+      "checks": []
+    },
+    {
+      "name": "Microsoft.Windows.CppWinRT",
+      "version": "2.0.210806.1",
+      "url": "https://www.nuget.org/api/v2/package/Microsoft.Windows.CppWinRT/2.0.210806.1",
+      "sha256": "8CF197A03C1B355E256C8DA2BBC024D432AD9986FE2441C25796E50F03BC07BA",
+      "size": 642114,
+      "target": "third_party/nuget/Microsoft.Windows.CppWinRT.2.0.210806.1.nupkg",
+      "extracted": false,
+      "checks": []
+    },
+    {
+      "name": "Microsoft.Windows.CppWinRT",
+      "version": "2.0.220418.1",
+      "url": "https://www.nuget.org/api/v2/package/Microsoft.Windows.CppWinRT/2.0.220418.1",
+      "sha256": "35F4B33A2625DA94C0F79DB51985148B255B5121445FC257E36597E6F54277C4",
+      "size": 650688,
+      "target": "third_party/nuget/Microsoft.Windows.CppWinRT.2.0.220418.1.nupkg",
+      "extracted": false,
+      "checks": []
+    },
+    {
+      "name": "Microsoft.Windows.ImplementationLibrary",
+      "version": "1.0.220201.1",
+      "url": "https://www.nuget.org/api/v2/package/Microsoft.Windows.ImplementationLibrary/1.0.220201.1",
+      "sha256": "924F1553BF191578261312BEDFA9E9A441AD9FCA59AAEAE4F0038AA3533CCD34",
+      "size": 291968,
+      "target": "third_party/nuget/Microsoft.Windows.ImplementationLibrary.1.0.220201.1.nupkg",
+      "extracted": false,
+      "checks": []
+    },
+    {
+      "name": "ASP.NET Core Runtime",
+      "version": "10.0.13",
+      "url": "https://builds.dotnet.microsoft.com/dotnet/aspnetcore/Runtime/10.0.13/aspnetcore-runtime-10.0.13-win-x64.zip",
+      "sha256": "866F4C95523CFEF79646105DA760FF0F3C8F2390460995D90E89475673E4B038",
+      "size": 48521775,
+      "target": "third_party/dotnet/aspnetcore-runtime-10.0.13-win-x64.zip",
+      "extracted": true,
+      "checks": [
+        "third_party/dotnet/dotnet.exe"
+      ]
+    }
+  ]
+}

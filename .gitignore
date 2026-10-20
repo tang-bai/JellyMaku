@@ -93,7 +93,8 @@ android/build/reports/problems/
 tools/downloads/
 tools/inno/
 tools/bin/
-third_party/
+third_party/*
+!third_party/manifest.json
 testdata/
 artifacts/
 
