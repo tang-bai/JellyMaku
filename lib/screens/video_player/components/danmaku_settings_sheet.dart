@@ -6,6 +6,7 @@ import 'package:fladder/danmaku/danmaku_api_client.dart';
 import 'package:fladder/danmaku/danmaku_models.dart';
 import 'package:fladder/providers/danmaku_provider.dart';
 import 'package:fladder/providers/settings/danmaku_settings_provider.dart';
+import 'package:fladder/util/localization_helper.dart';
 import 'package:fladder/screens/video_player/components/danmaku_match_dialog.dart';
 
 Future<void> showDanmakuSettings(BuildContext context) {
@@ -47,7 +48,7 @@ class _DanmakuSettingsDialogState
     setState(() => _pickingFile = true);
     try {
       final result = await FilePicker.platform.pickFiles(
-        dialogTitle: '选择本地弹幕文件',
+        dialogTitle: context.localized.danmakuPickFileTitle,
         type: FileType.custom,
         allowedExtensions: const ['xml', 'json'],
       );
@@ -57,7 +58,7 @@ class _DanmakuSettingsDialogState
       if (path == null || path.isEmpty || !mounted) return;
       ref.read(danmakuSettingsProvider.notifier).setLocalFile(path);
     } catch (error) {
-      if (mounted) setState(() => _testResult = '选择文件失败：$error');
+      if (mounted) setState(() => _testResult = context.localized.danmakuPickFileError(error.toString()));
     } finally {
       if (mounted) setState(() => _pickingFile = false);
     }
@@ -71,7 +72,7 @@ class _DanmakuSettingsDialogState
     final client = DanmakuApiClient(baseUrl: _apiBase.text);
     try {
       await client.testConnection();
-      if (mounted) setState(() => _testResult = '连接成功');
+      if (mounted) setState(() => _testResult = context.localized.danmakuConnectionOk);
     } catch (error) {
       if (mounted) setState(() => _testResult = error.toString());
     } finally {
@@ -80,13 +81,14 @@ class _DanmakuSettingsDialogState
     }
   }
 
-  String _statusLabel(DanmakuLoadStatus status) => switch (status) {
-        DanmakuLoadStatus.idle => '空闲',
-        DanmakuLoadStatus.disabled => '已禁用',
-        DanmakuLoadStatus.loading => '加载中',
-        DanmakuLoadStatus.ready => '已就绪',
-        DanmakuLoadStatus.noMatch => '未匹配到弹幕',
-        DanmakuLoadStatus.error => '错误',
+  String _statusLabel(BuildContext context, DanmakuLoadStatus status) =>
+      switch (status) {
+        DanmakuLoadStatus.idle => context.localized.danmakuStatusIdle,
+        DanmakuLoadStatus.disabled => context.localized.danmakuStatusDisabled,
+        DanmakuLoadStatus.loading => context.localized.danmakuStatusLoading,
+        DanmakuLoadStatus.ready => context.localized.danmakuStatusReady,
+        DanmakuLoadStatus.noMatch => context.localized.danmakuStatusNoMatch,
+        DanmakuLoadStatus.error => context.localized.danmakuStatusError,
       };
 
   @override
@@ -108,7 +110,7 @@ class _DanmakuSettingsDialogState
                 children: [
                   const Icon(Icons.chat_bubble_outline_rounded),
                   const SizedBox(width: 8),
-                  Text('弹幕设置', style: theme.textTheme.titleLarge),
+                  Text(context.localized.danmakuSettingsTitle, style: theme.textTheme.titleLarge),
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
@@ -117,17 +119,25 @@ class _DanmakuSettingsDialogState
                 ],
               ),
               const SizedBox(height: 8),
-              Text('danmu_api · 状态：${_statusLabel(state.status)}',
-                  style: theme.textTheme.bodySmall),
+              Text(
+                context.localized
+                    .danmakuApiStatus(_statusLabel(context, state.status)),
+                style: theme.textTheme.bodySmall,
+              ),
               if (state.match != null)
                 Text(
-                  '已匹配：${state.match!.animeTitle}'
-                  '${state.match!.episodeTitle.isEmpty ? '' : ' · ${state.match!.episodeTitle}'}'
-                  '（${switch (state.match!.source) {
-                    'manual' => '手动',
-                    'local' => '本地',
-                    _ => '自动',
-                  }}）',
+                  context.localized.danmakuMatched(
+                    [
+                      state.match!.animeTitle,
+                      if (state.match!.episodeTitle.isNotEmpty)
+                        state.match!.episodeTitle,
+                    ].join(' · '),
+                    switch (state.match!.source) {
+                      'manual' => context.localized.danmakuSourceManual,
+                      'local' => context.localized.danmakuSourceLocal,
+                      _ => context.localized.danmakuSourceAuto,
+                    },
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall,
@@ -144,7 +154,7 @@ class _DanmakuSettingsDialogState
                   children: [
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('启用弹幕'),
+                      title: Text(context.localized.danmakuEnable),
                       value: settings.enabled,
                       onChanged: (value) {
                         notifier.setEnabled(value);
@@ -156,9 +166,9 @@ class _DanmakuSettingsDialogState
                     ExpansionTile(
                       tilePadding: EdgeInsets.zero,
                       childrenPadding: EdgeInsets.zero,
-                      title: const Text('高级：弹幕 API 地址'),
+                      title: Text(context.localized.danmakuAdvancedApi),
                       subtitle: Text(
-                        '默认 $kDefaultDanmuApiBase；可填自建 danmu_api',
+                        context.localized.danmakuApiBaseSubtitle(kDefaultDanmuApiBase),
                         style: theme.textTheme.bodySmall,
                       ),
                       children: [
@@ -169,14 +179,12 @@ class _DanmakuSettingsDialogState
                             children: [
                               TextField(
                                 controller: _apiBase,
-                                decoration: const InputDecoration(
-                                  labelText: 'danmu_api 地址',
+                                decoration: InputDecoration(
+                                  labelText: context.localized.danmakuApiBaseLabel,
                                   hintText: kDefaultDanmuApiBase,
-                                  helperText: '默认公共实例无需配置。自建服务若设置了 '
-                                      'TOKEN，请把 /{TOKEN} 加在地址末尾，例如 '
-                                      'http://192.168.1.10:9321/87654321；'
-                                      '地址需以 http(s):// 开头。',
-                                  border: OutlineInputBorder(),
+                                  helperText: context.localized
+                                      .danmakuApiBaseHelper,
+                                  border: const OutlineInputBorder(),
                                 ),
                                 onChanged: (value) =>
                                     notifier.setApiBase(value),
@@ -194,7 +202,7 @@ class _DanmakuSettingsDialogState
                                                 strokeWidth: 2),
                                           )
                                         : const Icon(Icons.wifi_tethering),
-                                    label: const Text('测试连接'),
+                                    label: Text(context.localized.danmakuTestConnection),
                                   ),
                                   const SizedBox(width: 12),
                                   if (_testResult != null)
@@ -214,13 +222,13 @@ class _DanmakuSettingsDialogState
                       ],
                     ),
                     const Divider(height: 28),
-                    Text('本地弹幕文件', style: theme.textTheme.titleSmall),
+                    Text(context.localized.danmakuLocalFileTitle, style: theme.textTheme.titleSmall),
                     const SizedBox(height: 4),
                     Text(
                       (settings.localFile ?? '').isEmpty
-                          ? '未选择。支持 Bilibili XML / danmu_api 兼容 JSON；'
-                              '选择后优先于在线匹配。'
-                          : '当前：${_fileName(settings.localFile!)}',
+                          ? context.localized.danmakuLocalFileEmpty
+                          : context.localized.danmakuLocalFileCurrent(
+                              _fileName(settings.localFile!)),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall,
@@ -233,19 +241,19 @@ class _DanmakuSettingsDialogState
                         FilledButton.tonalIcon(
                           onPressed: _pickingFile ? null : _pickLocalFile,
                           icon: const Icon(Icons.folder_open),
-                          label: const Text('选择文件…'),
+                          label: Text(context.localized.danmakuChooseFile),
                         ),
                         if ((settings.localFile ?? '').isNotEmpty)
                           OutlinedButton.icon(
                             onPressed: () => notifier.setLocalFile(null),
                             icon: const Icon(Icons.close),
-                            label: const Text('清除本地文件'),
+                            label: Text(context.localized.danmakuClearLocalFile),
                           ),
                       ],
                     ),
                     const Divider(height: 28),
                     _SliderTile(
-                      label: '字体大小',
+                      label: context.localized.danmakuFontSize,
                       value: settings.fontSize,
                       min: 16,
                       max: 72,
@@ -254,7 +262,7 @@ class _DanmakuSettingsDialogState
                       onChanged: notifier.setFontSize,
                     ),
                     _SliderTile(
-                      label: '透明度',
+                      label: context.localized.danmakuOpacity,
                       value: settings.opacity,
                       min: 0.1,
                       max: 1,
@@ -263,16 +271,17 @@ class _DanmakuSettingsDialogState
                       onChanged: notifier.setOpacity,
                     ),
                     _SliderTile(
-                      label: '滚动时长',
+                      label: context.localized.danmakuSpeed,
                       value: settings.speedSeconds,
                       min: 3,
                       max: 20,
                       divisions: 17,
-                      display: '${settings.speedSeconds.toStringAsFixed(0)} 秒',
+                      display: context.localized.danmakuSecondsValue(
+                          settings.speedSeconds.toStringAsFixed(0)),
                       onChanged: notifier.setSpeed,
                     ),
                     _SliderTile(
-                      label: '显示区域',
+                      label: context.localized.danmakuDisplayArea,
                       value: settings.displayArea,
                       min: 0.2,
                       max: 1,
@@ -281,49 +290,50 @@ class _DanmakuSettingsDialogState
                       onChanged: notifier.setDisplayArea,
                     ),
                     _SliderTile(
-                      label: '时间偏移',
+                      label: context.localized.danmakuOffset,
                       value: settings.offsetSeconds,
                       min: -60,
                       max: 60,
                       divisions: 120,
-                      display: '${settings.offsetSeconds > 0 ? '+' : ''}'
-                          '${settings.offsetSeconds.toStringAsFixed(1)} 秒',
+                      display: context.localized.danmakuSecondsValue(
+                          '${settings.offsetSeconds > 0 ? '+' : ''}'
+                          '${settings.offsetSeconds.toStringAsFixed(1)}'),
                       onChanged: notifier.setOffset,
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('显示滚动弹幕'),
+                      title: Text(context.localized.danmakuShowScroll),
                       value: settings.showScroll,
                       onChanged: notifier.setShowScroll,
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('显示顶部弹幕'),
+                      title: Text(context.localized.danmakuShowTop),
                       value: settings.showTop,
                       onChanged: notifier.setShowTop,
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('显示底部弹幕'),
+                      title: Text(context.localized.danmakuShowBottom),
                       value: settings.showBottom,
                       onChanged: notifier.setShowBottom,
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('合并重复弹幕'),
-                      subtitle: const Text('5 秒内相同内容合并为“xN”顶部弹幕'),
+                      title: Text(context.localized.danmakuMerge),
+                      subtitle: Text(context.localized.danmakuMergeHint),
                       value: settings.mergeDuplicates,
                       onChanged: notifier.setMergeDuplicates,
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('保留弹幕颜色'),
-                      subtitle: const Text('关闭后全部按白色绘制'),
+                      title: Text(context.localized.danmakuShowColor),
+                      subtitle: Text(context.localized.danmakuShowColorHint),
                       value: settings.showColor,
                       onChanged: notifier.setShowColor,
                     ),
                     _SliderTile(
-                      label: '描边粗细',
+                      label: context.localized.danmakuStrokeWidth,
                       value: settings.strokeWidth,
                       min: 0,
                       max: 6,
@@ -332,18 +342,16 @@ class _DanmakuSettingsDialogState
                       onChanged: notifier.setStrokeWidth,
                     ),
                     const Divider(height: 28),
-                    Text('弹幕来源', style: theme.textTheme.titleSmall),
+                    Text(context.localized.danmakuSourceTitle, style: theme.textTheme.titleSmall),
                     const SizedBox(height: 4),
                     Text(
-                      'danmu_api 会聚合 BiliBili、巴哈、爱优腾等来源，并用'
-                      '「[来源]」标签标记；弹幕以同一列表返回。'
-                      '这里只控制本地导入是否显示。',
+                      context.localized.danmakuSourceDescription,
                       style: theme.textTheme.bodySmall,
                     ),
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('本地导入'),
-                      subtitle: const Text('本地 XML/JSON 文件导入'),
+                      title: Text(context.localized.danmakuLocalImport),
+                      subtitle: Text(context.localized.danmakuLocalImportHint),
                       value: settings.showLocalSource,
                       onChanged: notifier.setShowLocalSource,
                     ),
@@ -362,12 +370,12 @@ class _DanmakuSettingsDialogState
                                   if (applied == true) {
                                     ScaffoldMessenger.maybeOf(context)
                                         ?.showSnackBar(
-                                      const SnackBar(content: Text('已应用手动匹配')),
+                                      SnackBar(content: Text(context.localized.danmakuManualApplied)),
                                     );
                                   }
                                 },
                           icon: const Icon(Icons.manage_search),
-                          label: const Text('手动匹配…'),
+                          label: Text(context.localized.danmakuManualMatch),
                         ),
                         OutlinedButton.icon(
                           onPressed: state.status == DanmakuLoadStatus.loading
@@ -375,7 +383,7 @@ class _DanmakuSettingsDialogState
                               : () =>
                                   ref.read(danmakuProvider.notifier).reload(),
                           icon: const Icon(Icons.refresh),
-                          label: const Text('重新加载'),
+                          label: Text(context.localized.danmakuReload),
                         ),
                         OutlinedButton.icon(
                           onPressed: state.match != null &&
@@ -387,20 +395,19 @@ class _DanmakuSettingsDialogState
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.maybeOf(context)
                                       ?.showSnackBar(
-                                    const SnackBar(content: Text('已清除匹配')),
+                                    SnackBar(content: Text(context.localized.danmakuMatchCleared)),
                                   );
                                 }
                               : null,
                           icon: const Icon(Icons.link_off),
-                          label: const Text('清除匹配'),
+                          label: Text(context.localized.danmakuClearMatch),
                         ),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '弹幕由 danmu_api 聚合（https://github.com/huangxd-/danmu_api）；'
-                      '默认公共实例：$kDefaultDanmuApiBase。'
-                      '弹幕功能免费，禁止未授权商用。',
+                      context.localized
+                          .danmakuFooter(kDefaultDanmuApiBase),
                       style: theme.textTheme.bodySmall,
                     ),
                   ],

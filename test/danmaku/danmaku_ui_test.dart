@@ -3,12 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:fladder/l10n/generated/app_localizations.dart';
 import 'package:fladder/screens/video_player/components/danmaku_match_dialog.dart';
 import 'package:fladder/screens/video_player/components/danmaku_settings_sheet.dart';
 
 Widget _host(void Function(BuildContext context) open) {
   return ProviderScope(
     child: MaterialApp(
+      locale: const Locale('zh'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: Builder(
         builder: (context) => Scaffold(
           body: Center(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:fladder/danmaku/danmaku_models.dart';
 import 'package:fladder/providers/danmaku_provider.dart';
+import 'package:fladder/util/localization_helper.dart';
 
 /// 手动匹配弹幕：搜索番剧 → 选择分集 → 写入映射并重载。
 ///
@@ -54,7 +55,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
   Future<void> _search() async {
     final keyword = _keyword.text.trim();
     if (keyword.isEmpty) {
-      setState(() => _error = '请输入番剧名称');
+      setState(() => _error = context.localized.danmakuEnterAnimeName);
       return;
     }
     setState(() {
@@ -72,7 +73,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
       setState(() {
         _loading = false;
         _animes = animes;
-        if (animes.isEmpty) _error = '未找到番剧，试试日文原名或更短的关键词';
+        if (animes.isEmpty) _error = context.localized.danmakuNoAnimeFound;
       });
     } catch (error) {
       if (!mounted) return;
@@ -101,7 +102,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
       setState(() {
         _loading = false;
         _episodes = episodes;
-        if (episodes.isEmpty) _error = '该条目没有分集';
+        if (episodes.isEmpty) _error = context.localized.danmakuNoEpisodes;
       });
     } catch (error) {
       if (!mounted) return;
@@ -149,19 +150,22 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
     });
   }
 
-  String get _title => switch (_step) {
-        _MatchStep.search => '手动匹配弹幕',
-        _MatchStep.anime => '选择番剧',
-        _MatchStep.episode => '选择分集',
+  String _title(BuildContext context) => switch (_step) {
+        _MatchStep.search => context.localized.danmakuManualMatchTitle,
+        _MatchStep.anime => context.localized.danmakuSelectAnime,
+        _MatchStep.episode => context.localized.danmakuSelectEpisode,
       };
 
-  String _episodeSubtitle(DanmakuEpisodeRef episode) {
+  String _episodeSubtitle(BuildContext context, DanmakuEpisodeRef episode) {
     final host = Uri.tryParse(episode.url)?.host ?? '';
-    if (host.isEmpty) return '无原始链接 · episodeId ${episode.episodeId}';
+    if (host.isEmpty) {
+      return context.localized
+          .danmakuNoUrlEpisode(episode.episodeId.toString());
+    }
     return '$host · episodeId ${episode.episodeId}';
   }
 
-  String? get _subtitle => switch (_step) {
+  String? _subtitle() => switch (_step) {
         _MatchStep.search => null,
         _MatchStep.anime => _keyword.text.trim(),
         _MatchStep.episode => _selectedAnime?.animeTitle,
@@ -186,7 +190,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
                     IconButton(
                       onPressed: busy ? null : _back,
                       icon: const Icon(Icons.arrow_back),
-                      tooltip: '返回',
+                      tooltip: context.localized.danmakuBack,
                     )
                   else
                     const Icon(Icons.link_rounded),
@@ -195,10 +199,10 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_title, style: theme.textTheme.titleLarge),
-                        if (_subtitle != null && _subtitle!.isNotEmpty)
+                        Text(_title(context), style: theme.textTheme.titleLarge),
+                        if (_subtitle() != null && _subtitle()!.isNotEmpty)
                           Text(
-                            _subtitle!,
+                            _subtitle()!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall,
@@ -248,11 +252,11 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
           autofocus: true,
           textInputAction: TextInputAction.search,
           onSubmitted: (_) => _search(),
-          decoration: const InputDecoration(
-            labelText: '番剧名称',
-            hintText: '例如：孤独摇滚 / Bocchi the Rock!',
-            prefixIcon: Icon(Icons.search),
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: context.localized.danmakuAnimeName,
+            hintText: context.localized.danmakuAnimeNameHint,
+            prefixIcon: const Icon(Icons.search),
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 12),
@@ -261,17 +265,17 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
           child: FilledButton.icon(
             onPressed: _loading ? null : _search,
             icon: const Icon(Icons.search),
-            label: const Text('搜索'),
+            label: Text(context.localized.search),
           ),
         ),
         const SizedBox(height: 12),
         Text(
-          '匹配结果会优先于自动匹配保存；清除匹配后恢复按标题+集号自动搜索。',
+          context.localized.danmakuSearchNote,
           style: theme.textTheme.bodySmall,
         ),
         const Spacer(),
         Text(
-          '弹幕由 danmu_api 聚合；选择分集后会以该分集的原始页面拉取弹幕。',
+          context.localized.danmakuSearchFooter,
           style: theme.textTheme.bodySmall,
         ),
       ],
@@ -282,7 +286,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
     if (_loading) return const SizedBox.shrink();
     if (_animes.isEmpty) {
       return Center(
-        child: Text('没有可选番剧', style: theme.textTheme.bodyMedium),
+        child: Text(context.localized.danmakuNoAnime, style: theme.textTheme.bodyMedium),
       );
     }
     return ListView.separated(
@@ -306,7 +310,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
     if (_loading) return const SizedBox.shrink();
     if (_episodes.isEmpty) {
       return Center(
-        child: Text('没有可选分集', style: theme.textTheme.bodyMedium),
+        child: Text(context.localized.danmakuNoEpisode, style: theme.textTheme.bodyMedium),
       );
     }
     final filter = _episodeFilter.text.trim().toLowerCase();
@@ -322,16 +326,17 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
         TextField(
           controller: _episodeFilter,
           onChanged: (_) => setState(() {}),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             isDense: true,
-            hintText: '按标题筛选分集',
-            prefixIcon: Icon(Icons.filter_list),
-            border: OutlineInputBorder(),
+            hintText: context.localized.danmakuFilterEpisodes,
+            prefixIcon: const Icon(Icons.filter_list),
+            border: const OutlineInputBorder(),
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          '共 ${_episodes.length} 集，当前显示 ${visible.length} 集',
+          context.localized.danmakuEpisodeCount(
+              _episodes.length, visible.length),
           style: theme.textTheme.bodySmall,
         ),
         const SizedBox(height: 4),
@@ -343,7 +348,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
               return ListTile(
                 dense: true,
                 title: Text(episode.episodeTitle),
-                subtitle: Text(_episodeSubtitle(episode)),
+                subtitle: Text(_episodeSubtitle(context, episode)),
                 trailing: const Icon(Icons.check_circle_outline, size: 18),
                 onTap: _applying ? null : () => _apply(episode),
               );

@@ -76,7 +76,7 @@ class UpdateChecker {
     final currentVersion = info.version;
 
     final url = Uri.parse('https://api.github.com/repos/$owner/$repo/releases?per_page=$count');
-    final response = await http.get(url);
+    final response = await http.get(url, headers: {'User-Agent': 'JellyMaku'});
 
     if (response.statusCode != 200) {
       print('Failed to fetch releases: ${response.statusCode}');

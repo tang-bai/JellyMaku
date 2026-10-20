@@ -93,6 +93,13 @@ $env:FLUTTER_SUPPRESS_ANALYTICS = "true"
 
 输出：`artifacts/JellyMaku-0.1.0-windows-x64-portable.zip`。
 
+### 4.1 Inno 安装器
+
+- 脚本：`installer/jellymaku.iss`；构建：`tools/build-installer.ps1 -Version 0.1.0`
+- 依赖 Inno Setup 6（`ISCC.exe`）；会依次查找 PATH、`C:\Program Files (x86)\Inno Setup 6`、`C:\Program Files\Inno Setup 6`、`tools/inno\ISCC.exe`
+- 输出：`artifacts/installer/JellyMaku-<version>-windows-x64-setup.exe`
+- 当前机器未安装 Inno Setup，安装器脚本已加但**尚未编译验证**。
+
 ## 5. 常见失败
 
 | 现象 | 处理 |

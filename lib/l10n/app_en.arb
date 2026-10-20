@@ -1500,7 +1500,7 @@
       }
     }
   },
-  "aboutCreatedBy": "Created by DonutWare",
+  "aboutCreatedBy": "Created by JellyMaku contributors",
   "@aboutCreatedBy": {},
   "aboutSocials": "Socials",
   "@aboutSocials": {},
@@ -3024,4 +3024,175 @@
     }
   },
   "deepLinkItemNotFound": "This item isn't available for any of your accounts"
+,
+  "danmakuSettingsTitle": "Danmaku settings",
+  "@danmakuSettingsTitle": {},
+  "danmakuApiStatus": "danmu_api · Status: {status}",
+  "@danmakuApiStatus": {
+    "placeholders": {
+      "status": { "type": "String" }
+    }
+  },
+  "danmakuMatched": "Matched: {title} ({source})",
+  "@danmakuMatched": {
+    "placeholders": {
+      "title": { "type": "String" },
+      "source": { "type": "String" }
+    }
+  },
+  "danmakuSourceManual": "Manual",
+  "@danmakuSourceManual": {},
+  "danmakuSourceLocal": "Local",
+  "@danmakuSourceLocal": {},
+  "danmakuSourceAuto": "Auto",
+  "@danmakuSourceAuto": {},
+  "danmakuEnable": "Enable danmaku",
+  "@danmakuEnable": {},
+  "danmakuAdvancedApi": "Advanced: danmaku API URL",
+  "@danmakuAdvancedApi": {},
+  "danmakuApiBaseSubtitle": "Default {base}; a self-hosted danmu_api can be used",
+  "@danmakuApiBaseSubtitle": {
+    "placeholders": {
+      "base": { "type": "String" }
+    }
+  },
+  "danmakuApiBaseLabel": "danmu_api URL",
+  "@danmakuApiBaseLabel": {},
+  "danmakuApiBaseHelper": "The public instance needs no configuration. For self-hosted servers with a TOKEN, append /TOKEN to the URL, e.g. http://192.168.1.10:9321/87654321. The URL must start with http(s)://.",
+  "@danmakuApiBaseHelper": {},
+  "danmakuTestConnection": "Test connection",
+  "@danmakuTestConnection": {},
+  "danmakuConnectionOk": "Connected",
+  "@danmakuConnectionOk": {},
+  "danmakuPickFileTitle": "Choose local danmaku file",
+  "@danmakuPickFileTitle": {},
+  "danmakuPickFileError": "Failed to choose file: {error}",
+  "@danmakuPickFileError": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "danmakuLocalFileTitle": "Local danmaku file",
+  "@danmakuLocalFileTitle": {},
+  "danmakuLocalFileEmpty": "No file selected. Supports Bilibili XML / danmu_api compatible JSON; local files take priority over online matching.",
+  "@danmakuLocalFileEmpty": {},
+  "danmakuLocalFileCurrent": "Current: {name}",
+  "@danmakuLocalFileCurrent": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "danmakuChooseFile": "Choose file…",
+  "@danmakuChooseFile": {},
+  "danmakuClearLocalFile": "Clear local file",
+  "@danmakuClearLocalFile": {},
+  "danmakuFontSize": "Font size",
+  "@danmakuFontSize": {},
+  "danmakuOpacity": "Opacity",
+  "@danmakuOpacity": {},
+  "danmakuSpeed": "Scroll duration",
+  "@danmakuSpeed": {},
+  "danmakuDisplayArea": "Display area",
+  "@danmakuDisplayArea": {},
+  "danmakuOffset": "Time offset",
+  "@danmakuOffset": {},
+  "danmakuSecondsValue": "{value} s",
+  "@danmakuSecondsValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "danmakuShowScroll": "Show scrolling danmaku",
+  "@danmakuShowScroll": {},
+  "danmakuShowTop": "Show top danmaku",
+  "@danmakuShowTop": {},
+  "danmakuShowBottom": "Show bottom danmaku",
+  "@danmakuShowBottom": {},
+  "danmakuMerge": "Merge duplicate danmaku",
+  "@danmakuMerge": {},
+  "danmakuMergeHint": "Identical comments within 5 seconds are merged into an \"xN\" top danmaku",
+  "@danmakuMergeHint": {},
+  "danmakuShowColor": "Keep danmaku colors",
+  "@danmakuShowColor": {},
+  "danmakuShowColorHint": "Draw everything in white when off",
+  "@danmakuShowColorHint": {},
+  "danmakuStrokeWidth": "Stroke width",
+  "@danmakuStrokeWidth": {},
+  "danmakuSourceTitle": "Danmaku source",
+  "@danmakuSourceTitle": {},
+  "danmakuSourceDescription": "danmu_api aggregates BiliBili, Bahamut and other sources and marks them with a \"[source]\" tag; comments are returned in one list. This switch only controls whether local imports are shown.",
+  "@danmakuSourceDescription": {},
+  "danmakuLocalImport": "Local import",
+  "@danmakuLocalImport": {},
+  "danmakuLocalImportHint": "Import local XML/JSON files",
+  "@danmakuLocalImportHint": {},
+  "danmakuManualApplied": "Manual match applied",
+  "@danmakuManualApplied": {},
+  "danmakuManualMatch": "Manual match…",
+  "@danmakuManualMatch": {},
+  "danmakuReload": "Reload",
+  "@danmakuReload": {},
+  "danmakuMatchCleared": "Match cleared",
+  "@danmakuMatchCleared": {},
+  "danmakuClearMatch": "Clear match",
+  "@danmakuClearMatch": {},
+  "danmakuFooter": "Danmaku is aggregated by danmu_api (https://github.com/huangxd-/danmu_api); default public instance: {base}. Danmaku is free; unauthorized commercial use is prohibited.",
+  "@danmakuFooter": {
+    "placeholders": {
+      "base": { "type": "String" }
+    }
+  },
+  "danmakuStatusIdle": "Idle",
+  "@danmakuStatusIdle": {},
+  "danmakuStatusDisabled": "Disabled",
+  "@danmakuStatusDisabled": {},
+  "danmakuStatusLoading": "Loading",
+  "@danmakuStatusLoading": {},
+  "danmakuStatusReady": "Ready",
+  "@danmakuStatusReady": {},
+  "danmakuStatusNoMatch": "No match",
+  "@danmakuStatusNoMatch": {},
+  "danmakuStatusError": "Error",
+  "@danmakuStatusError": {},
+  "danmakuEnterAnimeName": "Enter an anime name",
+  "@danmakuEnterAnimeName": {},
+  "danmakuNoAnimeFound": "No anime found. Try the Japanese title or a shorter keyword.",
+  "@danmakuNoAnimeFound": {},
+  "danmakuNoEpisodes": "This item has no episodes",
+  "@danmakuNoEpisodes": {},
+  "danmakuManualMatchTitle": "Manual danmaku match",
+  "@danmakuManualMatchTitle": {},
+  "danmakuSelectAnime": "Select anime",
+  "@danmakuSelectAnime": {},
+  "danmakuSelectEpisode": "Select episode",
+  "@danmakuSelectEpisode": {},
+  "danmakuNoUrlEpisode": "No source URL · episodeId {id}",
+  "@danmakuNoUrlEpisode": {
+    "placeholders": {
+      "id": { "type": "String" }
+    }
+  },
+  "danmakuBack": "Back",
+  "@danmakuBack": {},
+  "danmakuAnimeName": "Anime name",
+  "@danmakuAnimeName": {},
+  "danmakuAnimeNameHint": "e.g. Bocchi the Rock!",
+  "@danmakuAnimeNameHint": {},
+  "danmakuSearchNote": "A manual match is saved and takes priority over auto matching; clear it to fall back to title + episode search.",
+  "@danmakuSearchNote": {},
+  "danmakuSearchFooter": "Danmaku is aggregated by danmu_api; after selecting an episode, comments are fetched from that episode page.",
+  "@danmakuSearchFooter": {},
+  "danmakuNoAnime": "No anime available",
+  "@danmakuNoAnime": {},
+  "danmakuNoEpisode": "No episodes available",
+  "@danmakuNoEpisode": {},
+  "danmakuFilterEpisodes": "Filter episodes by title",
+  "@danmakuFilterEpisodes": {},
+  "danmakuEpisodeCount": "{total} episodes, showing {visible}",
+  "@danmakuEpisodeCount": {
+    "placeholders": {
+      "total": { "type": "int" },
+      "visible": { "type": "int" }
+    }
+  }
 }

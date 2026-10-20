@@ -56,10 +56,11 @@
 
 ### A5 品牌/打包
 
-- [x] JellyMaku 名称/exe/窗口/版本资源（关于页/安装器未做）。
-- [ ] 更新检查不指回 Fladder。
-- [ ] i18n ARB en/zh；gen-l10n（弹幕设置仍硬编码英文）。
-- [x] portable zip；Anime4K/Fladder 许可保留（Inno 安装器未做）。
+- [x] JellyMaku 名称/exe/窗口/版本资源；窗口标题已改为 JellyMaku；关于页链接改为 JellyMaku。
+- [x] 更新检查指向 `tang-bai/JellyMaku`（含 Windows zip 资产识别与 UA）。
+- [x] i18n ARB en/zh；gen-l10n（弹幕设置/手动匹配/按钮提示已迁移，中文 UI 测试通过）。
+- [x] portable zip；Anime4K/Fladder 许可保留；Inno 脚本 `installer/jellymaku.iss` + `tools/build-installer.ps1` 已加。
+- [ ] Inno 安装器实际编译与干净目录安装验证（当前机器未装 Inno Setup）。
 - [ ] 干净目录完整功能验证；Stage A 真实 E2E 验收。
 
 ## 2. Stage B 检查清单
