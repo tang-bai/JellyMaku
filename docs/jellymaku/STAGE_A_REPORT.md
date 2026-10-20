@@ -20,8 +20,8 @@
 - 可执行文件版本资源：ProductName/FileDescription = JellyMaku；OriginalFilename = JellyMaku.exe。
 - 冒烟：进程启动成功，窗口标题 `JellyMaku`，12 秒后正常关闭（`CloseMainWindow`）。
 - 便携包：`artifacts/JellyMaku-0.1.0-windows-x64-portable.zip`
-  - 大小：90,684,428 bytes（弹幕匀速/缓存修复后重打包）
-  - SHA256：`94804254F4333B700345DAD9F161A4836F5BF899F7415C427A370A14D66DFCD6`
+  - 大小：90,684,544 bytes（v0.1.0-beta.1 首个 Beta）
+  - SHA256：`296537FAC6D225D466AC950136608F5D239BB4C3480BD7E32667FFAA4250DF9A`
   - 结构：`JellyMaku/JellyMaku.exe` + DLL + `data/` + README/LICENSE/AGENTS。
 
 ## 3. 验证结果

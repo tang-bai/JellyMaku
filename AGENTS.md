@@ -2,7 +2,7 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：Stage A 核心已构建（Windows release 可启动；analyze 0 issue；103 tests passed）；已推送 GitHub（Stage A 基线 `dc1f8d5c`；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入）。
+> 状态：**v0.1.0-beta.1** 首个 Windows Beta 已发布（analyze 0 issue；103 tests passed）；GitHub main 持续更新；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入。
 > 日期：2026-10-19。
 
 ## 0. 当前仓库状态（必须先理解）
