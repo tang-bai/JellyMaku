@@ -12,12 +12,12 @@
 | 旧 MPV Shim 实现 | 丢失 | 本地/远程均不可恢复；不再作为基座 |
 | Fladder 源码 | 已导入 + 已合并 develop | PR #735 head + Fladder develop `de7b5a2a`（2026-10-21 合并；见 IMPLEMENTATION） |
 | Flutter 工具链 | 完成 | 3.35.7；analyze 0 issue |
-| 构建/单测 | 完成 | Windows release（10-21 02:24，develop 合并后）；137 tests；analyze 0 |
-| 弹幕 | 核心功能已接入；播放器内真实 E2E 未做 | danmu_api（默认公共实例，可自建）/match 自动匹配/URL 拉取/合并去重/本地导入/URL 哈希缓存/叠加层/设置；API 已实测，播放器内未验证 |
-| 超分 | 核心已接入；未验收 | Anime4K Fast/Quality；画质/性能未测 |
+| 构建/单测 | 完成 | Windows release（10-21，品牌/ARB/按钮顺序后）；138 tests；analyze 0 |
+| 弹幕 | 已接入并完成 E2E | danmu_api 自动/手动匹配、URL 拉取、合并去重、本地导入、叠加层；NAS 播放器内 seek/pause 自动验证，字幕/切集/弹幕由用户手动确认；5000 条基准 52–55ms 解析、约 1ms/帧 |
+| 超分 | 核心已接入；部分验收 | Anime4K Fast/Balanced/Strong/4x；截图已采，性能仅 GPU 粗测，缺 FPS/掉帧 |
 | SyncPlay | 代码+单测；真实双端未做 | PR #735 head；见 PARTY |
 | Bangumi 时间表/图片/评论 | 未开始 | 条件功能；见 BANGUMI/KAZUMI |
-| 打包/品牌 | 便携包已出；安装器脚本已加未编译 | JellyMaku.exe/窗口/资源；zip 90,878,704 bytes；`installer/jellymaku.iss` |
+| 打包/品牌 | 便携包已出；安装器脚本未编译 | JellyMaku.exe/窗口/资源；zip 90,878,704 bytes；`installer/jellymaku.iss`；更新检查/关于页/窗口标题已品牌化 |
 
 ## 2. 里程碑
 
@@ -36,23 +36,22 @@
 
 ## 3. 当前阻塞
 
-1. **已推送**：main 已推送到 origin（e2b3ca7）；后续变更需确认后再 push。
-2. **develop 合并已本地完成**：合并分支 `merge/develop-20261021`，已 analyze/test/build，尚未推送 main；真实 Jellyfin E2E 仍未做。
-3. **真实 Jellyfin E2E 已基本完成**：NAS（192.168.8.137:8096，12.2.0）验证登录/播放/暂停/seek；字幕切换、切集、弹幕叠加层由用户手动验证通过（2026-10-21）。剩余：SyncPlay 双端、超分性能。
-4. **弹幕播放器内 E2E 未做**：danmu_api 的 search/match/comment 已用 PowerShell 实测 200（6,898 条弹幕），但未在真实 Jellyfin 播放器中验证加载/切集/暂停。
-5. **SyncPlay 真实双端未做**：单测通过；Jellyfin 12.2 WebSocket/时钟误差未验证。
-6. **超分未验收**：无画质/性能截图；ANGLE/OpenGL 下 shader 可能被拒绝。
-7. **Bangumi 网络**：官方不可达；评论/搜索镜像 401；需用户代理/自建 Worker。
-8. **安装器/中文 ARB 未做**：当前 portable zip；弹幕设置文案硬编码中文，未走 ARB。
+1. **未推送**：main 领先 origin 31+ 提交，推送需用户确认。
+2. **SyncPlay 真实双端未做**：单测通过；Jellyfin 12.2 WebSocket/时钟误差未验证；中文组面板未完善。
+3. **超分性能未验收**：截图已有，缺 FPS/掉帧记录（仅 GPU 利用率粗测）。
+4. **安装器未编译**：Inno Setup 6 未安装；脚本已加，需装好 ISCC 后构建 setup.exe 并做干净目录安装验证。
+5. **资产清单缺失**：third_party/manifest.json 与 tools/verify-assets.ps1 未生成/未实现。
+6. **Stage A 报告过期**：STAGE_A_REPORT.md 仍是旧弹幕实现的历史版本，验收前需重写。
+7. **Bangumi 网络（Stage B）**：官方不可达；评论/搜索镜像 401；需用户代理/自建 Worker。
 
 ## 4. 下一步（建议顺序）
 
-1. 推送 main 到 origin，确认远程可构建。
-2. 推送 develop 合并分支前确认；随后做真实 Jellyfin E2E。
-3. 下载/启动 Jellyfin 12.2 + .NET 10 + 测试媒体；做登录/播放/seek/切集/字幕 E2E。
-4. 在播放器内做真实弹幕 E2E（自动/手动匹配、切集、暂停、本地导入）；重新构建 Windows 包。
-5. SyncPlay 双端联调；超分画质/性能验收；安装器/中文 ARB。
-6. Stage B Bangumi 数据层/Mock；再决定真实评论联调。
+1. **SyncPlay 双端联调**：JellyMaku + Jellyfin Web / 双实例，验证播放/暂停/seek/切集/重连，记录误差与截图。
+2. **超分性能验收**：用 PresentMon/CapFrameX 采各档 FPS/掉帧，补进 A3 证据。
+3. **安装器**：安装 Inno Setup 6 后运行 `tools/build-installer.ps1`，做干净目录安装/卸载验证。
+4. **资产清单**：生成 `third_party/manifest.json`，实现 `tools/verify-assets.ps1`。
+5. **Stage A 收尾**：重写 `STAGE_A_REPORT.md`，确认无密钥/大文件入库，推送 main。
+6. **Stage B**：Bangumi 数据层/Mock；再决定真实评论代理方案。
 
 ## 5. 决策待确认
 

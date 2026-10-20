@@ -44,7 +44,8 @@
 - [x] shader 资产/许可；profile 模型（Anime4K Fast/Quality）。
 - [x] glsl-shaders 应用；失败仅日志回退。
 - [x] 播放器菜单/持久化（独立设置页未做）。
-- [ ] 至少 3 个 profile 截图；性能记录。
+- [x] 至少 3 个 profile 截图（`artifacts/screenshots/sr-*.png`）。
+- [ ] 性能记录（FPS/掉帧；目前只有 GPU 利用率粗测）。
 - [x] RTX VSR 结论：spike 失败已回退（`backup/pre-rtx-vsr`），v1 不做。
 
 ### A4 SyncPlay
