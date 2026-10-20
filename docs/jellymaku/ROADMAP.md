@@ -38,7 +38,7 @@
 
 1. **已推送**：main 已推送到 origin（e2b3ca7）；后续变更需确认后再 push。
 2. **develop 合并已本地完成**：合并分支 `merge/develop-20261021`，已 analyze/test/build，尚未推送 main；真实 Jellyfin E2E 仍未做。
-3. **真实 Jellyfin E2E 部分完成**：已用 NAS（192.168.8.137:8096，12.2.0）验证登录/播放/暂停/seek；字幕切换、切集、弹幕叠加层仍未验证。
+3. **真实 Jellyfin E2E 已基本完成**：NAS（192.168.8.137:8096，12.2.0）验证登录/播放/暂停/seek；字幕切换、切集、弹幕叠加层由用户手动验证通过（2026-10-21）。剩余：SyncPlay 双端、超分性能。
 4. **弹幕播放器内 E2E 未做**：danmu_api 的 search/match/comment 已用 PowerShell 实测 200（6,898 条弹幕），但未在真实 Jellyfin 播放器中验证加载/切集/暂停。
 5. **SyncPlay 真实双端未做**：单测通过；Jellyfin 12.2 WebSocket/时钟误差未验证。
 6. **超分未验收**：无画质/性能截图；ANGLE/OpenGL 下 shader 可能被拒绝。
