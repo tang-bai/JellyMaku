@@ -100,37 +100,57 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
 
     final position = playback.position;
     final now = DateTime.now();
+    final effectivePlaying = playback.playing && !playback.buffering;
+
+    // The overlay owns a display clock instead of jumping back to the last
+    // provider position. The provider only updates a few times per second;
+    // using it directly on resume pulls comments backwards for a frame.
     if (position != _lastPosition) {
+      final drift = position - _frozenPosition;
+      if (!effectivePlaying || drift.abs() > const Duration(seconds: 1)) {
+        // A real pause/seek or a large discontinuity: align to the provider.
+        _frozenPosition = position;
+      }
       _lastPosition = position;
-      _lastPositionAt = now;
-      _frozenPosition = position;
     }
 
-    final elapsedSincePosition = now.difference(_lastPositionAt);
-    final effectivePlaying = playback.playing && !playback.buffering;
-    final Duration current;
+    final elapsed = now.difference(_lastPositionAt);
+    _lastPositionAt = now;
+
     if (effectivePlaying) {
-      if (!_wasPlaying) {
-        // Do not count paused/buffered time as elapsed playback time.
-        _lastPositionAt = now;
-      }
-      _wasPlaying = true;
-      current = Duration(
-        microseconds: position.inMicroseconds +
-            (elapsedSincePosition.inMicroseconds * rate).round(),
-      );
-    } else {
-      // Freeze at the extrapolated time on the pause/buffer transition.
-      // Using the raw provider position here makes comments jump backwards.
       if (_wasPlaying) {
-        _frozenPosition = Duration(
-          microseconds: position.inMicroseconds +
-              (elapsedSincePosition.inMicroseconds * rate).round(),
+        _frozenPosition += Duration(
+          microseconds: (elapsed.inMicroseconds * rate).round(),
         );
-        _wasPlaying = false;
+      } else {
+        // Resume from the frozen display time; do not count paused time.
+        _wasPlaying = true;
       }
-      current = _frozenPosition;
+
+      // A normal position update lags the interpolated clock and must not
+      // pull it back. Only correct a genuine forward jump smoothly.
+      final drift = position - _frozenPosition;
+      if (drift > const Duration(milliseconds: 120)) {
+        _frozenPosition += Duration(
+          microseconds: (drift.inMicroseconds * 0.15).round(),
+        );
+      } else if (drift < const Duration(milliseconds: -120)) {
+        if (drift < const Duration(seconds: -2)) {
+          // A real backward seek, not resume lag.
+          _frozenPosition = position;
+        } else {
+          // The provider lags after resume; slow down gently instead of
+          // snapping the comments backwards.
+          _frozenPosition += Duration(
+            microseconds: (drift.inMicroseconds * 0.02).round(),
+          );
+        }
+      }
+    } else {
+      _wasPlaying = false;
     }
+
+    final current = _frozenPosition;
 
     return IgnorePointer(
       child: RepaintBoundary(
