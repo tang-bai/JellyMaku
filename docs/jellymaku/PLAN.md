@@ -1,7 +1,7 @@
 
 # 实施总计划（Stage A / Stage B）
 
-> 状态：Stage A 核心已构建/验证（Windows release + 119 tests + 启动冒烟）；弹幕手动匹配/来源过滤已补齐；真实 E2E/最新 develop/安装器未完成。
+> 状态：Stage A 核心已构建/验证（Windows release + 121 tests + 启动冒烟）；弹幕手动匹配/来源过滤已补齐；真实 E2E/最新 develop/安装器未完成。
 > 日期：2026-10-19。
 > 基座：DonutWare/Fladder develop de7b5a2a23f16f5f3bb164ec0baedf50941e4808 + PR #735。
 > 原则：先交付可用的 Jellyfin 播放器，再叠加 Bangumi；每阶段有可运行产物与证据。

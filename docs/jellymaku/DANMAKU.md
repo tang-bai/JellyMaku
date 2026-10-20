@@ -65,6 +65,7 @@
 - 缓存：URL 型结果的 episodeId 只在该服务器内有意义，不写数值 key 缓存，避免换服务器串数据。
 - HTTPS：证书必须与域名匹配。实测 `danmu.api.tangbai.cc` 证书 hostname mismatch，Dart 报 `HandshakeException`；请用 `http://` 或修复证书。
 - 已实测（2026-10-20）：搜索“孤独摇滚”返回 9 条候选，用 URL 拉取 759 条弹幕并全部解析成功。
+- 错误恢复：URL 路由失败/返回 0 条 → 回退 `/comment/{id}`；id 仍报 `Invalid url format`/404 → 按标题+集号重搜，选一个绝对 http(s) 的候选再拉。
 
 ## 3. 匹配
 

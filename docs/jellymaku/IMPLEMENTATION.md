@@ -1,7 +1,7 @@
 
 # 实施检查清单与证据模板
 
-> 状态：Stage A 核心已构建/验证：Flutter 3.35.7、analyze 0、119 tests（2026-10-20）；Windows release + 启动冒烟、portable zip 于 2026-10-20 重新构建。
+> 状态：Stage A 核心已构建/验证：Flutter 3.35.7、analyze 0、121 tests（2026-10-20）；Windows release + 启动冒烟、portable zip 于 2026-10-20 重新构建。
 > 弹幕在 2026-10-20 增加了 Kazumi 对齐能力：手动匹配三步 UI、来源过滤、合并去重、实时类型/来源开关、描边/颜色开关。
 > 真实 Jellyfin/DDP/SyncPlay E2E 仍未完成；弹幕未做真实凭证联调。
 > 用途：让后续 agent 按清单推进，避免“文档写了但没做”。
@@ -17,7 +17,7 @@
 - [ ] 补最新 develop 合并（仍为 PR #735 head）。
 - [x] Flutter 3.35.7 到 .flutter；PUB_CACHE 本地。
 - [x] VS BuildTools/Windows SDK/Developer Mode 检查通过。
-- [x] flutter analyze/test 通过（0 issue；119 tests）。
+- [x] flutter analyze/test 通过（0 issue；121 tests）。
 - [x] flutter build windows --release 成功；启动冒烟通过。
 - [ ] 本地 Jellyfin 12.2 + .NET 10 启动；登录/播放测试片。
 - [ ] third_party/manifest.json 生成；verify-assets 通过。
@@ -115,7 +115,7 @@
 - 日期：2026-10-20
 - commit：feat(danmaku): add source filters, manual match and duplicate merge；feat(danmaku): add local import and local echo（2026-10-20）
 - 命令：
-  - `.\.flutter\bin\flutter.bat test --no-pub` → 119 tests passed
+  - `.\.flutter\bin\flutter.bat test --no-pub` → 121 tests passed
   - `.\.flutter\bin\dart.bat analyze lib test` → No issues found
 - 结果：通过（单元/静态）；未做真实 DDP/Jellyfin E2E、未重新构建 Windows 包。
 - 截图：artifacts/screenshots/danmaku-*（未生成）
@@ -126,10 +126,10 @@
 ### Windows release 重建（2026-10-20）
 
 - 命令（ASCII 路径 `L:\JellyMaku`）：
-  - `.flutter\bin\flutter.bat build windows --release --no-pub` → √ Built `build\windows\x64\runner\Release\JellyMaku.exe`（119.5s；接入 danmu_api 后重建）
-  - `tools\pack.ps1 -Version 0.1.0` → `artifacts\JellyMaku-0.1.0-windows-x64-portable.zip`（90,729,136 bytes，SHA256 `A70877656C5E8D010FF90D8BDA8EE25A5A1FAF2B3C7311F7B6E279495CCAB516`）
+  - `.flutter\bin\flutter.bat build windows --release --no-pub` → √ Built `build\windows\x64\runner\Release\JellyMaku.exe`（120.0s；URL 错误恢复后重建）
+  - `tools\pack.ps1 -Version 0.1.0` → `artifacts\JellyMaku-0.1.0-windows-x64-portable.zip`（90,731,122 bytes，SHA256 `EDD069EFD5BFF0E7D9D1DE2F09D748638C7546FB1E4E9DA8132D66B707059766`）
   - 启动冒烟：portable exe 启动 8 秒未退出，随后手动结束。
-- 证据：`data\app.so` 时间 2026-10-20 21:57；zip 21:59。
+- 证据：`data\app.so` 时间 2026-10-20 22:11；zip 22:13。
 - 注意：`JellyMaku.exe` 本体未变（runner 未改），新 Dart 代码在 `data\app.so`；只替换 exe 不会更新界面。
 
 ### 自建 danmu_api 接入（2026-10-20）
@@ -137,6 +137,7 @@
 - 服务器：`http://danmu.api.tangbai.cc`（HTTPS 证书 hostname mismatch，Dart `HandshakeException`）。
 - 实测：`search/episodes?anime=孤独摇滚&v2=true` → 9 条候选；`/api/v2/comment?url=<分集 url>` → 759 条，解析 759 条。
 - 代码：免签名（AppId 为空不发认证头）、搜索内嵌分集、URL 拉弹幕、URL 结果不写缓存。
+- 错误恢复：URL 路由 4xx/异常 → 回退 `/comment/{id}`；id 仍 400/404 → 按标题+集号重搜并选 http(s) 候选；协议相对 URL 自动补 `https:`。
 - 命令：临时 `flutter test` live probe（已删除）→ 1 passed。
 - 未验证：播放器内真实切集/暂停；巴哈来源（danmu_api 服务端支持，未单独验证）。
 
@@ -154,6 +155,6 @@
 - 文档：完成；本次更新 DANMAKU/IMPLEMENTATION/ROADMAP/AGENTS。
 - 代码：Fladder + PR #735 head 已导入；弹幕（自动+手动匹配/来源/合并/本地导入/叠加层）、超分（Anime4K）已接入；Bangumi Stage B 未开始。
 - 构建：Windows release 重新构建成功、启动冒烟通过（2026-10-20）；portable zip 已重打。
-- 测试：119 tests passed（2026-10-20）；`dart analyze lib test` → No issues found。
+- 测试：121 tests passed（2026-10-20）；`dart analyze lib test` → No issues found。
 - 发布：portable zip 已出；安装器/中文 ARB 未做。
 - 未验证：真实 DDP 凭证、真实 Jellyfin 播放、SyncPlay 双端、超分画质/性能、弹幕 p[3] 来源语义。

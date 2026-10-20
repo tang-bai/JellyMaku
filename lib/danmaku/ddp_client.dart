@@ -219,27 +219,50 @@ class DdpClient {
     bool withRelated = true,
     String url = '',
   }) async {
-    // danmu_api 的 /comment/{id} 需要它自己的内存映射，直接请求常为空；
-    // 它支持 /comment?url=<原始页面>，用搜索结果里的 url 最稳。
-    final data = url.isEmpty
-        ? await _get(
-            '/api/v2/comment/$episodeId',
-            query: {
-              'withRelated': withRelated ? 'true' : 'false',
-              'chConvert': '$chConvert',
-            },
-          )
-        : await _get(
-            '/api/v2/comment',
-            query: {
-              'url': url,
-              'withRelated': withRelated ? 'true' : 'false',
-              'chConvert': '$chConvert',
-            },
-          );
+    final query = {
+      'withRelated': withRelated ? 'true' : 'false',
+      'chConvert': '$chConvert',
+    };
+    final normalized = _normalizeVideoUrl(url);
 
+    // danmu_api 的 /comment/{id} 依赖它自己的内存映射，直接请求常为空；
+    // 它支持 /comment?url=<原始页面>，用搜索结果里的 url 最稳。
+    Map<String, dynamic>? data;
+    if (normalized.isNotEmpty) {
+      try {
+        data = await _get(
+          '/api/v2/comment',
+          query: {...query, 'url': normalized},
+        );
+      } on DanmakuException {
+        // 候选 url 可能不是绝对 http(s)，或被服务器判定无效；退回 id 路由。
+        data = null;
+      }
+    }
+    data ??= await _get(
+      '/api/v2/comment/$episodeId',
+      query: query,
+    );
+
+    var comments = _parseComments(data['comments']);
+    if (comments.isEmpty && normalized.isNotEmpty && episodeId > 0) {
+      // URL 命中但 0 条时再试一次 id（服务器可能刚重启、映射丢失）。
+      try {
+        final fallback = await _get(
+          '/api/v2/comment/$episodeId',
+          query: query,
+        );
+        final fallbackComments = _parseComments(fallback['comments']);
+        if (fallbackComments.isNotEmpty) comments = fallbackComments;
+      } catch (_) {
+        // 保留空结果，交给上层显示“暂无弹幕”。
+      }
+    }
+    return comments;
+  }
+
+  List<DdpComment> _parseComments(Object? rawComments) {
     final comments = <DdpComment>[];
-    final rawComments = data['comments'];
     if (rawComments is List) {
       for (final entry in rawComments) {
         if (entry is! Map) continue;
@@ -251,6 +274,16 @@ class DdpClient {
       }
     }
     return comments;
+  }
+
+  /// 只接受绝对 http(s)、协议相对或 local: 资源；其余交给 id 路由。
+  String _normalizeVideoUrl(String raw) {
+    var url = raw.trim();
+    if (url.startsWith('local:')) return url;
+    if (url.startsWith('//')) url = 'https:$url';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.contains('.') && !url.contains(' ')) return 'https://$url';
+    return '';
   }
 
   Future<void> testConnection() async {

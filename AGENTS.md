@@ -2,7 +2,7 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：**v0.1.0-beta.2** Windows Beta 已发布（analyze 0 issue；119 tests passed）；GitHub main 持续更新；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入；弹幕手动匹配/本地导入/自建 danmu_api 已接入；DDP 无来源标签；AppId 高级可选。
+> 状态：**v0.1.0-beta.2** Windows Beta 已发布（analyze 0 issue；121 tests passed）；GitHub main 持续更新；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入；弹幕手动匹配/本地导入/自建 danmu_api 已接入；DDP 无来源标签；AppId 高级可选。
 > 日期：2026-10-20。
 
 ## 0. 当前仓库状态（必须先理解）
@@ -10,7 +10,7 @@
 - 本地 git 已初始化，main 为工作分支；origin https://github.com/tang-bai/JellyMaku 已推送（Stage A 基线 `dc1f8d5c`）。
 - main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 项目文档/AGENTS。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
-- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、119 tests passed；Windows release 重新构建/启动冒烟通过（2026-10-20）**。
+- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、121 tests passed；Windows release 重新构建/启动冒烟通过（2026-10-20）**。
 - 基线说明：为尽快拿到可运行起点，main 以 PR #735 head 为基线（包含 Fladder + SyncPlay），**尚未合并最新 develop**；Phase A0 仍需补这次合并。
 - 未验证：真实 Jellyfin 12.2 E2E、真实 DDP 凭证、SyncPlay 双客户端、超分画质/性能。
 - 因此：
@@ -124,10 +124,10 @@ dart analyze lib test
 |---|---|
 | 文档/AGENTS | 完成；Stage A 报告/BUILD_WINDOWS 已补 |
 | Fladder 源码导入 | 完成（PR #735 head 基线） |
-| Flutter/构建 | 完成：analyze 0、119 tests、Windows release 成功、启动冒烟 |
+| Flutter/构建 | 完成：analyze 0、121 tests、Windows release 成功、启动冒烟 |
 | SyncPlay | 代码已导入；单测通过；真实双端未联调 |
 | 弹幕 | DDP/自建 danmu_api/自动+手动匹配/合并去重/本地导入/缓存/叠加层/设置/DPAPI（AppId 高级可选）已接入；DDP 无来源标签；真实联调未完成 |
-| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；119 tests；画质/性能未验收 |
+| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；121 tests；画质/性能未验收 |
 | 品牌/打包 | JellyMaku exe/窗口/资源；portable zip；安装器/中文 ARB 未完成 |
 | Bangumi 时间表/图片/评论 | 未开始 |
 | 推送 GitHub | 完成（基线 dc1f8d5c） |
@@ -152,7 +152,7 @@ dart analyze lib test
 16. **DDP 来源字段语义（已实测）**：`withRelated=true` 的响应里 `p[3]` 是十六进制用户 id，不是 BiliBili/Gamer 标签；第三方弹幕已被聚合进同一列表。不要再做“按站过滤”或“关闭弹弹play 就只剩 B 站/巴哈”的 UI。
 17. **弹幕设置分两类**：时间偏移/屏蔽词/合并/条数会改变解析结果，必须防抖重载（300ms）；字号/颜色/描边/类型与本地开关只影响绘制，直接重绘，不要触发网络或解析。
 18. **本地导入的边界**：`localFile` 优先于 DDP 与手动映射，且不需要凭证；AppId/AppSecret 默认折叠在「高级」里，普通用户无需填写；不提供发送弹幕（DDP 无发送 API）。
-19. **自建 danmu_api 的坑**：它必须走 `/api/v2/comment?url=<分集页面>`（`/comment/{id}` 常为空）；没有 `/bangumi/{id}`，手动匹配用搜索结果内嵌的 episodes；其 episodeId 不跨服务器稳定，URL 型结果不要写数值缓存；HTTPS 证书 hostname mismatch 会 `HandshakeException`，用 `http://` 或修证书。
+19. **自建 danmu_api 的坑**：它必须走 `/api/v2/comment?url=<分集页面>`（`/comment/{id}` 常为空/404）；没有 `/bangumi/{id}`，手动匹配用搜索结果内嵌的 episodes；其 episodeId 不跨服务器稳定，URL 型结果不要写数值缓存；HTTPS 证书 hostname mismatch 会 `HandshakeException`，用 `http://` 或修证书；遇到 `Invalid url format` 要回退到 id 路由，再失败就按标题+集号重搜选 http(s) 候选。
 
 ## 11. 文档索引
 

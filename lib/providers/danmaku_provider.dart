@@ -189,11 +189,34 @@ class DanmakuController extends StateNotifier<DanmakuState> {
             )
           : null;
       if (raw == null) {
-        raw = await client.getComments(
-          match.episodeId,
-          chConvert: settings.chConvert,
-          url: match.url,
-        );
+        try {
+          raw = await client.getComments(
+            match.episodeId,
+            chConvert: settings.chConvert,
+            url: match.url,
+          );
+        } on DanmakuException catch (error) {
+          // danmu_api 的 id 映射失效时会报 Invalid url/404；用标题+集号重搜一次，
+          // 优先拿带 url 的候选，避免整集弹幕直接失败。
+          final recoverable = error.statusCode == 400 ||
+              error.statusCode == 404 ||
+              error.message.toLowerCase().contains('invalid url');
+          if (!customServer || !recoverable) rethrow;
+          if (error.statusCode == 401 || error.statusCode == 403) rethrow;
+          final candidates = await client.searchEpisodes(
+            media.searchTitle,
+            media.episodeNumber,
+          );
+          final withUrl = candidates.where(
+            (candidate) => candidate.url.trim().startsWith('http'),
+          );
+          if (withUrl.isEmpty) rethrow;
+          raw = await client.getComments(
+            withUrl.first.episodeId,
+            chConvert: settings.chConvert,
+            url: withUrl.first.url,
+          );
+        }
         if (match.url.isEmpty) {
           await cache.writeComments(match.episodeId, settings.chConvert, raw);
         }

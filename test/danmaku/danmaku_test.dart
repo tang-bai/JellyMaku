@@ -138,6 +138,75 @@ void main() {
       client.dispose();
     });
 
+    test('normalizes protocol-relative urls before requesting comments',
+        () async {
+      late http.Request captured;
+      final mock = MockClient((request) async {
+        captured = request;
+        return http.Response(
+          jsonEncode({
+            'comments': [
+              {'cid': 1, 'p': '1.0,1,16777215,[bilibili1]', 'm': 'ok'},
+            ],
+          }),
+          200,
+        );
+      });
+      final client = DdpClient(
+        baseUrl: 'http://danmu.example',
+        appId: '',
+        appSecret: '',
+        httpClient: mock,
+      );
+
+      await client.getComments(2, url: '//example.com/ep1');
+
+      expect(captured.url.queryParameters['url'], 'https://example.com/ep1');
+      client.dispose();
+    });
+
+    test('falls back to the id route when the server rejects the url',
+        () async {
+      final paths = <String>[];
+      final mock = MockClient((request) async {
+        paths.add(request.url.path);
+        if (request.url.path == '/api/v2/comment') {
+          return http.Response(
+            jsonEncode({
+              'errorCode': 400,
+              'errorMessage': 'Invalid url format, must start with http or https',
+              'comments': [],
+            }),
+            400,
+          );
+        }
+        return http.Response(
+          jsonEncode({
+            'comments': [
+              {'cid': 1, 'p': '1.0,1,16777215,[bilibili1]', 'm': 'fallback'},
+            ],
+          }),
+          200,
+        );
+      });
+      final client = DdpClient(
+        baseUrl: 'http://danmu.example',
+        appId: '',
+        appSecret: '',
+        httpClient: mock,
+      );
+
+      final comments = await client.getComments(
+        2,
+        url: 'https://example.com/ep1',
+      );
+
+      expect(paths.first, '/api/v2/comment');
+      expect(paths.last, '/api/v2/comment/2');
+      expect(comments.single.m, 'fallback');
+      client.dispose();
+    });
+
     test('getEpisodes reads bangumi.episodes', () async {
       final mock = MockClient((request) async {
         expect(request.url.path, '/api/v2/bangumi/12345');
