@@ -22,6 +22,7 @@ class DanmakuSettingsModel {
   final bool showBiliBiliSource;
   final bool showGamerSource;
   final bool showDanDanPlaySource;
+  final bool showLocalSource;
   final bool mergeDuplicates;
   final bool showColor;
   final double strokeWidth;
@@ -51,6 +52,7 @@ class DanmakuSettingsModel {
     this.showBiliBiliSource = true,
     this.showGamerSource = true,
     this.showDanDanPlaySource = true,
+    this.showLocalSource = true,
     this.mergeDuplicates = false,
     this.showColor = true,
     this.strokeWidth = 1.5,
@@ -86,10 +88,12 @@ class DanmakuSettingsModel {
     bool? showBiliBiliSource,
     bool? showGamerSource,
     bool? showDanDanPlaySource,
+    bool? showLocalSource,
     bool? mergeDuplicates,
     bool? showColor,
     double? strokeWidth,
     String? localFile,
+    bool clearLocalFile = false,
   }) {
     return DanmakuSettingsModel(
       enabled: enabled ?? this.enabled,
@@ -115,10 +119,11 @@ class DanmakuSettingsModel {
       showBiliBiliSource: showBiliBiliSource ?? this.showBiliBiliSource,
       showGamerSource: showGamerSource ?? this.showGamerSource,
       showDanDanPlaySource: showDanDanPlaySource ?? this.showDanDanPlaySource,
+      showLocalSource: showLocalSource ?? this.showLocalSource,
       mergeDuplicates: mergeDuplicates ?? this.mergeDuplicates,
       showColor: showColor ?? this.showColor,
       strokeWidth: strokeWidth ?? this.strokeWidth,
-      localFile: localFile ?? this.localFile,
+      localFile: clearLocalFile ? null : (localFile ?? this.localFile),
     );
   }
 
@@ -146,6 +151,7 @@ class DanmakuSettingsModel {
       'showBiliBiliSource': showBiliBiliSource,
       'showGamerSource': showGamerSource,
       'showDanDanPlaySource': showDanDanPlaySource,
+      'showLocalSource': showLocalSource,
       'mergeDuplicates': mergeDuplicates,
       'showColor': showColor,
       'strokeWidth': strokeWidth,
@@ -196,6 +202,7 @@ class DanmakuSettingsModel {
       showBiliBiliSource: json['showBiliBiliSource'] as bool? ?? true,
       showGamerSource: json['showGamerSource'] as bool? ?? true,
       showDanDanPlaySource: json['showDanDanPlaySource'] as bool? ?? true,
+      showLocalSource: json['showLocalSource'] as bool? ?? true,
       mergeDuplicates: json['mergeDuplicates'] as bool? ?? false,
       showColor: json['showColor'] as bool? ?? true,
       strokeWidth: number(json['strokeWidth'], 1.5),

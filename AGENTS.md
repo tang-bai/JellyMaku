@@ -2,7 +2,7 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：**v0.1.0-beta.2** Windows Beta 已发布（analyze 0 issue；110 tests passed）；GitHub main 持续更新；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入；弹幕手动匹配/来源过滤已接入。
+> 状态：**v0.1.0-beta.2** Windows Beta 已发布（analyze 0 issue；118 tests passed）；GitHub main 持续更新；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入；弹幕手动匹配/来源过滤/本地导入/发送回显已接入。
 > 日期：2026-10-20。
 
 ## 0. 当前仓库状态（必须先理解）
@@ -10,7 +10,7 @@
 - 本地 git 已初始化，main 为工作分支；origin https://github.com/tang-bai/JellyMaku 已推送（Stage A 基线 `dc1f8d5c`）。
 - main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 项目文档/AGENTS。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
-- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、110 tests passed（2026-10-20）；Windows release 构建/启动冒烟为 2026-10-19 产物**。
+- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、118 tests passed（2026-10-20）；Windows release 构建/启动冒烟为 2026-10-19 产物**。
 - 基线说明：为尽快拿到可运行起点，main 以 PR #735 head 为基线（包含 Fladder + SyncPlay），**尚未合并最新 develop**；Phase A0 仍需补这次合并。
 - 未验证：真实 Jellyfin 12.2 E2E、真实 DDP 凭证、SyncPlay 双客户端、超分画质/性能。
 - 因此：
@@ -124,10 +124,10 @@ dart analyze lib test
 |---|---|
 | 文档/AGENTS | 完成；Stage A 报告/BUILD_WINDOWS 已补 |
 | Fladder 源码导入 | 完成（PR #735 head 基线） |
-| Flutter/构建 | 完成：analyze 0、110 tests、Windows release 成功、启动冒烟 |
+| Flutter/构建 | 完成：analyze 0、118 tests、Windows release 成功、启动冒烟 |
 | SyncPlay | 代码已导入；单测通过；真实双端未联调 |
-| 弹幕 | DDP/自动+手动匹配/来源过滤/合并去重/缓存/叠加层/设置/DPAPI 已接入；本地 XML/发送/真实联调未完成 |
-| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；110 tests；画质/性能未验收 |
+| 弹幕 | DDP/自动+手动匹配/来源过滤/合并去重/本地 XML·JSON 导入/发送回显/缓存/叠加层/设置/DPAPI 已接入；真实联调未完成 |
+| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；118 tests；画质/性能未验收 |
 | 品牌/打包 | JellyMaku exe/窗口/资源；portable zip；安装器/中文 ARB 未完成 |
 | Bangumi 时间表/图片/评论 | 未开始 |
 | 推送 GitHub | 完成（基线 dc1f8d5c） |
@@ -151,6 +151,7 @@ dart analyze lib test
 15. **弹幕渲染要缓存**：轨道分配与带颜色的 TextPainter 必须缓存；每帧重排全部评论/重新 layout 文本会造成帧时间不稳，看起来像弹幕在跳动。
 16. **DDP 来源字段语义**：`withRelated=true` 时 `p[3]` 可能是来源标签（BiliBili/Gamer）而非用户 id；解析时两者都保留，来源过滤必须放在绘制层实时判断，否则切换开关要重新请求。真实响应需用凭证再确认一次。
 17. **弹幕设置分两类**：时间偏移/屏蔽词/合并/条数会改变解析结果，必须防抖重载（300ms）；字号/颜色/描边/来源与类型开关只影响绘制，直接重绘，不要触发网络或解析。
+18. **本地导入/发送的边界**：`localFile` 优先于 DDP 与手动映射，且不需要凭证；发送只做本地回显（`source=local`），不写 DDP、不落盘，切集/关闭即消失。不要把“发送”文案写成上传到弹幕库。
 
 ## 11. 文档索引
 

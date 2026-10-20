@@ -99,6 +99,7 @@ bool isDanmakuVisible(
     DanmakuSource.biliBili => settings.showBiliBiliSource,
     DanmakuSource.gamer => settings.showGamerSource,
     DanmakuSource.danDanPlay => settings.showDanDanPlaySource,
+    DanmakuSource.local => settings.showLocalSource,
   };
 }
 

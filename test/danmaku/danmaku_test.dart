@@ -163,6 +163,25 @@ void main() {
       expect(isDanmakuVisible(comments[0], onlyRelated), isTrue);
     });
 
+    test('local import comments follow showLocalSource', () {
+      const local = DanmakuComment(
+        time: 1,
+        mode: DanmakuMode.scroll,
+        color: 0xFFFFFF,
+        uid: 'local',
+        text: 'echo',
+        source: DanmakuSource.local,
+      );
+      expect(isDanmakuVisible(local, const DanmakuSettingsModel()), isTrue);
+      expect(
+        isDanmakuVisible(
+          local,
+          const DanmakuSettingsModel(showLocalSource: false),
+        ),
+        isFalse,
+      );
+    });
+
     test('merges duplicated text within the five second window', () {
       final comments = parseDanmakuComments(
         const [
@@ -206,9 +225,11 @@ void main() {
       const settings = DanmakuSettingsModel(
         showBiliBiliSource: false,
         showGamerSource: false,
+        showLocalSource: false,
         mergeDuplicates: true,
         showColor: false,
         strokeWidth: 3.5,
+        localFile: r'C:\danmaku\ep1.xml',
       );
       final restored = DanmakuSettingsModel.fromJson(settings.toJson());
 
@@ -217,7 +238,15 @@ void main() {
       expect(restored.showDanDanPlaySource, isTrue);
       expect(restored.mergeDuplicates, isTrue);
       expect(restored.showColor, isFalse);
+      expect(restored.showLocalSource, isFalse);
       expect(restored.strokeWidth, 3.5);
+      expect(restored.localFile, r'C:\danmaku\ep1.xml');
+    });
+
+    test('clearLocalFile removes the selected file', () {
+      const settings = DanmakuSettingsModel(localFile: 'ep1.xml');
+      expect(settings.copyWith(clearLocalFile: true).localFile, isNull);
+      expect(settings.copyWith(localFile: 'ep2.xml').localFile, 'ep2.xml');
     });
   });
 }

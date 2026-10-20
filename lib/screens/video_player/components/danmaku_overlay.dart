@@ -113,6 +113,7 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
           previous.mergeDuplicates != next.mergeDuplicates ||
           previous.autoMatch != next.autoMatch ||
           previous.hashMatch != next.hashMatch ||
+          previous.localFile != next.localFile ||
           !listEquals(previous.blockWords, next.blockWords) ||
           !listEquals(previous.blockUsers, next.blockUsers);
       if (parseChanged) _scheduleReload();

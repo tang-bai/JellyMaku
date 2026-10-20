@@ -18,12 +18,14 @@ enum DanmakuSource {
   biliBili,
   gamer,
   danDanPlay,
+  local,
 }
 
 DanmakuSource parseDanmakuSource(String raw) {
   final value = raw.toLowerCase();
   if (value.contains('bilibili')) return DanmakuSource.biliBili;
   if (value.contains('gamer')) return DanmakuSource.gamer;
+  if (value.contains('local')) return DanmakuSource.local;
   return DanmakuSource.danDanPlay;
 }
 

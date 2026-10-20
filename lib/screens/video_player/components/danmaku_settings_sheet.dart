@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,6 +27,7 @@ class _DanmakuSettingsDialogState
   late final TextEditingController _appId;
   late final TextEditingController _appSecret;
   bool _testing = false;
+  bool _pickingFile = false;
   String? _testResult;
 
   @override
@@ -41,6 +43,26 @@ class _DanmakuSettingsDialogState
     _appId.dispose();
     _appSecret.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickLocalFile() async {
+    setState(() => _pickingFile = true);
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        dialogTitle: '选择本地弹幕文件',
+        type: FileType.custom,
+        allowedExtensions: const ['xml', 'json'],
+      );
+      final files = result?.files;
+      if (files == null || files.isEmpty) return;
+      final path = files.single.path;
+      if (path == null || path.isEmpty || !mounted) return;
+      ref.read(danmakuSettingsProvider.notifier).setLocalFile(path);
+    } catch (error) {
+      if (mounted) setState(() => _testResult = '选择文件失败：$error');
+    } finally {
+      if (mounted) setState(() => _pickingFile = false);
+    }
   }
 
   Future<void> _testConnection() async {
@@ -113,7 +135,11 @@ class _DanmakuSettingsDialogState
                 Text(
                   '已匹配：${state.match!.animeTitle}'
                   '${state.match!.episodeTitle.isEmpty ? '' : ' · ${state.match!.episodeTitle}'}'
-                  '（${state.match!.source == 'manual' ? '手动' : '自动'}）',
+                  '（${switch (state.match!.source) {
+                    'manual' => '手动',
+                    'local' => '本地',
+                    _ => '自动',
+                  }}）',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall,
@@ -183,6 +209,37 @@ class _DanmakuSettingsDialogState
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall,
                             ),
+                          ),
+                      ],
+                    ),
+                    const Divider(height: 28),
+                    Text('本地弹幕文件', style: theme.textTheme.titleSmall),
+                    const SizedBox(height: 4),
+                    Text(
+                      (settings.localFile ?? '').isEmpty
+                          ? '未选择。支持 Bilibili XML / DDP JSON；'
+                              '选择后优先于在线匹配，且不需要 AppId。'
+                          : '当前：${_fileName(settings.localFile!)}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton.tonalIcon(
+                          onPressed: _pickingFile ? null : _pickLocalFile,
+                          icon: const Icon(Icons.folder_open),
+                          label: const Text('选择文件…'),
+                        ),
+                        if ((settings.localFile ?? '').isNotEmpty)
+                          OutlinedButton.icon(
+                            onPressed: () =>
+                                notifier.setLocalFile(null),
+                            icon: const Icon(Icons.close),
+                            label: const Text('清除本地文件'),
                           ),
                       ],
                     ),
@@ -322,13 +379,22 @@ class _DanmakuSettingsDialogState
                       value: settings.showDanDanPlaySource,
                       onChanged: notifier.setShowDanDanPlaySource,
                     ),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('本地导入'),
+                      subtitle: const Text('本地 XML/JSON 文件与发送回显'),
+                      value: settings.showLocalSource,
+                      onChanged: notifier.setShowLocalSource,
+                    ),
                     const Divider(height: 28),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
                       children: [
                         FilledButton.tonalIcon(
-                          onPressed: () async {
+                          onPressed: (settings.localFile ?? '').isNotEmpty
+                              ? null
+                              : () async {
                             final applied =
                                 await showDanmakuMatchDialog(context);
                             if (!context.mounted) return;
@@ -382,6 +448,8 @@ class _DanmakuSettingsDialogState
     );
   }
 }
+
+String _fileName(String path) => path.split(RegExp(r'[\\/]')).last;
 
 class _SliderTile extends StatelessWidget {
   const _SliderTile({

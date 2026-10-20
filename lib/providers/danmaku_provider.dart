@@ -8,6 +8,7 @@ import 'package:fladder/danmaku/cache.dart';
 import 'package:fladder/danmaku/comment_parser.dart';
 import 'package:fladder/danmaku/danmaku_models.dart';
 import 'package:fladder/danmaku/ddp_client.dart';
+import 'package:fladder/danmaku/local_import.dart';
 import 'package:fladder/danmaku/matcher.dart';
 import 'package:fladder/providers/settings/danmaku_settings_provider.dart';
 
@@ -71,6 +72,7 @@ class DanmakuController extends StateNotifier<DanmakuState> {
   int _generation = 0;
   DanmakuMediaInfo? _media;
   DanmakuCache? _cacheInstance;
+  final List<DanmakuComment> _localEcho = [];
 
   DanmakuMediaInfo? get media => _media;
 
@@ -81,12 +83,59 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     }
 
     final settings = ref.read(danmakuSettingsProvider);
+    if (_media != null && _media!.itemId != media.itemId) {
+      _localEcho.clear();
+    }
     if (!settings.enabled) {
       _media = media;
       state = DanmakuState(
         status: DanmakuLoadStatus.disabled,
         itemId: media.itemId,
       );
+      return;
+    }
+
+    // 本地文件优先于 DDP：无凭证也能播放/演示，且不回源到弹弹play。
+    final localFile = settings.localFile?.trim() ?? '';
+    if (localFile.isNotEmpty) {
+      _media = media;
+      final generation = ++_generation;
+      state = DanmakuState(
+        status: DanmakuLoadStatus.loading,
+        itemId: media.itemId,
+      );
+      try {
+        final file = File(localFile);
+        if (!await file.exists()) {
+          throw const LocalDanmakuFormatException('本地弹幕文件不存在');
+        }
+        final name = _localFileName(localFile);
+        final comments = parseLocalDanmakuFile(
+          await file.readAsString(),
+          fileName: name,
+        );
+        if (generation != _generation) return;
+        state = DanmakuState(
+          status: DanmakuLoadStatus.ready,
+          comments: _mergeEchoes(comments),
+          itemId: media.itemId,
+          title: name,
+          match: DanmakuMatch(
+            episodeId: 0,
+            animeTitle: name,
+            episodeTitle: '',
+            shift: 0,
+            source: 'local',
+          ),
+        );
+      } catch (error) {
+        if (generation != _generation) return;
+        state = DanmakuState(
+          status: DanmakuLoadStatus.error,
+          itemId: media.itemId,
+          error: '本地弹幕读取失败：$error',
+        );
+      }
       return;
     }
 
@@ -155,7 +204,7 @@ class DanmakuController extends StateNotifier<DanmakuState> {
       final comments = parseDanmakuComments(raw, settings, shift: match.shift);
       state = DanmakuState(
         status: DanmakuLoadStatus.ready,
-        comments: comments,
+        comments: _mergeEchoes(comments),
         itemId: media.itemId,
         title: match.animeTitle,
         match: match,
@@ -259,11 +308,48 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     );
   }
 
+  /// 发送弹幕的本地回显：只进入当前会话的评论列表，不写 DDP、不落盘。
+  bool addLocalEcho({
+    required String text,
+    required DanmakuMode mode,
+    required double time,
+    int color = 0xFFFFFF,
+  }) {
+    if (state.status != DanmakuLoadStatus.ready) return false;
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return false;
+    final clamped =
+        trimmed.length > 60 ? trimmed.substring(0, 60) : trimmed;
+    final comment = DanmakuComment(
+      time: time < 0 ? 0 : time,
+      mode: mode,
+      color: color,
+      uid: 'local',
+      text: clamped,
+      source: DanmakuSource.local,
+    );
+    _localEcho.add(comment);
+    final merged = <DanmakuComment>[...state.comments, comment]
+      ..sort((a, b) => a.time.compareTo(b.time));
+    state = state.copyWith(comments: merged);
+    return true;
+  }
+
   void stop() {
     _generation++;
     _media = null;
+    _localEcho.clear();
     state = const DanmakuState();
   }
+
+  List<DanmakuComment> _mergeEchoes(List<DanmakuComment> comments) {
+    if (_localEcho.isEmpty) return comments;
+    return <DanmakuComment>[...comments, ..._localEcho]
+      ..sort((a, b) => a.time.compareTo(b.time));
+  }
+
+  String _localFileName(String path) =>
+      path.split(RegExp(r'[\\/]')).last;
 
   Future<DanmakuCache> _cache() async {
     final existing = _cacheInstance;

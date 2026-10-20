@@ -12,8 +12,8 @@
 | 旧 MPV Shim 实现 | 丢失 | 本地/远程均不可恢复；不再作为基座 |
 | Fladder 源码 | 已导入 | PR #735 head 基线；最新 develop 待合并 |
 | Flutter 工具链 | 完成 | 3.35.7；analyze 0 issue |
-| 构建/单测 | 完成 | Windows release/启动冒烟（10-19）；110 tests（10-20） |
-| 弹幕 | 核心+手动匹配已接入；真实联调未做 | DDP/自动+手动匹配/来源过滤/合并去重/缓存/叠加层/设置/DPAPI；local XML/发送未做 |
+| 构建/单测 | 完成 | Windows release/启动冒烟（10-19）；118 tests（10-20） |
+| 弹幕 | 核心功能已接入；真实联调未做 | DDP/自动+手动匹配/来源过滤/合并去重/本地导入/发送回显/缓存/叠加层/设置/DPAPI；真实联调未做 |
 | 超分 | 核心已接入；未验收 | Anime4K Fast/Quality；画质/性能未测 |
 | SyncPlay | 代码+单测；真实双端未做 | PR #735 head；见 PARTY |
 | Bangumi 时间表/图片/评论 | 未开始 | 条件功能；见 BANGUMI/KAZUMI |

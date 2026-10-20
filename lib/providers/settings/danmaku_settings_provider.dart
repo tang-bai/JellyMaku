@@ -114,6 +114,9 @@ class DanmakuSettingsNotifier extends StateNotifier<DanmakuSettingsModel> {
   void setShowDanDanPlaySource(bool value) =>
       _apply(state.copyWith(showDanDanPlaySource: value));
 
+  void setShowLocalSource(bool value) =>
+      _apply(state.copyWith(showLocalSource: value));
+
   void setMergeDuplicates(bool value) =>
       _apply(state.copyWith(mergeDuplicates: value));
 
@@ -123,6 +126,8 @@ class DanmakuSettingsNotifier extends StateNotifier<DanmakuSettingsModel> {
       _apply(state.copyWith(strokeWidth: value.clamp(0, 6)));
 
   void setLocalFile(String? value) {
-    _apply(state.copyWith(localFile: value));
+    _apply(value == null
+        ? state.copyWith(clearLocalFile: true)
+        : state.copyWith(localFile: value));
   }
 }
