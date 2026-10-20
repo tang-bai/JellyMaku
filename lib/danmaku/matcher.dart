@@ -26,6 +26,7 @@ Future<DanmakuMatch> matchDanmaku(
         episodeTitle: manual['episodeTitle']?.toString() ?? '',
         shift: (manual['shift'] as num?)?.toDouble() ?? 0,
         source: 'manual',
+        url: manual['url']?.toString() ?? '',
       );
     }
   }
@@ -42,12 +43,39 @@ Future<DanmakuMatch> matchDanmaku(
     throw const DanmakuNoMatch();
   }
 
-  final chosen = candidates.first;
+  final chosen = candidates.reduce(
+    (a, b) => _candidateScore(b, media) > _candidateScore(a, media) ? b : a,
+  );
   return DanmakuMatch(
     episodeId: chosen.episodeId,
     animeTitle: chosen.animeTitle,
     episodeTitle: chosen.episodeTitle,
     shift: chosen.shift,
     source: 'search',
+    url: chosen.url,
   );
+}
+
+/// 自动匹配的轻量打分：优先 B 站/巴哈，避开电影/剧场版和非目标来源。
+int _candidateScore(DanmakuCandidate candidate, DanmakuMediaInfo media) {
+  var score = 0;
+  final url = candidate.url.toLowerCase();
+  final title = candidate.animeTitle.toLowerCase();
+  if (url.contains('bilibili.com')) score += 4;
+  if (url.contains('gamer.com.tw')) score += 4;
+  if (url.contains('youku.com') ||
+      url.contains('iqiyi.com') ||
+      url.contains('le.com') ||
+      url.contains('mgtv.com')) {
+    score -= 2;
+  }
+  if (title.contains('电影') || title.contains('剧场版')) score -= 3;
+  final wanted = media.searchTitle.toLowerCase();
+  if (wanted.isNotEmpty && title.contains(wanted)) score += 2;
+  if (!media.isMovie &&
+      RegExp('第\\s*${media.episodeNumber}\\s*[话集]')
+          .hasMatch(candidate.episodeTitle)) {
+    score += 2;
+  }
+  return score;
 }

@@ -86,21 +86,21 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
 
     ref.listen(danmakuSettingsProvider, (previous, next) {
       if (previous == null) return;
-      final connectionChanged = previous.enabled != next.enabled ||
-          previous.appId != next.appId ||
-          previous.appSecret != next.appSecret ||
-          previous.apiBase != next.apiBase;
-      if (connectionChanged) {
+      if (previous.enabled != next.enabled) {
         if (!next.enabled) {
           ref.read(danmakuProvider.notifier).stop();
           return;
         }
-        if (previous.enabled != next.enabled) {
-          _loadedItemId = null;
-          _loadFrom(ref.read(playBackModel));
-        } else {
-          ref.read(danmakuProvider.notifier).reload();
-        }
+        _loadedItemId = null;
+        _loadFrom(ref.read(playBackModel));
+        return;
+      }
+      // 地址/凭证是边输入边保存的，防抖后再重载，避免每敲一个字符发一次请求。
+      final connectionChanged = previous.appId != next.appId ||
+          previous.appSecret != next.appSecret ||
+          previous.apiBase != next.apiBase;
+      if (connectionChanged) {
+        _scheduleReload();
         return;
       }
 

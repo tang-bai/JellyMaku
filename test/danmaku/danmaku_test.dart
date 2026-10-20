@@ -67,6 +67,77 @@ void main() {
       client.dispose();
     });
 
+    test('searchAnime keeps episodes/url and omits auth without credentials',
+        () async {
+      late http.Request captured;
+      final mock = MockClient((request) async {
+        captured = request;
+        return http.Response(
+          jsonEncode({
+            'animes': [
+              {
+                'animeId': 1,
+                'animeTitle': 'A',
+                'episodes': [
+                  {
+                    'episodeId': 2,
+                    'episodeTitle': 'E1',
+                    'url': 'https://example.com/ep1',
+                  },
+                ],
+              },
+            ],
+          }),
+          200,
+        );
+      });
+      final client = DdpClient(
+        baseUrl: 'http://danmu.example',
+        appId: '',
+        appSecret: '',
+        httpClient: mock,
+      );
+
+      final animes = await client.searchAnime('A');
+
+      expect(animes.single.episodes.single.episodeId, 2);
+      expect(animes.single.episodes.single.url, 'https://example.com/ep1');
+      expect(captured.headers.containsKey('X-Signature'), isFalse);
+      expect(captured.headers.containsKey('X-AppId'), isFalse);
+      client.dispose();
+    });
+
+    test('getComments uses the url query for custom servers', () async {
+      late http.Request captured;
+      final mock = MockClient((request) async {
+        captured = request;
+        return http.Response(
+          jsonEncode({
+            'comments': [
+              {'cid': 1, 'p': '1.0,1,16777215,[bilibili1]', 'm': 'hi'},
+            ],
+          }),
+          200,
+        );
+      });
+      final client = DdpClient(
+        baseUrl: 'http://danmu.example',
+        appId: '',
+        appSecret: '',
+        httpClient: mock,
+      );
+
+      final comments = await client.getComments(
+        2,
+        url: 'https://example.com/ep1',
+      );
+
+      expect(comments.single.m, 'hi');
+      expect(captured.url.path, '/api/v2/comment');
+      expect(captured.url.queryParameters['url'], 'https://example.com/ep1');
+      client.dispose();
+    });
+
     test('getEpisodes reads bangumi.episodes', () async {
       final mock = MockClient((request) async {
         expect(request.url.path, '/api/v2/bangumi/12345');

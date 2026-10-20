@@ -43,10 +43,15 @@ class DanmakuAnime {
   final String animeTitle;
   final String typeDescription;
 
+  /// 自建 DDP 兼容服务器（danmu_api）会把分集直接放在搜索结果里。
+  /// 官方 DDP 的 animes[] 不含分集，需要在选中番剧后再请求 /bangumi/{id}。
+  final List<DanmakuEpisodeRef> episodes;
+
   const DanmakuAnime({
     required this.animeId,
     required this.animeTitle,
     this.typeDescription = '',
+    this.episodes = const [],
   });
 }
 
@@ -55,9 +60,13 @@ class DanmakuEpisodeRef {
   final int episodeId;
   final String episodeTitle;
 
+  /// danmu_api 的分集带原始页面 URL；官方 DDP 没有该字段。
+  final String url;
+
   const DanmakuEpisodeRef({
     required this.episodeId,
     required this.episodeTitle,
+    this.url = '',
   });
 }
 
@@ -66,12 +75,14 @@ class DanmakuCandidate {
   final String animeTitle;
   final String episodeTitle;
   final double shift;
+  final String url;
 
   const DanmakuCandidate({
     required this.episodeId,
     required this.animeTitle,
     required this.episodeTitle,
     this.shift = 0,
+    this.url = '',
   });
 }
 
@@ -81,6 +92,7 @@ class DanmakuMatch {
   final String episodeTitle;
   final double shift;
   final String source;
+  final String url;
 
   const DanmakuMatch({
     required this.episodeId,
@@ -88,6 +100,7 @@ class DanmakuMatch {
     required this.episodeTitle,
     required this.shift,
     required this.source,
+    this.url = '',
   });
 }
 

@@ -24,6 +24,7 @@ class _DanmakuSettingsDialog extends ConsumerStatefulWidget {
 
 class _DanmakuSettingsDialogState
     extends ConsumerState<_DanmakuSettingsDialog> {
+  late final TextEditingController _apiBase;
   late final TextEditingController _appId;
   late final TextEditingController _appSecret;
   bool _testing = false;
@@ -34,12 +35,14 @@ class _DanmakuSettingsDialogState
   void initState() {
     super.initState();
     final settings = ref.read(danmakuSettingsProvider);
+    _apiBase = TextEditingController(text: settings.apiBase);
     _appId = TextEditingController(text: settings.appId);
     _appSecret = TextEditingController(text: settings.appSecret);
   }
 
   @override
   void dispose() {
+    _apiBase.dispose();
     _appId.dispose();
     _appSecret.dispose();
     super.dispose();
@@ -181,6 +184,21 @@ class _DanmakuSettingsDialogState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              TextField(
+                                controller: _apiBase,
+                                decoration: const InputDecoration(
+                                  labelText: '弹幕服务器地址',
+                                  hintText: 'https://api.dandanplay.net',
+                                  helperText: '可填自建 DDP 兼容服务器（如 '
+                                      'http://danmu.api.tangbai.cc），'
+                                      '此时 AppId 可留空。'
+                                      'HTTPS 证书与域名不匹配时请改用 http://',
+                                  border: OutlineInputBorder(),
+                                ),
+                                onChanged: (value) =>
+                                    notifier.setApiBase(value),
+                              ),
+                              const SizedBox(height: 10),
                               TextField(
                                 controller: _appId,
                                 decoration: const InputDecoration(

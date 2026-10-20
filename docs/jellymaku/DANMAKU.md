@@ -1,7 +1,7 @@
 
 # 弹幕设计（DanDanPlay + Flutter 叠加层）
 
-> 状态：v1 核心 + Kazumi 对齐增强已实现（2026-10-20）：DDP 签名/缓存/自动匹配/手动匹配 UI/去重合并/本地 XML·JSON 导入/叠加层/设置/DPAPI。
+> 状态：v1 核心 + Kazumi 对齐增强已实现（2026-10-20）：DDP 签名/缓存/自动匹配/手动匹配 UI/去重合并/本地 XML·JSON 导入/自建 DDP 兼容服务器（danmu_api）/叠加层/设置/DPAPI。
 > 未完成：真实 DDP 凭证联调、真实 Jellyfin 播放器 E2E。
 > 不提供发送弹幕（DDP 无发送 API；入口已移除）。
 > 目标：在 Fladder 上实现弹弹play 弹幕：自动/手动匹配、滚动/顶部/底部、来源/类型过滤、样式/偏移、缓存/降级。
@@ -35,6 +35,7 @@
 | 分集列表（手动匹配） | GET /api/v2/bangumi/{animeId} | bangumi.episodes[]（episodeId/episodeTitle） |
 | 搜索剧集（自动匹配） | GET /api/v2/search/episodes?anime=...&episode=... | 候选 |
 | 评论 | GET /api/v2/comment/{episodeId}?withRelated=true&chConvert=1 | 弹幕列表；withRelated 合并第三方源 |
+| 评论（URL） | GET /api/v2/comment?url=<原始页面>&withRelated=true | danmu_api 用这个最稳；官方 DDP 不支持 |
 | 连接测试 | 搜索一个固定关键词 | UI Test connection |
 
 ### 2.3 错误
@@ -54,6 +55,17 @@
 - 本地文件不写 comments/mapping 缓存；只在播放时读取解析。
 - DDP 请求只带标题/TMDB/集号/hash，不带 Jellyfin token/服务器地址。
 
+### 2.5 自建 DDP 兼容服务器（danmu_api）
+
+- 设置 → 高级 → 「弹幕服务器地址」填 `http://danmu.api.tangbai.cc`，AppId/AppSecret 留空即可。
+- 免签名：客户端只在 AppId/AppSecret 都非空时才发 `X-AppId/X-Timestamp/X-Signature`。
+- 搜索：`/api/v2/search/episodes?anime=...&v2=true` 返回 `animes[].episodes[]`，分集自带原始 `url`。
+- 拉弹幕：优先 `/api/v2/comment?url=<分集 url>`；danmu_api 的 `/comment/{id}` 依赖它自己的内存映射，直接请求常为空。
+- 手动匹配：danmu_api 没有 `/api/v2/bangumi/{animeId}`（404），客户端直接用搜索结果里的分集。
+- 缓存：URL 型结果的 episodeId 只在该服务器内有意义，不写数值 key 缓存，避免换服务器串数据。
+- HTTPS：证书必须与域名匹配。实测 `danmu.api.tangbai.cc` 证书 hostname mismatch，Dart 报 `HandshakeException`；请用 `http://` 或修复证书。
+- 已实测（2026-10-20）：搜索“孤独摇滚”返回 9 条候选，用 URL 拉取 759 条弹幕并全部解析成功。
+
 ## 3. 匹配
 
 优先级：
@@ -62,7 +74,7 @@
 2. 手动映射（mapping.json，source=manual）。
 3. 可选文件 hash（/match，未实现）。
 4. TMDB/ProviderIds（字段已采集，未参与匹配）。
-5. 系列名/标题 + 集号（search/episodes，取第一条候选）。
+5. 系列名/标题 + 集号（search/episodes；轻量打分：优先 B 站/巴哈、避开电影/剧场版与非目标来源）。
 6. 无匹配 → 候选/手动匹配（弹窗）。
 
 手动匹配流程（与 Kazumi 一致的三步）：
@@ -144,7 +156,7 @@ MediaInfo：
 - 播放器按钮/菜单：Toggle、Settings。
 - 状态行：ready/loading/no_match/no_credentials/error；显示当前匹配标题与手动/自动。
 - 设置页：
-  - AppId/AppSecret 默认折叠在「高级：弹弹play AppId（可选）」里；不填也能用本地导入，只有在线匹配需要。Test connection 同在该折叠内。
+  - 高级折叠：弹幕服务器地址（官方或自建 danmu_api）、AppId/AppSecret（可选）、Test connection。自建服务器可留空 AppId。
   - 字体/字号/透明度/速度/区域/偏移/描边/颜色。
   - 顶/底/滚动开关；本地导入开关。第三方弹幕由 DDP 聚合，无法按站单独开关。
   - 合并重复弹幕；简繁；自动匹配/hash/最大条数/缓存天数（字段存在）。
@@ -192,7 +204,9 @@ MediaInfo：
 - 不提供发送弹幕/回复/举报；DDP 没有发送 API，入口已移除。
 - 本地导入一次一个文件，不做目录扫描/文件名自动匹配；XML 用容错正则解析，极端命名空间可能失败。
 - 特殊 ASS 特效不还原；截图默认不含弹幕层。
-- DDP 在线匹配需要用户凭证；无凭证时仍可用本地导入，在线匹配提示配置。
+- DDP 在线匹配需要用户凭证；无凭证时可用本地导入，或填自建 danmu_api 服务器（免签名）。
+- 自建服务器的 URL 型弹幕不写缓存；danmu_api 的 episodeId 不跨服务器稳定，换服务器后需重新匹配。
+- HTTPS 证书必须匹配域名；当前 danmu.api.tangbai.cc 证书 hostname mismatch，需用 http:// 或修证书。
 
 ## 11. 与 Kazumi 实现的对应关系
 
@@ -204,6 +218,7 @@ MediaInfo：
 | 手动匹配 | 三步搜索 | 三步对话框 + mapping 持久化 |
 | 去重合并 | 归一化 + 5s 窗口 + xN | 相同，默认关闭 |
 | 本地导入 | 无 | 设置选择 Bilibili XML / DDP JSON，source=local |
+| 自建服务器 | 无 | 支持 danmu_api：URL 拉弹幕、免 AppId；官方 DDP 仍走签名 |
 | 发送 | 本地回显 / SyncPlay 聊天 | 不提供（入口已移除） |
 | 渲染 | canvas_danmaku（Ticker+CustomPaint） | 自绘 CustomPainter + 独立显示时钟 |
 | 暂停 | canvas.pause() | 冻结显示时钟 |

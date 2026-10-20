@@ -10,7 +10,10 @@ import 'package:fladder/danmaku/danmaku_models.dart';
 import 'package:fladder/danmaku/ddp_client.dart';
 import 'package:fladder/danmaku/local_import.dart';
 import 'package:fladder/danmaku/matcher.dart';
+import 'package:fladder/models/settings/danmaku_settings_model.dart';
 import 'package:fladder/providers/settings/danmaku_settings_provider.dart';
+
+const _officialApiBase = 'https://api.dandanplay.net';
 
 enum DanmakuLoadStatus {
   idle,
@@ -135,7 +138,8 @@ class DanmakuController extends StateNotifier<DanmakuState> {
       return;
     }
 
-    if (!settings.hasCredentials) {
+    final customServer = _isCustomServer(settings);
+    if (!settings.hasCredentials && !customServer) {
       _media = media;
       state = DanmakuState(
         status: DanmakuLoadStatus.noCredentials,
@@ -175,23 +179,31 @@ class DanmakuController extends StateNotifier<DanmakuState> {
       );
       if (generation != _generation) return;
 
-      var raw = await cache.readComments(
-        match.episodeId,
-        settings.chConvert,
-        settings.cacheDays,
-      );
+      // URL 型结果（danmu_api）的 episodeId 只在该服务器内有意义，
+      // 不写数值 key 的缓存，避免换服务器后串数据。
+      var raw = match.url.isEmpty
+          ? await cache.readComments(
+              match.episodeId,
+              settings.chConvert,
+              settings.cacheDays,
+            )
+          : null;
       if (raw == null) {
         raw = await client.getComments(
           match.episodeId,
           chConvert: settings.chConvert,
+          url: match.url,
         );
-        await cache.writeComments(match.episodeId, settings.chConvert, raw);
+        if (match.url.isEmpty) {
+          await cache.writeComments(match.episodeId, settings.chConvert, raw);
+        }
         await cache.writeMapping(media.itemId, {
           'episodeId': match.episodeId,
           'animeTitle': match.animeTitle,
           'episodeTitle': match.episodeTitle,
           'shift': match.shift,
           'source': match.source,
+          'url': match.url,
           'updatedAt': DateTime.now().toIso8601String(),
         });
       }
@@ -264,6 +276,7 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     required String animeTitle,
     required String episodeTitle,
     double shift = 0,
+    String url = '',
   }) async {
     final media = _media;
     if (media == null) {
@@ -276,6 +289,7 @@ class DanmakuController extends StateNotifier<DanmakuState> {
       'episodeTitle': episodeTitle,
       'shift': shift,
       'source': 'manual',
+      'url': url,
       'updatedAt': DateTime.now().toIso8601String(),
     });
     state = const DanmakuState();
@@ -294,15 +308,20 @@ class DanmakuController extends StateNotifier<DanmakuState> {
 
   DdpClient _requireClient() {
     final settings = ref.read(danmakuSettingsProvider);
-    if (!settings.hasCredentials) {
+    if (!settings.hasCredentials && !_isCustomServer(settings)) {
       throw const DanmakuException(
-          '请展开“高级：弹弹play AppId”填写凭证，或改用本地导入');
+          '请展开“高级”填写弹弹play AppId，或填写自建服务器地址/使用本地导入');
     }
     return DdpClient(
       baseUrl: settings.apiBase,
       appId: settings.appId,
       appSecret: settings.appSecret,
     );
+  }
+
+  bool _isCustomServer(DanmakuSettingsModel settings) {
+    final base = settings.apiBase.trim().replaceAll(RegExp(r'/+$'), '');
+    return base.isNotEmpty && base != _officialApiBase;
   }
 
   void stop() {

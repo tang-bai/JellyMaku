@@ -92,8 +92,12 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
       _step = _MatchStep.episode;
     });
     try {
-      final episodes =
-          await ref.read(danmakuProvider.notifier).episodesForAnime(anime.animeId);
+      // danmu_api 的搜索结果已带分集；官方 DDP 才需要再查 /bangumi/{id}。
+      final episodes = anime.episodes.isNotEmpty
+          ? anime.episodes
+          : await ref
+              .read(danmakuProvider.notifier)
+              .episodesForAnime(anime.animeId);
       if (!mounted) return;
       setState(() {
         _loading = false;
@@ -121,6 +125,7 @@ class _DanmakuMatchDialogState extends ConsumerState<DanmakuMatchDialog> {
             episodeId: episode.episodeId,
             animeTitle: anime.animeTitle,
             episodeTitle: episode.episodeTitle,
+            url: episode.url,
           );
       if (!mounted) return;
       Navigator.of(context).pop(true);

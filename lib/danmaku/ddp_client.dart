@@ -51,19 +51,23 @@ class DdpClient {
   }
 
   Map<String, String> _headers(String path) {
-    final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    return {
-      'X-AppId': appId,
-      'X-Timestamp': '$timestamp',
-      'X-Signature': signature(
+    final headers = <String, String>{
+      'Accept': 'application/json',
+      'User-Agent': 'JellyMaku/0.1 (https://github.com/tang-bai/JellyMaku)',
+    };
+    // 自建 DDP 兼容服务器（如 danmu_api）不校验签名；只有填了凭证才发认证头。
+    if (appId.isNotEmpty && appSecret.isNotEmpty) {
+      final timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      headers['X-AppId'] = appId;
+      headers['X-Timestamp'] = '$timestamp';
+      headers['X-Signature'] = signature(
         appId: appId,
         appSecret: appSecret,
         timestamp: timestamp,
         path: path,
-      ),
-      'Accept': 'application/json',
-      'User-Agent': 'JellyMaku/0.1 (https://github.com/tang-bai/JellyMaku)',
-    };
+      );
+    }
+    return headers;
   }
 
   Uri _uri(String path, [Map<String, String>? query]) {
@@ -136,6 +140,7 @@ class DdpClient {
             animeTitle: animeTitle,
             episodeTitle: episodeEntry['episodeTitle']?.toString() ?? '',
             shift: (episodeEntry['shift'] as num?)?.toDouble() ?? 0,
+            url: episodeEntry['url']?.toString() ?? '',
           ));
         }
       }
@@ -158,10 +163,26 @@ class DdpClient {
         final animeId = (entry['animeId'] as num?)?.toInt();
         final title = entry['animeTitle']?.toString() ?? '';
         if (animeId == null || animeId <= 0 || title.isEmpty) continue;
+        final episodes = <DanmakuEpisodeRef>[];
+        final rawEpisodes = entry['episodes'];
+        if (rawEpisodes is List) {
+          for (final episodeEntry in rawEpisodes) {
+            if (episodeEntry is! Map) continue;
+            final episodeId = (episodeEntry['episodeId'] as num?)?.toInt();
+            if (episodeId == null || episodeId <= 0) continue;
+            episodes.add(DanmakuEpisodeRef(
+              episodeId: episodeId,
+              episodeTitle:
+                  episodeEntry['episodeTitle']?.toString() ?? '',
+              url: episodeEntry['url']?.toString() ?? '',
+            ));
+          }
+        }
         animes.add(DanmakuAnime(
           animeId: animeId,
           animeTitle: title,
           typeDescription: entry['typeDescription']?.toString() ?? '',
+          episodes: episodes,
         ));
       }
     }
@@ -184,6 +205,7 @@ class DdpClient {
           episodes.add(DanmakuEpisodeRef(
             episodeId: episodeId,
             episodeTitle: entry['episodeTitle']?.toString() ?? '',
+            url: entry['url']?.toString() ?? '',
           ));
         }
       }
@@ -195,14 +217,26 @@ class DdpClient {
     int episodeId, {
     int chConvert = 1,
     bool withRelated = true,
+    String url = '',
   }) async {
-    final data = await _get(
-      '/api/v2/comment/$episodeId',
-      query: {
-        'withRelated': withRelated ? 'true' : 'false',
-        'chConvert': '$chConvert',
-      },
-    );
+    // danmu_api 的 /comment/{id} 需要它自己的内存映射，直接请求常为空；
+    // 它支持 /comment?url=<原始页面>，用搜索结果里的 url 最稳。
+    final data = url.isEmpty
+        ? await _get(
+            '/api/v2/comment/$episodeId',
+            query: {
+              'withRelated': withRelated ? 'true' : 'false',
+              'chConvert': '$chConvert',
+            },
+          )
+        : await _get(
+            '/api/v2/comment',
+            query: {
+              'url': url,
+              'withRelated': withRelated ? 'true' : 'false',
+              'chConvert': '$chConvert',
+            },
+          );
 
     final comments = <DdpComment>[];
     final rawComments = data['comments'];
