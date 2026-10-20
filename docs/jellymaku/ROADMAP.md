@@ -12,8 +12,8 @@
 | 旧 MPV Shim 实现 | 丢失 | 本地/远程均不可恢复；不再作为基座 |
 | Fladder 源码 | 已导入 | PR #735 head 基线；最新 develop 待合并 |
 | Flutter 工具链 | 完成 | 3.35.7；analyze 0 issue |
-| 构建/单测 | 完成 | Windows release/启动冒烟（10-20）；118 tests（10-20） |
-| 弹幕 | 核心功能已接入；真实联调未做 | DDP/自动+手动匹配/来源过滤/合并去重/本地导入/发送回显/缓存/叠加层/设置/DPAPI；真实联调未做 |
+| 构建/单测 | 完成 | Windows release/启动冒烟（10-20）；117 tests（10-20） |
+| 弹幕 | 核心功能已接入；真实联调未做 | DDP/自动+手动匹配/来源过滤/合并去重/本地导入/缓存/叠加层/设置/DPAPI（AppId 高级可选）；真实联调未做 |
 | 超分 | 核心已接入；未验收 | Anime4K Fast/Quality；画质/性能未测 |
 | SyncPlay | 代码+单测；真实双端未做 | PR #735 head；见 PARTY |
 | Bangumi 时间表/图片/评论 | 未开始 | 条件功能；见 BANGUMI/KAZUMI |
@@ -50,7 +50,7 @@
 1. 推送 main 到 origin，确认远程可构建。
 2. 补最新 develop 合并，重新跑 analyze/test/build。
 3. 下载/启动 Jellyfin 12.2 + .NET 10 + 测试媒体；做登录/播放/seek/切集/字幕 E2E。
-4. 申请 DDP AppId/AppSecret；真实弹幕联调（含 p[3] 来源语义）；补本地导入/发送回显。
+4. 申请 DDP AppId/AppSecret；真实弹幕联调（含 p[3] 来源语义）；本地导入已可用。
 5. SyncPlay 双端联调；超分画质/性能验收；安装器/中文 ARB。
 6. Stage B Bangumi 数据层/Mock；再决定真实评论联调。
 

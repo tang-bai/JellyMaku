@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:fladder/screens/video_player/components/danmaku_match_dialog.dart';
-import 'package:fladder/screens/video_player/components/danmaku_send_dialog.dart';
 import 'package:fladder/screens/video_player/components/danmaku_settings_sheet.dart';
 
 Widget _host(void Function(BuildContext context) open) {
@@ -39,19 +38,12 @@ void main() {
 
     expect(find.text('弹幕设置'), findsOneWidget);
     expect(find.text('启用弹幕'), findsOneWidget);
+    // AppId 默认折叠在“高级”里，普通用户不需要填写。
+    expect(find.text('弹弹play AppId'), findsNothing);
+    await tester.tap(find.text('高级：弹弹play AppId（可选）'));
+    await tester.pumpAndSettle();
     expect(find.text('弹弹play AppId'), findsOneWidget);
     expect(find.text('测试连接'), findsOneWidget);
-  });
-
-  testWidgets('send dialog validates empty input', (tester) async {
-    await tester.pumpWidget(_host(showDanmakuSendDialog));
-    await tester.tap(find.text('open'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('发送弹幕'), findsOneWidget);
-    await tester.tap(find.text('发送'));
-    await tester.pump();
-    expect(find.text('请输入弹幕内容'), findsOneWidget);
   });
 
   testWidgets('manual match dialog starts at the search step', (tester) async {

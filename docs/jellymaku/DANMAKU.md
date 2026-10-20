@@ -1,8 +1,9 @@
 
 # 弹幕设计（DanDanPlay + Flutter 叠加层）
 
-> 状态：v1 核心 + Kazumi 对齐增强已实现（2026-10-20）：DDP 签名/缓存/自动匹配/手动匹配 UI/来源过滤/去重合并/本地 XML·JSON 导入/发送回显/叠加层/设置/DPAPI。
-> 未完成：真实 DDP 凭证联调、真实 Jellyfin 播放器 E2E、发送到远端弹幕库（DDP 无发送 API）。
+> 状态：v1 核心 + Kazumi 对齐增强已实现（2026-10-20）：DDP 签名/缓存/自动匹配/手动匹配 UI/来源过滤/去重合并/本地 XML·JSON 导入/叠加层/设置/DPAPI。
+> 未完成：真实 DDP 凭证联调、真实 Jellyfin 播放器 E2E。
+> 不提供发送弹幕（DDP 无发送 API；入口已移除）。
 > 目标：在 Fladder 上实现弹弹play 弹幕：自动/手动匹配、滚动/顶部/底部、来源/类型过滤、样式/偏移、缓存/降级。
 > 参考：Kazumi 的 DDP 客户端/解析/来源过滤/合并去重（GPL-3.0）；渲染仍为 Flutter CustomPainter，不引入 canvas_danmaku。
 
@@ -140,10 +141,10 @@ MediaInfo：
 
 ## 6. UI/设置
 
-- 播放器按钮/菜单：Toggle、发送弹幕（本地回显）、Settings。
+- 播放器按钮/菜单：Toggle、Settings。
 - 状态行：ready/loading/no_match/no_credentials/error；显示当前匹配标题与手动/自动。
 - 设置页：
-  - AppId/AppSecret（DPAPI）、Test connection、API Base（高级）。
+  - AppId/AppSecret 默认折叠在「高级：弹弹play AppId（可选）」里；不填也能用本地导入，只有在线匹配需要。Test connection 同在该折叠内。
   - 字体/字号/透明度/速度/区域/偏移/描边/颜色。
   - 顶/底/滚动开关；**来源开关：BiliBili / Gamer / 弹弹play 自有**。
   - 合并重复弹幕；简繁；自动匹配/hash/最大条数/缓存天数（字段存在）。
@@ -178,7 +179,7 @@ MediaInfo：
   - 解析/模式/偏移/屏蔽/精确去重/来源/合并规则/实时可见性。
   - 本地 XML/JSON：模式/颜色/实体解码/去重/坏格式；本地来源可见性。
   - 设置序列化（不落 AppSecret；新字段 round-trip）。
-  - Widget：设置弹窗、手动匹配首屏、发送弹窗空内容校验。
+  - Widget：设置弹窗（AppId 默认折叠/展开可见）、手动匹配首屏。
 - Mock DDP：签名头、search/comment、401/403/429/空评论/无匹配（部分）。
 - 本地 Jellyfin：弹幕加载、主字幕共存、seek/pause/切集、设置变更（未做）。
 - 5000 条性能；截图（未做）。
@@ -188,7 +189,7 @@ MediaInfo：
 
 - 自动匹配只取第一条候选，遇到同名片目可能匹配错；请用「手动匹配」。
 - p[3] 若在某些响应里始终是用户 id，则来源全部归为弹弹play 自有，来源过滤会表现为“全部显示/全部隐藏”——需要用真实凭证抓一次响应确认。
-- 发送只做本地回显：不写 DDP、不落盘，切集/关闭后消失；不支持回复/举报/远端发送。
+- 不提供发送弹幕/回复/举报；DDP 没有发送 API，入口已移除。
 - 本地导入一次一个文件，不做目录扫描/文件名自动匹配；XML 用容错正则解析，极端命名空间可能失败。
 - 特殊 ASS 特效不还原；截图默认不含弹幕层。
 - DDP 在线匹配需要用户凭证；无凭证时仍可用本地导入，在线匹配提示配置。
@@ -203,7 +204,7 @@ MediaInfo：
 | 手动匹配 | 三步搜索 | 三步对话框 + mapping 持久化 |
 | 去重合并 | 归一化 + 5s 窗口 + xN | 相同，默认关闭 |
 | 本地导入 | 无 | 设置选择 Bilibili XML / DDP JSON，source=local |
-| 发送 | 本地回显（selfSend）/ SyncPlay 聊天 | 本地回显；未接 SyncPlay 聊天 |
+| 发送 | 本地回显 / SyncPlay 聊天 | 不提供（入口已移除） |
 | 渲染 | canvas_danmaku（Ticker+CustomPaint） | 自绘 CustomPainter + 独立显示时钟 |
 | 暂停 | canvas.pause() | 冻结显示时钟 |
-| 发送 | 本地回显 / SyncPlay 聊天 | 未实现 |
+| 发送 | 本地回显 / SyncPlay 聊天 | 不提供 |

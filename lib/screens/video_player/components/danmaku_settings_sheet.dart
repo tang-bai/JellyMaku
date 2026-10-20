@@ -96,7 +96,7 @@ class _DanmakuSettingsDialogState
         DanmakuLoadStatus.disabled => '已禁用',
         DanmakuLoadStatus.loading => '加载中',
         DanmakuLoadStatus.ready => '已就绪',
-        DanmakuLoadStatus.noCredentials => '未配置凭证',
+        DanmakuLoadStatus.noCredentials => '未配置凭证（可本地导入）',
         DanmakuLoadStatus.noMatch => '未匹配到弹幕',
         DanmakuLoadStatus.error => '错误',
       };
@@ -165,51 +165,73 @@ class _DanmakuSettingsDialogState
                         }
                       },
                     ),
-                    TextField(
-                      controller: _appId,
-                      decoration: const InputDecoration(
-                        labelText: '弹弹play AppId',
-                        hintText: '在 dev.dandanplay.com 申请',
-                        border: OutlineInputBorder(),
+                    ExpansionTile(
+                      tilePadding: EdgeInsets.zero,
+                      childrenPadding: EdgeInsets.zero,
+                      title: const Text('高级：弹弹play AppId（可选）'),
+                      subtitle: Text(
+                        settings.hasCredentials
+                            ? '已配置，可使用在线匹配'
+                            : '不填也能用本地导入；在线匹配才需要',
+                        style: theme.textTheme.bodySmall,
                       ),
-                      onChanged: (value) =>
-                          notifier.setCredentials(appId: value),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: _appSecret,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: '弹弹play AppSecret',
-                        border: OutlineInputBorder(),
-                      ),
-                      onChanged: (value) =>
-                          notifier.setCredentials(appSecret: value),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
                       children: [
-                        FilledButton.tonalIcon(
-                          onPressed: _testing ? null : _testConnection,
-                          icon: _testing
-                              ? const SizedBox.square(
-                                  dimension: 16,
-                                  child:
-                                      CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Icon(Icons.wifi_tethering),
-                          label: const Text('测试连接'),
-                        ),
-                        const SizedBox(width: 12),
-                        if (_testResult != null)
-                          Expanded(
-                            child: Text(
-                              _testResult!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall,
-                            ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              TextField(
+                                controller: _appId,
+                                decoration: const InputDecoration(
+                                  labelText: '弹弹play AppId',
+                                  hintText: '在 dev.dandanplay.com 申请',
+                                  border: OutlineInputBorder(),
+                                ),
+                                onChanged: (value) =>
+                                    notifier.setCredentials(appId: value),
+                              ),
+                              const SizedBox(height: 10),
+                              TextField(
+                                controller: _appSecret,
+                                obscureText: true,
+                                decoration: const InputDecoration(
+                                  labelText: '弹弹play AppSecret',
+                                  border: OutlineInputBorder(),
+                                ),
+                                onChanged: (value) =>
+                                    notifier.setCredentials(appSecret: value),
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  FilledButton.tonalIcon(
+                                    onPressed:
+                                        _testing ? null : _testConnection,
+                                    icon: _testing
+                                        ? const SizedBox.square(
+                                            dimension: 16,
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 2),
+                                          )
+                                        : const Icon(Icons.wifi_tethering),
+                                    label: const Text('测试连接'),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  if (_testResult != null)
+                                    Expanded(
+                                      child: Text(
+                                        _testResult!,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.bodySmall,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
                           ),
+                        ),
                       ],
                     ),
                     const Divider(height: 28),
@@ -382,7 +404,7 @@ class _DanmakuSettingsDialogState
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('本地导入'),
-                      subtitle: const Text('本地 XML/JSON 文件与发送回显'),
+                      subtitle: const Text('本地 XML/JSON 文件导入'),
                       value: settings.showLocalSource,
                       onChanged: notifier.setShowLocalSource,
                     ),

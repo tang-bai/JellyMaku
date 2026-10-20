@@ -29,7 +29,6 @@ import 'package:fladder/screens/video_player/components/video_player_controls_ex
 import 'package:fladder/screens/video_player/components/video_player_options_sheet.dart';
 import 'package:fladder/screens/video_player/components/video_player_quality_controls.dart';
 import 'package:fladder/screens/video_player/components/video_player_screenshot_indicator.dart';
-import 'package:fladder/screens/video_player/components/danmaku_send_dialog.dart';
 import 'package:fladder/screens/video_player/components/danmaku_settings_sheet.dart';
 import 'package:fladder/screens/video_player/components/video_player_seek_indicator.dart';
 import 'package:fladder/screens/video_player/components/video_player_speed_indicator.dart';
@@ -508,13 +507,6 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                   ),
                   seekForwardButton(ref),
                   nextVideoButton,
-                  Tooltip(
-                    message: '发送弹幕',
-                    child: IconButton(
-                      onPressed: () => showDanmakuSendDialog(context),
-                      icon: const Icon(Icons.send_rounded),
-                    ),
-                  ),
                   Tooltip(
                     message: 'Danmaku',
                     child: IconButton(

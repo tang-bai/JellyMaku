@@ -72,7 +72,6 @@ class DanmakuController extends StateNotifier<DanmakuState> {
   int _generation = 0;
   DanmakuMediaInfo? _media;
   DanmakuCache? _cacheInstance;
-  final List<DanmakuComment> _localEcho = [];
 
   DanmakuMediaInfo? get media => _media;
 
@@ -83,9 +82,6 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     }
 
     final settings = ref.read(danmakuSettingsProvider);
-    if (_media != null && _media!.itemId != media.itemId) {
-      _localEcho.clear();
-    }
     if (!settings.enabled) {
       _media = media;
       state = DanmakuState(
@@ -117,7 +113,7 @@ class DanmakuController extends StateNotifier<DanmakuState> {
         if (generation != _generation) return;
         state = DanmakuState(
           status: DanmakuLoadStatus.ready,
-          comments: _mergeEchoes(comments),
+          comments: comments,
           itemId: media.itemId,
           title: name,
           match: DanmakuMatch(
@@ -204,7 +200,7 @@ class DanmakuController extends StateNotifier<DanmakuState> {
       final comments = parseDanmakuComments(raw, settings, shift: match.shift);
       state = DanmakuState(
         status: DanmakuLoadStatus.ready,
-        comments: _mergeEchoes(comments),
+        comments: comments,
         itemId: media.itemId,
         title: match.animeTitle,
         match: match,
@@ -299,7 +295,8 @@ class DanmakuController extends StateNotifier<DanmakuState> {
   DdpClient _requireClient() {
     final settings = ref.read(danmakuSettingsProvider);
     if (!settings.hasCredentials) {
-      throw const DanmakuException('请先在弹幕设置中填写 AppId / AppSecret');
+      throw const DanmakuException(
+          '请展开“高级：弹弹play AppId”填写凭证，或改用本地导入');
     }
     return DdpClient(
       baseUrl: settings.apiBase,
@@ -308,44 +305,10 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     );
   }
 
-  /// 发送弹幕的本地回显：只进入当前会话的评论列表，不写 DDP、不落盘。
-  bool addLocalEcho({
-    required String text,
-    required DanmakuMode mode,
-    required double time,
-    int color = 0xFFFFFF,
-  }) {
-    if (state.status != DanmakuLoadStatus.ready) return false;
-    final trimmed = text.trim();
-    if (trimmed.isEmpty) return false;
-    final clamped =
-        trimmed.length > 60 ? trimmed.substring(0, 60) : trimmed;
-    final comment = DanmakuComment(
-      time: time < 0 ? 0 : time,
-      mode: mode,
-      color: color,
-      uid: 'local',
-      text: clamped,
-      source: DanmakuSource.local,
-    );
-    _localEcho.add(comment);
-    final merged = <DanmakuComment>[...state.comments, comment]
-      ..sort((a, b) => a.time.compareTo(b.time));
-    state = state.copyWith(comments: merged);
-    return true;
-  }
-
   void stop() {
     _generation++;
     _media = null;
-    _localEcho.clear();
     state = const DanmakuState();
-  }
-
-  List<DanmakuComment> _mergeEchoes(List<DanmakuComment> comments) {
-    if (_localEcho.isEmpty) return comments;
-    return <DanmakuComment>[...comments, ..._localEcho]
-      ..sort((a, b) => a.time.compareTo(b.time));
   }
 
   String _localFileName(String path) =>
