@@ -23,6 +23,8 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
   late final Ticker _ticker;
   Duration _lastPosition = Duration.zero;
   DateTime _lastPositionAt = DateTime.now();
+  Duration _frozenPosition = Duration.zero;
+  bool _wasPlaying = false;
   String? _loadedItemId;
 
   @override
@@ -97,17 +99,38 @@ class _DanmakuOverlayState extends ConsumerState<DanmakuOverlay>
     }
 
     final position = playback.position;
+    final now = DateTime.now();
     if (position != _lastPosition) {
       _lastPosition = position;
-      _lastPositionAt = DateTime.now();
+      _lastPositionAt = now;
+      _frozenPosition = position;
     }
-    final elapsedSincePosition = DateTime.now().difference(_lastPositionAt);
-    final current = playback.playing
-        ? Duration(
-            microseconds: position.inMicroseconds +
-                (elapsedSincePosition.inMicroseconds * rate).round(),
-          )
-        : position;
+
+    final elapsedSincePosition = now.difference(_lastPositionAt);
+    final effectivePlaying = playback.playing && !playback.buffering;
+    final Duration current;
+    if (effectivePlaying) {
+      if (!_wasPlaying) {
+        // Do not count paused/buffered time as elapsed playback time.
+        _lastPositionAt = now;
+      }
+      _wasPlaying = true;
+      current = Duration(
+        microseconds: position.inMicroseconds +
+            (elapsedSincePosition.inMicroseconds * rate).round(),
+      );
+    } else {
+      // Freeze at the extrapolated time on the pause/buffer transition.
+      // Using the raw provider position here makes comments jump backwards.
+      if (_wasPlaying) {
+        _frozenPosition = Duration(
+          microseconds: position.inMicroseconds +
+              (elapsedSincePosition.inMicroseconds * rate).round(),
+        );
+        _wasPlaying = false;
+      }
+      current = _frozenPosition;
+    }
 
     return IgnorePointer(
       child: RepaintBoundary(
