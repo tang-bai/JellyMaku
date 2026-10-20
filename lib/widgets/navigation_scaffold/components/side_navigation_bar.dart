@@ -42,7 +42,8 @@ class SideNavigationRail extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textDirection = Directionality.of(context);
     final isRtl = textDirection == TextDirection.rtl;
-    final expandedSideBar = ref.watch(clientSettingsProvider.select((value) => value.expandSideBar));
+    final expandedSideBar = ref
+        .watch(clientSettingsProvider.select((value) => value.expandSideBar));
 
     final expandedWidth = 200.0;
 
@@ -54,9 +55,15 @@ class SideNavigationRail extends ConsumerWidget {
       padding.bottom,
     );
     final startInset = directionalPadding.resolve(textDirection).left;
-    final tooltipPosition = isRtl ? TooltipPosition.left : TooltipPosition.right;
+    final tooltipPosition =
+        isRtl ? TooltipPosition.left : TooltipPosition.right;
 
     final largeBar = AdaptiveLayout.layoutModeOf(context) != LayoutMode.single;
+    final currentDestination =
+        (currentIndex >= 0 && currentIndex < destinations.length)
+            ? destinations[currentIndex]
+            : null;
+    final hasCustomFab = currentDestination?.customFab != null;
     final fullyExpanded = largeBar ? expandedSideBar : false;
     final shouldExpand = fullyExpanded;
     final isDesktop = AdaptiveLayout.of(context).isDesktop;
@@ -70,13 +77,18 @@ class SideNavigationRail extends ConsumerWidget {
         .resolve(textDirection);
     final collapsedWidth = 90.0 + startInset;
 
-    final fullScreenChildRoute = fullScreenRoutes.contains(context.router.current.name);
+    final fullScreenChildRoute =
+        fullScreenRoutes.contains(context.router.current.name);
 
-    final hasOverlay = AdaptiveLayout.layoutModeOf(context) == LayoutMode.dual ||
-        homeRoutes.any((element) => element.name.contains(context.router.current.name));
+    final hasOverlay = AdaptiveLayout.layoutModeOf(context) ==
+            LayoutMode.dual ||
+        homeRoutes.any(
+            (element) => element.name.contains(context.router.current.name));
 
     final useBlurredBackground = ref.watch(clientSettingsProvider.select(
-          (value) => value.backgroundImage == BackgroundType.blurred && value.enableBlurEffects,
+          (value) =>
+              value.backgroundImage == BackgroundType.blurred &&
+              value.enableBlurEffects,
         )) &&
         !topBarNoBlurRoutes.contains(context.router.current.name);
 
@@ -89,7 +101,8 @@ class SideNavigationRail extends ConsumerWidget {
         AdaptiveLayout(
           data: AdaptiveLayout.of(context).copyWith(
             // -0.1 offset to fix single visible pixel line
-            sideBarWidth: (fullyExpanded ? expandedWidth : collapsedWidth) - 0.1,
+            sideBarWidth:
+                (fullyExpanded ? expandedWidth : collapsedWidth) - 0.1,
           ),
           child: child,
         ),
@@ -105,8 +118,12 @@ class SideNavigationRail extends ConsumerWidget {
                     width: blurWidth,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        begin: isRtl ? Alignment.centerRight : Alignment.centerLeft,
-                        end: isRtl ? Alignment.centerLeft : Alignment.centerRight,
+                        begin: isRtl
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        end: isRtl
+                            ? Alignment.centerLeft
+                            : Alignment.centerRight,
                         colors: [
                           surfaceColor.withAlpha(255),
                           surfaceColor.withAlpha(175),
@@ -118,8 +135,12 @@ class SideNavigationRail extends ConsumerWidget {
                         ? ShaderMask(
                             shaderCallback: (bounds) {
                               return LinearGradient(
-                                begin: isRtl ? Alignment.centerRight : Alignment.centerLeft,
-                                end: isRtl ? Alignment.centerLeft : Alignment.centerRight,
+                                begin: isRtl
+                                    ? Alignment.centerRight
+                                    : Alignment.centerLeft,
+                                end: isRtl
+                                    ? Alignment.centerLeft
+                                    : Alignment.centerRight,
                                 colors: [
                                   Colors.white.withAlpha(255),
                                   Colors.white.withAlpha(175),
@@ -160,29 +181,44 @@ class SideNavigationRail extends ConsumerWidget {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 14),
                             child: CollapseButton(
-                              label: shouldExpand ? Expanded(child: Text(context.localized.navigation)) : null,
+                              label: shouldExpand
+                                  ? Expanded(
+                                      child: Text(context.localized.navigation))
+                                  : null,
                               keepVisible: !(largeBar && expandedSideBar),
                               icon: Icon(
-                                largeBar && expandedSideBar ? IconsaxPlusLinear.sidebar_left : IconsaxPlusLinear.menu,
-                                color: Theme.of(context).colorScheme.onSurface.withValues(
-                                      alpha: largeBar && expandedSideBar ? 0.65 : 1,
+                                largeBar && expandedSideBar
+                                    ? IconsaxPlusLinear.sidebar_left
+                                    : IconsaxPlusLinear.menu,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(
+                                      alpha: largeBar && expandedSideBar
+                                          ? 0.65
+                                          : 1,
                                     ),
                               ),
                               onPressed: !largeBar
                                   ? () => scaffoldKey.currentState?.openDrawer()
                                   : () => ref
                                       .read(clientSettingsProvider.notifier)
-                                      .update((state) => state.copyWith(expandSideBar: !state.expandSideBar)),
+                                      .update((state) => state.copyWith(
+                                          expandSideBar: !state.expandSideBar)),
                             ),
                           ),
                           if (largeBar) ...[
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4).copyWith(bottom: expandedSideBar ? 10 : 0),
-                              child: AnimatedFadeSize(
-                                duration: const Duration(milliseconds: 250),
-                                child: actionButtonWidget(context, shouldExpand),
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 4)
+                                  .copyWith(bottom: expandedSideBar ? 10 : 0),
+                              child: hasCustomFab
+                                  ? actionButtonWidget(context, shouldExpand)
+                                  : AnimatedFadeSize(
+                                      duration:
+                                          const Duration(milliseconds: 250),
+                                      child: actionButtonWidget(
+                                          context, shouldExpand),
+                                    ),
                             ),
                           ],
                           Expanded(
@@ -196,18 +232,22 @@ class SideNavigationRail extends ConsumerWidget {
                           ),
                           NavigationButton(
                             label: context.localized.settings,
-                            selected: currentLocation.contains(const SettingsRoute().routeName),
+                            selected: currentLocation
+                                .contains(const SettingsRoute().routeName),
                             selectedIcon: const Icon(IconsaxPlusBold.setting_3),
                             horizontal: true,
                             expanded: shouldExpand,
                             icon: const SizedBox.shrink(),
                             customIcon: const ExcludeFocusTraversal(
-                                child: SizedBox.square(dimension: 40, child: SettingsUserIcon())),
+                                child: SizedBox.square(
+                                    dimension: 40, child: SettingsUserIcon())),
                             onPressed: () {
-                              if (AdaptiveLayout.layoutModeOf(context) == LayoutMode.single) {
+                              if (AdaptiveLayout.layoutModeOf(context) ==
+                                  LayoutMode.single) {
                                 context.router.push(const SettingsRoute());
                               } else {
-                                context.router.push(const ClientSettingsRoute());
+                                context.router
+                                    .push(const ClientSettingsRoute());
                               }
                             },
                           ),
@@ -238,7 +278,10 @@ class SideNavigationRail extends ConsumerWidget {
   }
 
   Widget actionButtonWidget(BuildContext context, bool expanded) {
-    final destination = (currentIndex >= 0 && currentIndex < destinations.length) ? destinations[currentIndex] : null;
+    final destination =
+        (currentIndex >= 0 && currentIndex < destinations.length)
+            ? destinations[currentIndex]
+            : null;
 
     // If there's a custom FAB widget, use it (DashboardFabs already
     // includes SyncPlay for the dashboard route).
@@ -261,8 +304,10 @@ class _RailTraversalPolicy extends ReadingOrderTraversalPolicy {
   @override
   bool inDirection(FocusNode currentNode, TraversalDirection direction) {
     final isRtl = Directionality.of(currentNode.context!) == TextDirection.rtl;
-    final toMainDirection = isRtl ? TraversalDirection.left : TraversalDirection.right;
-    final awayFromMainDirection = isRtl ? TraversalDirection.right : TraversalDirection.left;
+    final toMainDirection =
+        isRtl ? TraversalDirection.left : TraversalDirection.right;
+    final awayFromMainDirection =
+        isRtl ? TraversalDirection.right : TraversalDirection.left;
 
     if (direction == awayFromMainDirection) {
       return false;
@@ -275,14 +320,18 @@ class _RailTraversalPolicy extends ReadingOrderTraversalPolicy {
         return super.inDirection(currentNode, direction);
       }
     }
-    if (direction == TraversalDirection.up || direction == TraversalDirection.down) {
+    if (direction == TraversalDirection.up ||
+        direction == TraversalDirection.down) {
       final scope = currentNode.enclosingScope;
       if (scope == null) {
         return false;
       }
 
       final candidates = scope.traversalDescendants
-          .where((n) => n.canRequestFocus && FocusTraversalGroup.maybeOfNode(n) == this && _isLaidOut(n))
+          .where((n) =>
+              n.canRequestFocus &&
+              FocusTraversalGroup.maybeOfNode(n) == this &&
+              _isLaidOut(n))
           .toList();
 
       if (candidates.isEmpty) return false;
@@ -294,7 +343,8 @@ class _RailTraversalPolicy extends ReadingOrderTraversalPolicy {
         index = direction == TraversalDirection.down ? -1 : sorted.length;
       }
 
-      final nextIndex = direction == TraversalDirection.down ? index + 1 : index - 1;
+      final nextIndex =
+          direction == TraversalDirection.down ? index + 1 : index - 1;
 
       if (nextIndex < 0 || nextIndex >= sorted.length) {
         return true;

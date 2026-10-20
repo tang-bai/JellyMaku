@@ -15,8 +15,8 @@ import 'package:fladder/widgets/syncplay/syncplay_utils.dart';
 
 /// Dashboard actions above the main navigation list.
 ///
-/// Search stays the original compact icon button. SyncPlay uses the same
-/// NavigationButton as the rest of the sidebar so it matches 控制台/媒体库.
+/// Search expands into a full-width icon + text button; SyncPlay uses the
+/// same NavigationButton as the rest of the sidebar so it matches 控制台/媒体库.
 class DashboardFabs extends ConsumerWidget {
   const DashboardFabs({super.key});
 
@@ -35,14 +35,17 @@ class DashboardFabs extends ConsumerWidget {
       key: const Key('dashboard_search'),
       onPressed: () => context.router.navigate(LibrarySearchRoute()),
       child: const Icon(IconsaxPlusLinear.search_normal_1),
-    ).normal;
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 8,
       children: [
-        Align(alignment: Alignment.center, child: search),
+        if (expanded)
+          search.extended
+        else
+          Align(alignment: Alignment.center, child: search.normal),
         NavigationButton(
           label: context.localized.syncPlay,
           selected: isActive,
