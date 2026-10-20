@@ -494,8 +494,6 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                       )),
                     ),
                   ),
-                  previousButton,
-                  seekBackwardButton(ref),
                   Tooltip(
                     message: context.localized.danmaku,
                     child: IconButton(
@@ -503,6 +501,8 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                       icon: const Icon(Icons.chat_bubble_outline_rounded),
                     ),
                   ),
+                  previousButton,
+                  seekBackwardButton(ref),
                   IconButton.filledTonal(
                     iconSize: 38,
                     onPressed: () {
