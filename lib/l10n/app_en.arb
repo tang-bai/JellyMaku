@@ -176,6 +176,8 @@
   "@controls": {},
   "gestures": "Gestures",
   "@gestures": {},
+  "danmaku": "Danmaku",
+  "@danmaku": {},
   "dashboard": "Dashboard",
   "@dashboard": {},
   "dashboardContinue": "Continue",

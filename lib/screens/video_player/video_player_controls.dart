@@ -508,7 +508,7 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                   seekForwardButton(ref),
                   nextVideoButton,
                   Tooltip(
-                    message: 'Danmaku',
+                    message: context.localized.danmaku,
                     child: IconButton(
                       onPressed: () => showDanmakuSettings(context),
                       icon: const Icon(Icons.chat_bubble_outline_rounded),
