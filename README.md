@@ -1,7 +1,7 @@
 
 # JellyMaku
 
-> 状态：**v0.1.0-beta.1** 首个 Windows Beta（analyze 0 issue；103 tests passed；2026-10-20）
+> 状态：**v0.1.0-beta.2** Windows Beta（analyze 0 issue；103 tests passed；2026-10-20）
 > 目标基座：DonutWare/Fladder（Flutter/Dart，GPL-3.0）
 > 当前仓库：main 已包含 Fladder + PR #735 + Stage A 代码；已推送 origin（最新提交见 git log）。
 
