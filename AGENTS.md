@@ -146,6 +146,7 @@ dart analyze lib test
 10. **插件注册器过期**：升级 screen_brightness_windows 后必须删除并重新生成 generated_plugin_registrant.cc/.h。
 11. **SMTC 初始化竞态**：SMTC 必须在 runApp 前初始化；`_subscribePlayerState` 必须先于可选 SMTC 设置，SMTC 异常不得中断进度订阅。`smtc_windows 1.1.0` 需配 `flutter_rust_bridge 2.11.1`，否则 codegen/runtime 版本检查会失败。
 12. **弹幕轨道必须稳定**：轨道分配要基于完整时间轴，不能每帧只对活动评论重排；否则评论进出窗口时行列会跳动。
+13. **桌面点击暂停不能重复切换**：不要同时监听 `onHorizontalDragDown` 和 `onTap` 调用 `playOrPause`/`userPlayOrPause`；一次点击会切换两次，表现为点中间不暂停。
 
 ## 11. 文档索引
 
