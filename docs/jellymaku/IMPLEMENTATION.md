@@ -158,6 +158,22 @@
   - 启动冒烟：Release exe 运行 8s 正常后手动结束。
 - 未验证：播放器内真实加载/切集/暂停；真实 Jellyfin 媒体；真实混合来源弹幕表现。
 
+### 本地 Jellyfin E2E（NAS，2026-10-21）
+
+- 服务器：`http://192.168.8.137:8096`，Jellyfin **12.2.0**（ServerName「媒体库」）；测试账号 `test`（密码不入库）。
+- 登录：`POST /Users/AuthenticateByName` 返回 200。注意 12.2 需要 `Authorization: MediaBrowser Client="...", Device="...", DeviceId="...", Token="..."`；沿用旧的 `X-Emby-Authorization` 会 400。
+- 客户端：JellyMaku 自动登录成功；`/Sessions` 出现 `Client=JellyMaku`、`DeviceName=Windows`、`User=test`。
+- 媒体库：电影 191 条、剧集 5380 条可见。
+- 播放：打开《药屋少女的呢喃》S01E51「如果没有面包」：
+  - 位置 54s → 59s（5s 采样）；
+  - 空格暂停后位置冻结在 60s（3s 内不变）；再按空格恢复并推进到 62s；
+  - 右方向键 ×3 → 155s（每次约 30s，符合用户 skipForward 设置）。
+- 未验证/待补：
+  - **字幕切换**：当前条目无字幕轨；需改选带字幕条目（库内多条 zho 字幕）。
+  - **切集**：Shift+N 未触发（该集为第 51 集，可能没有下一集）；需从中间集验证。
+  - **弹幕叠加层**：未观察到对 danmu_api 的连接；该标题 `/api/v2/match` 返回 `isMatched=false`（API 本身 HTTP 200 可达）。
+- 限制：Flutter 自绘 UI 在 Windows 只暴露 `FLUTTERVIEW` 节点，UIA 无法按控件名定位；本次用坐标点击 + 窗口标题辅助，建议后续补 `integration_test` 或可访问性语义树。
+
 ### 上游 Fladder develop 合并（2026-10-21）
 
 - 日期：2026-10-21
