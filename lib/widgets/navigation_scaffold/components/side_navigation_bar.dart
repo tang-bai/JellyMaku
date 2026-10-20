@@ -92,175 +92,195 @@ class SideNavigationRail extends ConsumerWidget {
         )) &&
         !topBarNoBlurRoutes.contains(context.router.current.name);
 
-    final blurWidth = (shouldExpand ? expandedWidth : collapsedWidth) + 25;
-
     final surfaceColor = Theme.of(context).colorScheme.surface;
+    final targetWidth = fullyExpanded ? expandedWidth : collapsedWidth;
 
-    return Stack(
-      children: [
-        AdaptiveLayout(
-          data: AdaptiveLayout.of(context).copyWith(
-            // -0.1 offset to fix single visible pixel line
-            sideBarWidth:
-                (fullyExpanded ? expandedWidth : collapsedWidth) - 0.1,
-          ),
-          child: child,
-        ),
-        Positioned.fill(
-          child: Align(
-            alignment: AlignmentDirectional.topStart,
-            child: RepaintBoundary(
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 250),
-                opacity: !fullScreenChildRoute ? 1 : 0,
-                child: IgnorePointer(
-                  child: Container(
-                    width: blurWidth,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: isRtl
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        end: isRtl
-                            ? Alignment.centerLeft
-                            : Alignment.centerRight,
-                        colors: [
-                          surfaceColor.withAlpha(255),
-                          surfaceColor.withAlpha(175),
-                          surfaceColor.withAlpha(0),
-                        ],
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: collapsedWidth, end: targetWidth),
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOutCubic,
+      builder: (context, animatedWidth, _) {
+        final blurWidth = animatedWidth + 25;
+        return Stack(
+          children: [
+            AdaptiveLayout(
+              data: AdaptiveLayout.of(context).copyWith(
+                // -0.1 offset to fix single visible pixel line
+                sideBarWidth: animatedWidth - 0.1,
+              ),
+              child: child,
+            ),
+            Positioned.fill(
+              child: Align(
+                alignment: AlignmentDirectional.topStart,
+                child: RepaintBoundary(
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 250),
+                    opacity: !fullScreenChildRoute ? 1 : 0,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: blurWidth,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: isRtl
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            end: isRtl
+                                ? Alignment.centerLeft
+                                : Alignment.centerRight,
+                            colors: [
+                              surfaceColor.withAlpha(255),
+                              surfaceColor.withAlpha(175),
+                              surfaceColor.withAlpha(0),
+                            ],
+                          ),
+                        ),
+                        child: useBlurredBackground
+                            ? ShaderMask(
+                                shaderCallback: (bounds) {
+                                  return LinearGradient(
+                                    begin: isRtl
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft,
+                                    end: isRtl
+                                        ? Alignment.centerLeft
+                                        : Alignment.centerRight,
+                                    colors: [
+                                      Colors.white.withAlpha(255),
+                                      Colors.white.withAlpha(175),
+                                      Colors.white.withAlpha(0),
+                                    ],
+                                  ).createShader(
+                                    Rect.fromLTRB(
+                                        0, 0, blurWidth, bounds.height),
+                                  );
+                                },
+                                blendMode: BlendMode.dstIn,
+                                child: const BackgroundImage(),
+                              )
+                            : null,
                       ),
                     ),
-                    child: useBlurredBackground
-                        ? ShaderMask(
-                            shaderCallback: (bounds) {
-                              return LinearGradient(
-                                begin: isRtl
-                                    ? Alignment.centerRight
-                                    : Alignment.centerLeft,
-                                end: isRtl
-                                    ? Alignment.centerLeft
-                                    : Alignment.centerRight,
-                                colors: [
-                                  Colors.white.withAlpha(255),
-                                  Colors.white.withAlpha(175),
-                                  Colors.white.withAlpha(0),
+                  ),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: Align(
+                alignment: AlignmentDirectional.topStart,
+                child: FocusTraversalGroup(
+                  policy: _RailTraversalPolicy(),
+                  child: IgnorePointer(
+                    ignoring: !hasOverlay || fullScreenChildRoute,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 250),
+                      opacity: !fullScreenChildRoute ? 1 : 0,
+                      child: SizedBox(
+                        width: animatedWidth,
+                        child: Padding(
+                          key: const Key('navigation_rail'),
+                          padding: railPadding,
+                          child: ClipRect(
+                            child: Column(
+                              spacing: 2,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14),
+                                  child: CollapseButton(
+                                    label: shouldExpand
+                                        ? Expanded(
+                                            child: Text(
+                                                context.localized.navigation))
+                                        : null,
+                                    keepVisible: !(largeBar && expandedSideBar),
+                                    icon: Icon(
+                                      largeBar && expandedSideBar
+                                          ? IconsaxPlusLinear.sidebar_left
+                                          : IconsaxPlusLinear.menu,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(
+                                            alpha: largeBar && expandedSideBar
+                                                ? 0.65
+                                                : 1,
+                                          ),
+                                    ),
+                                    onPressed: !largeBar
+                                        ? () => scaffoldKey.currentState
+                                            ?.openDrawer()
+                                        : () => ref
+                                            .read(
+                                                clientSettingsProvider.notifier)
+                                            .update((state) => state.copyWith(
+                                                expandSideBar:
+                                                    !state.expandSideBar)),
+                                  ),
+                                ),
+                                if (largeBar) ...[
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                            horizontal: 4)
+                                        .copyWith(
+                                            bottom: expandedSideBar ? 10 : 0),
+                                    child: hasCustomFab
+                                        ? actionButtonWidget(
+                                            context, shouldExpand)
+                                        : AnimatedFadeSize(
+                                            duration: const Duration(
+                                                milliseconds: 250),
+                                            child: actionButtonWidget(
+                                                context, shouldExpand),
+                                          ),
+                                  ),
                                 ],
-                              ).createShader(
-                                Rect.fromLTRB(0, 0, blurWidth, bounds.height),
-                              );
-                            },
-                            blendMode: BlendMode.dstIn,
-                            child: const BackgroundImage(),
-                          )
-                        : null,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Positioned.fill(
-          child: Align(
-            alignment: AlignmentDirectional.topStart,
-            child: FocusTraversalGroup(
-              policy: _RailTraversalPolicy(),
-              child: IgnorePointer(
-                ignoring: !hasOverlay || fullScreenChildRoute,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 250),
-                  opacity: !fullScreenChildRoute ? 1 : 0,
-                  child: SizedBox(
-                    width: shouldExpand ? expandedWidth : collapsedWidth,
-                    child: Padding(
-                      key: const Key('navigation_rail'),
-                      padding: railPadding,
-                      child: Column(
-                        spacing: 2,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            child: CollapseButton(
-                              label: shouldExpand
-                                  ? Expanded(
-                                      child: Text(context.localized.navigation))
-                                  : null,
-                              keepVisible: !(largeBar && expandedSideBar),
-                              icon: Icon(
-                                largeBar && expandedSideBar
-                                    ? IconsaxPlusLinear.sidebar_left
-                                    : IconsaxPlusLinear.menu,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(
-                                      alpha: largeBar && expandedSideBar
-                                          ? 0.65
-                                          : 1,
-                                    ),
-                              ),
-                              onPressed: !largeBar
-                                  ? () => scaffoldKey.currentState?.openDrawer()
-                                  : () => ref
-                                      .read(clientSettingsProvider.notifier)
-                                      .update((state) => state.copyWith(
-                                          expandSideBar: !state.expandSideBar)),
+                                Expanded(
+                                  child: SideNavigationButtons(
+                                    largeBar: largeBar,
+                                    destinations: destinations,
+                                    tooltipPosition: tooltipPosition,
+                                    currentIndex: currentIndex,
+                                    shouldExpand: shouldExpand,
+                                  ),
+                                ),
+                                NavigationButton(
+                                  label: context.localized.settings,
+                                  selected: currentLocation.contains(
+                                      const SettingsRoute().routeName),
+                                  selectedIcon:
+                                      const Icon(IconsaxPlusBold.setting_3),
+                                  horizontal: true,
+                                  expanded: shouldExpand,
+                                  icon: const SizedBox.shrink(),
+                                  customIcon: const ExcludeFocusTraversal(
+                                      child: SizedBox.square(
+                                          dimension: 40,
+                                          child: SettingsUserIcon())),
+                                  onPressed: () {
+                                    if (AdaptiveLayout.layoutModeOf(context) ==
+                                        LayoutMode.single) {
+                                      context.router
+                                          .push(const SettingsRoute());
+                                    } else {
+                                      context.router
+                                          .push(const ClientSettingsRoute());
+                                    }
+                                  },
+                                ),
+                              ],
                             ),
                           ),
-                          if (largeBar) ...[
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4)
-                                  .copyWith(bottom: expandedSideBar ? 10 : 0),
-                              child: hasCustomFab
-                                  ? actionButtonWidget(context, shouldExpand)
-                                  : AnimatedFadeSize(
-                                      duration:
-                                          const Duration(milliseconds: 250),
-                                      child: actionButtonWidget(
-                                          context, shouldExpand),
-                                    ),
-                            ),
-                          ],
-                          Expanded(
-                            child: SideNavigationButtons(
-                              largeBar: largeBar,
-                              destinations: destinations,
-                              tooltipPosition: tooltipPosition,
-                              currentIndex: currentIndex,
-                              shouldExpand: shouldExpand,
-                            ),
-                          ),
-                          NavigationButton(
-                            label: context.localized.settings,
-                            selected: currentLocation
-                                .contains(const SettingsRoute().routeName),
-                            selectedIcon: const Icon(IconsaxPlusBold.setting_3),
-                            horizontal: true,
-                            expanded: shouldExpand,
-                            icon: const SizedBox.shrink(),
-                            customIcon: const ExcludeFocusTraversal(
-                                child: SizedBox.square(
-                                    dimension: 40, child: SettingsUserIcon())),
-                            onPressed: () {
-                              if (AdaptiveLayout.layoutModeOf(context) ==
-                                  LayoutMode.single) {
-                                context.router.push(const SettingsRoute());
-                              } else {
-                                context.router
-                                    .push(const ClientSettingsRoute());
-                              }
-                            },
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 

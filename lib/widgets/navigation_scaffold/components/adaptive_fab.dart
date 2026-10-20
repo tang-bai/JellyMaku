@@ -54,7 +54,14 @@ class AdaptiveFab {
             spacing: 16,
             children: [
               child,
-              Flexible(child: Text(title)),
+              Flexible(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
         ),
