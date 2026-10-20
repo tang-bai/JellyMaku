@@ -10,7 +10,7 @@
 - 本地 git 已初始化，main 为工作分支；origin https://github.com/tang-bai/JellyMaku 已推送（Stage A 基线 `dc1f8d5c`）。
 - main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 项目文档/AGENTS。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
-- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、118 tests passed（2026-10-20）；Windows release 构建/启动冒烟为 2026-10-19 产物**。
+- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、118 tests passed；Windows release 重新构建/启动冒烟通过（2026-10-20）**。
 - 基线说明：为尽快拿到可运行起点，main 以 PR #735 head 为基线（包含 Fladder + SyncPlay），**尚未合并最新 develop**；Phase A0 仍需补这次合并。
 - 未验证：真实 Jellyfin 12.2 E2E、真实 DDP 凭证、SyncPlay 双客户端、超分画质/性能。
 - 因此：

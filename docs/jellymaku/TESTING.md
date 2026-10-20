@@ -1,7 +1,7 @@
 
 # 测试策略与验收
 
-> 状态：部分执行。2026-10-20 已完成 analyze 0、118 tests；Windows release 构建为 2026-10-19 结果，本次弹幕改动未重新打包；真实 Jellyfin/DDP/SyncPlay 联调仍未执行。
+> 状态：部分执行。2026-10-20 已完成 analyze 0、118 tests；Windows release 重新构建、portable zip 重打、启动冒烟通过；真实 Jellyfin/DDP/SyncPlay 联调仍未执行。
 >
 > 已执行证据见 [STAGE_A_REPORT.md](STAGE_A_REPORT.md) 与 artifacts/logs/（本地，不入库）。
 

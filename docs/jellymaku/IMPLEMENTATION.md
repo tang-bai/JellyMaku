@@ -1,7 +1,7 @@
 
 # 实施检查清单与证据模板
 
-> 状态：Stage A 核心已构建/验证：Flutter 3.35.7、analyze 0、118 tests（2026-10-20 复核）；Windows release + 启动冒烟、portable zip 为 2026-10-19 产物。
+> 状态：Stage A 核心已构建/验证：Flutter 3.35.7、analyze 0、118 tests（2026-10-20）；Windows release + 启动冒烟、portable zip 于 2026-10-20 重新构建。
 > 弹幕在 2026-10-20 增加了 Kazumi 对齐能力：手动匹配三步 UI、来源过滤、合并去重、实时类型/来源开关、描边/颜色开关。
 > 真实 Jellyfin/DDP/SyncPlay E2E 仍未完成；弹幕未做真实凭证联调。
 > 用途：让后续 agent 按清单推进，避免“文档写了但没做”。
@@ -122,6 +122,15 @@
 - 已知问题：p[3] 来源语义待真实凭证确认；自动匹配仍取第一条候选；本地 XML 用正则解析。
 - 未验证项：真实凭证搜索/拉取、手动匹配落盘后的播放、来源开关在真实混合弹幕下的表现、本地文件在真实播放器中的时间轴、发送回显的布局/暂停行为。
 
+### Windows release 重建（2026-10-20）
+
+- 命令（ASCII 路径 `L:\JellyMaku`）：
+  - `.flutter\bin\flutter.bat build windows --release --no-pub` → √ Built `build\windows\x64\runner\Release\JellyMaku.exe`（126.5s）
+  - `tools\pack.ps1 -Version 0.1.0` → `artifacts\JellyMaku-0.1.0-windows-x64-portable.zip`（90,747,908 bytes，SHA256 `0B7909BEC6066EFA3C4F7CE45269968CE283AAB842590394A5D9F4349DB2864C`）
+  - 启动冒烟：portable exe 启动 8 秒未退出，随后手动结束。
+- 证据：`data\app.so` 时间 2026-10-20 20:06；zip 20:07。
+- 注意：`JellyMaku.exe` 本体未变（runner 未改），新 Dart 代码在 `data\app.so`；只替换 exe 不会更新界面。
+
 ## 4. 禁止事项
 
 - 不把“文档计划”写成“已实现”。
@@ -135,7 +144,7 @@
 
 - 文档：完成；本次更新 DANMAKU/IMPLEMENTATION/ROADMAP/AGENTS。
 - 代码：Fladder + PR #735 head 已导入；弹幕（自动+手动匹配/来源/合并/本地导入/发送回显/叠加层）、超分（Anime4K）已接入；Bangumi Stage B 未开始。
-- 构建：Windows release 成功、启动冒烟通过（2026-10-19）；本次改动未重新构建，仅 analyze/test。
+- 构建：Windows release 重新构建成功、启动冒烟通过（2026-10-20）；portable zip 已重打。
 - 测试：118 tests passed（2026-10-20）；`dart analyze lib test` → No issues found。
 - 发布：portable zip 已出；安装器/中文 ARB 未做。
 - 未验证：真实 DDP 凭证、真实 Jellyfin 播放、SyncPlay 双端、超分画质/性能、弹幕 p[3] 来源语义。
