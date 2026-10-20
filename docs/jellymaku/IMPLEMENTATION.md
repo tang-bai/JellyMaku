@@ -37,7 +37,7 @@
 - [x] Flutter 叠加层；设置弹窗；播放器入口。
 - [x] 单测/Mock（danmu_api HTTP mock/本地 HttpServer、解析/来源/合并、匹配请求、设置迁移）。
 - [x] Jellyfin E2E：seek/pause 自动验证；字幕切换/切集/弹幕叠加层由用户手动验证通过（2026-10-21）。
-- [ ] 截图/性能日志（5000 条未压测）。
+- [x] 5000 条解析/布局基准：`parse` 52–55ms、首帧 15–17ms、平均 1.0–1.1ms/帧（`test/danmaku/danmaku_perf_test.dart`；Flutter test 环境，非播放器内 FPS）。
 
 ### A3 超分
 
@@ -157,6 +157,16 @@
   - `tools\\pack.ps1 -Version 0.1.0` → `artifacts\\JellyMaku-0.1.0-windows-x64-portable.zip`，90,712,816 bytes，SHA256 `5FFC849F33D8E7216EE93AEC17192EBE7EEDAEEC8A47D97452FA891564B61237`。
   - 启动冒烟：Release exe 运行 8s 正常后手动结束。
 - 未验证：播放器内真实加载/切集/暂停；真实 Jellyfin 媒体；真实混合来源弹幕表现。
+
+### 弹幕 5000 条压测 / 超分截图（2026-10-21）
+
+- 弹幕基准：`flutter test --no-pub test/danmaku/danmaku_perf_test.dart`
+  - 5000 条：解析 52–55ms，首帧（轨道+文本布局）15–17ms，后续帧平均 1.0–1.1ms（120 帧）
+  - 限制：Flutter test/Ahem 字体环境，非播放器内实际 FPS；真实播放叠加层仍建议人工观感确认
+- 超分截图（NAS 12.2 播放《药屋少女的呢喃》，窗口截图）：
+  - `artifacts/screenshots/sr-off.png`、`sr-fast.png`、`sr-balanced.png`、`sr-strong.png`
+  - 历史对比：`sr-off-bright.png`、`sr-fast-bright.png`、`sr-quality-bright.png`、`sr-diff-off-quality.png`
+- 性能粗测：GPU 总利用率约 23%，JellyMaku 进程约 4.3%（Strong）；**未采集 FPS/掉帧**，A3 性能项暂不勾选。
 
 ### 本地 Jellyfin E2E（NAS，2026-10-21）
 
