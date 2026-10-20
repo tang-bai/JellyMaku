@@ -215,46 +215,27 @@ class DanmakuController extends StateNotifier<DanmakuState> {
             )
           : null;
       if (raw == null) {
-        try {
-          raw = await client.getComments(
-            match.episodeId,
-            chConvert: settings.chConvert,
-            url: match.url,
-          );
-        } on DanmakuException catch (error) {
-          // danmu_api 的 id 映射失效时会报 Invalid url/404；用标题+集号重搜一次，
-          // 优先拿带 url 的候选，避免整集弹幕直接失败。
-          final recoverable = error.statusCode == 400 ||
-              error.statusCode == 404 ||
-              error.message.toLowerCase().contains('invalid url');
-          if (!customServer || !recoverable) rethrow;
-          if (error.statusCode == 401 || error.statusCode == 403) rethrow;
-          final candidates = await client.searchEpisodes(
-            media.searchTitle,
-            media.episodeNumber,
-          );
-          final withUrl = candidates.where(
-            (candidate) => candidate.url.trim().startsWith('http'),
-          );
-          if (withUrl.isEmpty) rethrow;
-          raw = await client.getComments(
-            withUrl.first.episodeId,
-            chConvert: settings.chConvert,
-            url: withUrl.first.url,
-          );
+        raw = await _fetchCommentsWithFallback(
+          client,
+          media,
+          match,
+          settings,
+          customServer,
+        );
+        if (raw.isNotEmpty) {
+          if (match.url.isEmpty) {
+            await cache.writeComments(match.episodeId, settings.chConvert, raw);
+          }
+          await cache.writeMapping(media.itemId, {
+            'episodeId': match.episodeId,
+            'animeTitle': match.animeTitle,
+            'episodeTitle': match.episodeTitle,
+            'shift': match.shift,
+            'source': match.source,
+            'url': match.url,
+            'updatedAt': DateTime.now().toIso8601String(),
+          });
         }
-        if (match.url.isEmpty) {
-          await cache.writeComments(match.episodeId, settings.chConvert, raw);
-        }
-        await cache.writeMapping(media.itemId, {
-          'episodeId': match.episodeId,
-          'animeTitle': match.animeTitle,
-          'episodeTitle': match.episodeTitle,
-          'shift': match.shift,
-          'source': match.source,
-          'url': match.url,
-          'updatedAt': DateTime.now().toIso8601String(),
-        });
       }
       if (generation != _generation) return;
 
@@ -290,6 +271,59 @@ class DanmakuController extends StateNotifier<DanmakuState> {
     } finally {
       client?.dispose();
     }
+  }
+
+  /// 先试匹配到的地址；自建服务器上若源不可用/404，就按标题+集号换源重试。
+  Future<List<DdpComment>> _fetchCommentsWithFallback(
+    DdpClient client,
+    DanmakuMediaInfo media,
+    DanmakuMatch match,
+    DanmakuSettingsModel settings,
+    bool customServer,
+  ) async {
+    try {
+      final raw = await client.getComments(
+        match.episodeId,
+        chConvert: settings.chConvert,
+        url: match.url,
+      );
+      if (raw.isNotEmpty || !customServer) return raw;
+    } on DanmakuException {
+      if (!customServer) rethrow;
+    }
+
+    if (media.searchTitle.trim().isEmpty) return const [];
+    final candidates = await client.searchEpisodes(
+      media.searchTitle,
+      media.episodeNumber,
+    );
+    final ordered = candidates
+        .where((candidate) =>
+            candidate.url.trim().startsWith('http') &&
+            candidate.episodeId != match.episodeId)
+        .toList()
+      ..sort((a, b) => _sourceRank(b.url).compareTo(_sourceRank(a.url)));
+
+    for (final candidate in ordered.take(5)) {
+      try {
+        final raw = await client.getComments(
+          candidate.episodeId,
+          chConvert: settings.chConvert,
+          url: candidate.url,
+        );
+        if (raw.isNotEmpty) return raw;
+      } on DanmakuException {
+        continue;
+      }
+    }
+    return const [];
+  }
+
+  int _sourceRank(String url) {
+    final value = url.toLowerCase();
+    if (value.contains('bilibili.com')) return 3;
+    if (value.contains('gamer.com.tw')) return 2;
+    return 1;
   }
 
   Future<void> reload() async {

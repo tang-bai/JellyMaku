@@ -126,10 +126,10 @@
 ### Windows release 重建（2026-10-20）
 
 - 命令（ASCII 路径 `L:\JellyMaku`）：
-  - `.flutter\bin\flutter.bat build windows --release --no-pub` → √ Built `build\windows\x64\runner\Release\JellyMaku.exe`（120.4s；刷新旧 mapping 后重建）
-  - `tools\pack.ps1 -Version 0.1.0` → `artifacts\JellyMaku-0.1.0-windows-x64-portable.zip`（90,731,300 bytes，SHA256 `7B371A029DCA6254737659D99C613108D4FC73ABABC777647D958229211C6371`）
+  - `.flutter\bin\flutter.bat build windows --release --no-pub` → √ Built `build\windows\x64\runner\Release\JellyMaku.exe`（116.1s；多源回退后重建）
+  - `tools\pack.ps1 -Version 0.1.0` → `artifacts\JellyMaku-0.1.0-windows-x64-portable.zip`（90,733,695 bytes，SHA256 `4F25765532DDE9002C1ECA207100CE5AFBF2BF98C00D81B33A04DA41522CDB13`）
   - 启动冒烟：portable exe 启动 8 秒未退出，随后手动结束。
-- 证据：`data\app.so` 时间 2026-10-20 22:20；zip 22:20。
+- 证据：`data\app.so` 时间 2026-10-20 22:25；zip 22:26。
 - 注意：`JellyMaku.exe` 本体未变（runner 未改），新 Dart 代码在 `data\app.so`；只替换 exe 不会更新界面。
 
 ### 自建 danmu_api 接入（2026-10-20）
@@ -139,6 +139,7 @@
 - 代码：免签名（AppId 为空不发认证头）、搜索内嵌分集、URL 拉弹幕、URL 结果不写缓存。
 - 错误恢复：URL 路由 4xx/异常 → 回退 `/comment/{id}`；id 仍 400/404 → 按标题+集号重搜并选 http(s) 候选；协议相对 URL 自动补 `https:`。
 - 旧 mapping（只有 episodeId、没有 url）在自建服务器上会 404；加载时若 url 为空会重新搜索并刷新映射。
+- 多源回退：首选源 404/0 条时，按标题+集号重搜，优先 B 站→巴哈→其他，最多试 5 个候选；全失败才显示空。
 - DDP 错误信息现在带请求路径（如 `（/api/v2/comment/10021）`），便于定位。
 - 命令：临时 `flutter test` live probe（已删除）→ 1 passed。
 - 未验证：播放器内真实切集/暂停；巴哈来源（danmu_api 服务端支持，未单独验证）。
