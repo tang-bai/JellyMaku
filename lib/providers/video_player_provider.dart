@@ -410,7 +410,8 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
         model.item.type == FladderItemType.audio || model.mediaStreams?.videoStreams.isEmpty == true;
 
     try {
-      await state.stop();
+      // keepMediaSession: swapping items must not tear down the SMTC/media session (upstream 5d12e7b8).
+      await state.stop(keepMediaSession: true);
       ref.read(playbackRateProvider.notifier).state = 1.0;
       mediaState.update((state) => state.copyWith(
             state: useMinimizedPlayer ? VideoPlayerState.minimized : VideoPlayerState.fullScreen,
