@@ -1,7 +1,7 @@
 
 # 实施总计划（Stage A / Stage B）
 
-> 状态（2026-10-23）：Stage A 核心与 beta.5 发布完成；仍缺 SyncPlay 双端、超分 FPS/掉帧、安装版完整 E2E、播放信息面板实机验证；Stage B 未开始。任务描述保留原始计划，实际勾选/证据以 [ROADMAP.md](ROADMAP.md) 与 [IMPLEMENTATION.md](IMPLEMENTATION.md) 为准。
+> 状态（2026-10-23）：Stage A 核心与 beta.5 发布完成；SyncPlay 双端、超分性能、播放信息面板已由用户实机确认；仍缺安装版完整 E2E 与原始证据归档；Stage B 未开始。任务描述保留原始计划，实际勾选/证据以 [ROADMAP.md](ROADMAP.md) 与 [IMPLEMENTATION.md](IMPLEMENTATION.md) 为准。
 > 日期：2026-10-19（原始计划；2026-10-23 状态注记）。
 > 基座：DonutWare/Fladder develop de7b5a2a23f16f5f3bb164ec0baedf50941e4808 + PR #735。
 > 原则：先交付可用的 Jellyfin 播放器，再叠加 Bangumi；每阶段有可运行产物与证据。

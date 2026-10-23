@@ -1,10 +1,10 @@
 
 # 实施检查清单与证据模板
 
-> 状态（2026-10-23）：v0.1.0-beta.5 已发布；工作区干净。
+> 状态（2026-10-23）：v0.1.0-beta.5 已发布；本次文档验收状态更新未提交。
 > 当前 HEAD：analyze 0 issue；156 tests passed + 1 skipped；Windows release 于 2026-10-23 构建成功。
-> 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动），字幕切换/切集/弹幕叠加层（手动）。
-> 未完成：SyncPlay 双客户端、超分 FPS/掉帧、安装版完整 E2E、播放信息面板真实播放验证、Stage B。
+> 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动），字幕切换/切集/弹幕叠加层（手动）；用户实机确认 SyncPlay 双客户端、超分性能通过（2026-10-23）。
+> 未完成：安装版完整 E2E、Stage B；用户确认项缺原始 FPS/误差/截图归档。
 > 用途：让后续 agent 按清单推进，避免“文档写了但没做”。
 
 ## 1. Stage A 检查清单
@@ -46,7 +46,7 @@
 - [x] glsl-shaders 应用；失败仅日志回退。
 - [x] 播放器菜单/持久化（独立设置页未做）。
 - [x] 至少 3 个 profile 截图（`artifacts/screenshots/sr-*.png`）。
-- [ ] 性能记录（FPS/掉帧；目前只有 GPU 利用率粗测）。
+- [x] 性能验收：用户实机确认通过（2026-10-23）；原始 FPS/掉帧数据待归档。
 - [x] RTX VSR 结论：spike 失败已回退（`backup/pre-rtx-vsr`），v1 不做。
 
 ### A4 SyncPlay
@@ -54,8 +54,8 @@
 - [x] PR #735 代码导入；Windows release 构建包含 smtc_windows。
 - [x] 中文文案/组面板完善（2026-10-22 补齐 `syncPlay*` 与 `leave`，真实 UI 复测通过）。
 - [x] 侧栏「一起看」状态点与当前页面高亮互斥（2026-10-22 真实 UI 复测）。
-- [ ] 双客户端矩阵；Jellyfin 12.2 WebSocket（单测已通过，真实联调未做）。
-- [ ] 双端日志/截图/位置误差。
+- [x] 双客户端矩阵：用户实机确认通过（2026-10-23）。
+- [ ] 双端日志/截图/位置误差原始证据归档。
 
 ### A5 品牌/打包
 
@@ -71,7 +71,7 @@
 - [x] `SDR HD` 徽章可点击，打开实时播放信息对话框；显示码率/下载速度/缓冲/丢帧/硬解/渲染帧率/加载耗时。
 - [x] `PlaybackRuntimeStats` + libmpv/MDK/Native 后端分级读取；ARB 三语。
 - [x] 单测/analyze/Windows release 构建通过（2026-10-23）。
-- [ ] NAS Jellyfin 播放中点击徽章的 UI 截图与实时数值确认。
+- [x] 用户实机确认播放信息面板通过（2026-10-23）；原始 UI 截图/实时数值待归档。
 
 ## 2. Stage B 检查清单
 
@@ -301,7 +301,14 @@
   - `PlaybackRuntimeStats` + `BasePlayer.playbackStats()`：libmpv 读取 `video-bitrate`/`audio-bitrate`/`cache-speed`/`demuxer-cache-duration`/`frame-drop-count`/`estimated-vf-fps`/`hwdec-current`/`video-codec`/`audio-codec`/`file-format`，并记录加载耗时；下载速度优先用 `demuxer-cache-state` 的 `total-bytes` 增量计算，`cache-speed` 为 0 时仍可显示实际读取速率；MDK 读取 MediaInfo；Native 后端优雅降级为静态信息。
   - `lib/util/byte_formatting.dart`：字节数/下载速率格式化；ARB 新增中/英/繁中文案。
 - 证据（2026-10-23）：`dart analyze lib test` → No issues found；`flutter test --no-pub` → 156 tests passed（1 skipped）；`flutter build windows --release --no-pub` → `√ Built build\windows\x64\runner\Release\JellyMaku.exe`（114.9s）。
-- 未验证：真实 NAS Jellyfin 播放中点击徽章的 UI 截图与实时数值；libmpv `cache-speed` 在真实 HTTP 直连流上的数值表现需实机确认（本地文件探测为 0，属预期）。
+- 用户复测（2026-10-23）：播放信息面板确认通过；原始 UI 截图与 `cache-speed` 数值未归档。
+
+### 用户实机验收（2026-10-23）
+
+- 范围：SyncPlay 双客户端联调；Anime4K 超分性能；播放信息面板。
+- 结果：用户确认通过（口头验收）。
+- 证据：未提供原始截图/日志/FPS/位置误差；本记录不虚构数值。
+- 影响：A3 性能、A4 双端、A6 播放信息可标记通过；原始证据归档仍为待办。
 
 ### 文档复核（2026-10-23）
 
@@ -310,7 +317,7 @@
   - `.flutter\bin\flutter.bat test --no-pub` → 156 tests passed + 1 skipped（手动联网探针）
 - 结果：通过（静态/单测）；本次未重新构建/打包，沿用 2026-10-23 的 Windows release 构建记录。
 - 修改：同步 README/AGENTS/ROADMAP/IMPLEMENTATION/PLAN/DANMAKU/TESTING/BUILD_WINDOWS/ASSETS/ARCHITECTURE/UPSTREAM/DECISIONS/SR/PARTY 的状态与计数。
-- 剩余：SyncPlay 双端、超分性能、安装版 E2E、播放信息面板实机、Stage A 报告重写、随安装包复核第三方声明。
+- 剩余：安装版 E2E、用户确认项的原始性能/联调/播放信息证据归档。
 
 ## 4. 禁止事项
 
@@ -323,9 +330,9 @@
 
 ## 5. 当前进度
 
-- 文档：状态页已按 2026-10-23 结果同步；STAGE_A_REPORT 仍为历史版本，待重写。
+- 文档：状态页已按 2026-10-23 结果同步；STAGE_A_REPORT 已重写为 beta.5 验收报告。
 - 代码：Fladder + PR #735 head 已导入，develop `de7b5a2a` 已合并；弹幕/超分/SyncPlay/播放信息面板已接入；Bangumi Stage B 未开始。
 - 构建：当前 HEAD Windows release 于 2026-10-23 构建成功；beta.5 发布资产为同一提交产物。
 - 测试：当前 HEAD 156 tests passed + 1 skipped（2026-10-23）；analyze 0 issue。
 - 发布：v0.1.0-beta.5 安装器/便携包已发布；安装器未签名，安装目录完整 E2E 未做。
-- 未验证：SyncPlay 双端、超分 FPS/掉帧、安装版完整功能、播放信息面板实机数值。
+- 未验证：安装版完整功能；用户确认项缺原始 FPS/误差/截图。

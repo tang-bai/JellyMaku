@@ -7,14 +7,14 @@
 
 ## 0. 当前仓库状态（必须先理解）
 
-- 本地 `main` 已同步 origin https://github.com/tang-bai/JellyMaku 的 `main`；v0.1.0-beta.5 已发布，工作区干净。
+- 本地 `main` 已同步 origin https://github.com/tang-bai/JellyMaku 的 `main`；v0.1.0-beta.5 已发布；本次文档验收状态更新未提交。
 - `main` 已包含 Fladder 源码 + SyncPlay PR #735（head 79e249e）+ Stage A 弹幕/超分/品牌代码，并于 2026-10-21 合并 Fladder develop `de7b5a2a`。
 - v0.1.0-beta.5 的安装器/便携包已发布（2026-10-23）；安装器未签名。
 - beta.5 发布包含播放信息面板、Seerr/缺图/日志时间修复、SyncPlay 中文化与 `THIRD_PARTY_NOTICES.md`。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
 - Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、156 tests passed + 1 skipped；Windows release 于 2026-10-23 构建通过**（当前 HEAD，已打包 beta.5）。
-- 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动）以及字幕切换/切集/弹幕叠加层（手动）。
-- 未验证：SyncPlay 双客户端、超分 FPS/掉帧、安装版完整 E2E、播放信息面板真实播放数值。
+- 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动）以及字幕切换/切集/弹幕叠加层（手动）；用户实机确认 SyncPlay 双客户端、超分性能、播放信息面板通过（2026-10-23，原始数值/截图未归档）。
+- 未验证：安装版完整 E2E；用户确认项缺原始 FPS/误差/截图归档。
 - 因此：
   - 不要把“计划”当成“已实现”；
   - 不要把单测/构建通过当成真实 E2E 通过；
@@ -124,13 +124,13 @@ dart analyze lib test
 
 | 功能 | 状态 |
 |---|---|
-| 文档/AGENTS | 状态页已同步；Stage A 最终报告仍待重写 |
+| 文档/AGENTS | 状态页已同步；Stage A 报告已重写（2026-10-23） |
 | Fladder 源码导入 | 完成（PR #735 head + develop `de7b5a2a` 合并） |
 | Flutter/构建 | 当前 HEAD analyze 0、156 tests + 1 skipped、Windows release 构建成功；beta.5 发布包即当前 HEAD |
-| SyncPlay | 代码/单测/UI 中文化通过；真实双端未联调 |
+| SyncPlay | 用户实机确认双客户端通过；原始日志/误差/截图待归档 |
 | 弹幕 | danmu_api/自动+手动匹配/URL 拉取/合并/本地导入/缓存/叠加层已接入；NAS 播放器内叠加层手动确认 |
-| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；截图已有；FPS/掉帧未验收 |
-| 播放信息 | 实时码率/速度/缓冲/硬解/帧率面板已实现并构建；真实 NAS 播放 UI/数值未验证 |
+| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；用户确认性能通过；原始 FPS/掉帧待归档 |
+| 播放信息 | 用户实机确认通过；实时码率/速度/缓冲/硬解/帧率面板；原始截图/数值待归档 |
 | 品牌/打包 | beta.5 安装器 + 便携包已发布；安装版完整功能 E2E 未做 |
 | Bangumi 时间表/图片/评论 | 未开始 |
 | 推送 GitHub | `main` 已同步 origin（v0.1.0-beta.5） |

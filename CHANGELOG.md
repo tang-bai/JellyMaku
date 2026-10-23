@@ -17,8 +17,10 @@
 
 ### 验证与已知缺口
 
-- 当前工作区：analyze 0 issue；156 tests passed + 1 skipped；Windows release 构建成功（2026-10-23）。
-- 仍未验证：SyncPlay 真实双端、超分 FPS/掉帧、安装版完整 E2E、播放信息面板实机数值、Stage B。
+- beta.5 验证：analyze 0 issue；156 tests passed + 1 skipped；Windows release 构建成功（2026-10-23）。
+- 发布后用户复测（2026-10-23）：SyncPlay 双客户端、超分性能通过；原始 FPS/误差/截图未归档。
+- 发布后用户复测（2026-10-23）：播放信息面板通过；原始截图/数值未归档。
+- 仍未验证：安装版完整 E2E、Stage B。
 
 ## v0.1.0-beta.4 — 2026-10-21
 
