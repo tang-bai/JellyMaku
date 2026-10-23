@@ -647,12 +647,19 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                     ),
                   ),
                 if (item != null) ...{
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      child: Text(
-                        item.streamModel?.mediaInfoTag ?? "",
+                  Tooltip(
+                    message: context.localized.playbackStatsTooltip,
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell(
+                        onTap: () => showVideoPlaybackInformation(context),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          child: Text(
+                            item.streamModel?.mediaInfoTag ?? "",
+                          ),
+                        ),
                       ),
                     ),
                   ),

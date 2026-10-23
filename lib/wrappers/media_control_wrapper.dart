@@ -14,6 +14,7 @@ import 'package:fladder/models/playback/audio_prefetch_buffer.dart';
 import 'package:fladder/models/playback/audio_url_resolver.dart';
 import 'package:fladder/models/playback/playback_model.dart';
 import 'package:fladder/models/playback/playback_queue_state.dart';
+import 'package:fladder/models/playback/playback_stats.dart';
 import 'package:fladder/models/settings/video_player_settings.dart';
 import 'package:fladder/providers/api_provider.dart';
 import 'package:fladder/providers/audio_lyrics_provider.dart';
@@ -766,6 +767,9 @@ class MediaControlsWrapper extends BaseAudioHandler implements VideoPlayerContro
             ))
         .toList();
   }
+
+  /// Live statistics from the active backend, or null when it cannot report them.
+  Future<PlaybackRuntimeStats?> getPlaybackStats() async => _player?.playbackStats();
 
   Future<Uint8List?> takeScreenshot() {
     final player = _player;

@@ -68,7 +68,11 @@ class FladderImage extends ConsumerWidget {
               fit: fit,
               placeholderFit: fit,
               alignment: alignment ?? Alignment.center,
-              imageErrorBuilder: imageErrorBuilder,
+              // Jellyfin answers 404 for artwork it advertised but no longer
+              // has; keeping the failure local shows the placeholder instead
+              // of logging a SEVERE crash entry for every such item.
+              imageErrorBuilder: imageErrorBuilder ??
+                  (context, error, stackTrace) => placeHolder ?? const SizedBox.shrink(),
               image: leanBackMode
                   ? ResizeImage(
                       imageProvider,

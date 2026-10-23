@@ -4,6 +4,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
+import 'package:collection/collection.dart';
+
 import 'package:fvp/fvp.dart' as fvp;
 import 'package:fvp/mdk.dart';
 import 'package:image/image.dart' as img;
@@ -11,6 +13,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:fladder/models/items/media_streams_model.dart';
 import 'package:fladder/models/playback/playback_model.dart';
+import 'package:fladder/models/playback/playback_stats.dart';
 import 'package:fladder/models/settings/subtitle_settings_model.dart';
 import 'package:fladder/models/settings/video_player_settings.dart';
 import 'package:fladder/screens/video_player/video_player.dart' as video_screen;
@@ -205,6 +208,23 @@ class LibMDK extends BasePlayer {
       }
       return wantedSubtitle.index;
     }
+  }
+
+  @override
+  Future<PlaybackRuntimeStats?> playbackStats() async {
+    final info = _controller?.getMediaInfo();
+    if (info == null) return null;
+    final video = info.video?.firstOrNull;
+    final audio = info.audio?.firstOrNull;
+    final videoBitrate = video?.codec.bitRate;
+    final audioBitrate = audio?.codec.bitRate;
+    return PlaybackRuntimeStats(
+      videoBitrate: videoBitrate != null && videoBitrate > 0 ? videoBitrate : null,
+      audioBitrate: audioBitrate != null && audioBitrate > 0 ? audioBitrate : null,
+      videoCodec: video?.codec.codec,
+      audioCodec: audio?.codec.codec,
+      container: info.format,
+    );
   }
 
   @override

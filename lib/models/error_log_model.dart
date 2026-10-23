@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 
+import 'package:fladder/util/log_time.dart';
+
 enum ErrorType {
   severe,
   warning,
@@ -58,7 +60,7 @@ class ErrorLogModel {
   }
 
   String get content => [
-        time.toIso8601String(),
+        formatLogTime(time),
         "\n",
         "\n",
         stackTrace,
@@ -73,7 +75,8 @@ class ErrorLogModel {
       };
 
   Map<String, dynamic> toJson() => {
-        'time': time.toIso8601String(),
+        // Store the instant in UTC; display always renders UTC+8.
+        'time': time.toUtc().toIso8601String(),
         'level': type.name,
         'message': message,
         'stackTrace': stackTrace?.toString(),

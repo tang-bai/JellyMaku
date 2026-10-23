@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' as math;
 
@@ -16,6 +17,7 @@ import 'package:fladder/models/item_base_model.dart';
 import 'package:fladder/models/items/audio_model.dart';
 import 'package:fladder/models/items/media_streams_model.dart';
 import 'package:fladder/models/playback/playback_model.dart';
+import 'package:fladder/models/playback/playback_stats.dart';
 import 'package:fladder/models/playback/transcode_playback_model.dart';
 import 'package:fladder/models/settings/subtitle_settings_model.dart';
 import 'package:fladder/models/settings/video_player_settings.dart';
@@ -45,6 +47,9 @@ class LibMPV extends BasePlayer {
   final Duration _maxRetryDuration = const Duration(minutes: 1);
   final Duration _currentRetryDuration = const Duration(seconds: 5);
   Completer<void>? _loadCompleter;
+  Duration? _lastLoadDuration;
+  int? _lastCacheTotalBytes;
+  DateTime? _lastCacheSampleTime;
   final List<StreamSubscription> _playerStreamSubs = [];
   double _preferredVolume = 100;
   int _crossfadeGeneration = 0;
@@ -267,6 +272,12 @@ class LibMPV extends BasePlayer {
   @override
   Future<void> loadVideo(String url, bool play, {Duration startPosition = Duration.zero}) async {
     _loadCompleter = Completer<void>();
+    _lastLoadDuration = null;
+    _lastCacheTotalBytes = null;
+    _lastCacheSampleTime = null;
+    _lastCacheTotalBytes = null;
+    _lastCacheSampleTime = null;
+    final loadStopwatch = Stopwatch()..start();
     _firstLoadAttempt = DateTime.now();
 
     await setStartPosition(startPosition);
@@ -301,6 +312,8 @@ class LibMPV extends BasePlayer {
 
       void onReady() {
         if (_loadCompleter?.isCompleted == true) return;
+        loadStopwatch.stop();
+        _lastLoadDuration = loadStopwatch.elapsed;
         _finishedLoading();
         subBuffering?.cancel();
         subDuration?.cancel();
@@ -573,6 +586,81 @@ class LibMPV extends BasePlayer {
   Future<void> stop() async {
     unawaited(_audioSession?.setActive(false));
     return _player?.stop();
+  }
+
+  /// Derives the actual transfer rate from how many bytes the demuxer cache
+  /// gained since the previous sample. mpv's cache-speed can report 0 while
+  /// the buffer is full, so this interval average is a more useful value.
+  double? _positiveCacheSpeed(double? speed) => speed != null && speed > 0 ? speed : null;
+
+  double? _measureCacheDownloadSpeed(String? cacheState) {
+    final now = DateTime.now();
+    int? totalBytes;
+    if (cacheState != null && cacheState.isNotEmpty) {
+      try {
+        final state = jsonDecode(cacheState);
+        if (state is Map<String, dynamic>) {
+          totalBytes = (state['total-bytes'] as num?)?.toInt();
+        }
+      } catch (_) {
+        // Older mpv builds may not expose a JSON cache state.
+      }
+    }
+
+    final previousBytes = _lastCacheTotalBytes;
+    final previousSample = _lastCacheSampleTime;
+    _lastCacheTotalBytes = totalBytes;
+    _lastCacheSampleTime = now;
+
+    if (totalBytes == null || previousBytes == null || previousSample == null) {
+      return null;
+    }
+    final elapsedMs = now.difference(previousSample).inMilliseconds;
+    if (elapsedMs < 200) return null;
+    final delta = totalBytes - previousBytes;
+    if (delta < 0) return null;
+    return delta * 1000 / elapsedMs;
+  }
+
+  @override
+  Future<PlaybackRuntimeStats?> playbackStats() async {
+    final player = _player;
+    final platform = player?.platform;
+    if (platform is! mpv.NativePlayer) return null;
+    final native = platform as dynamic;
+
+    const properties = <String>[
+      'video-bitrate',
+      'audio-bitrate',
+      'cache-speed',
+      'demuxer-cache-duration',
+      'frame-drop-count',
+      'estimated-vf-fps',
+      'hwdec-current',
+      'video-codec',
+      'audio-codec',
+      'file-format',
+      'demuxer-cache-state',
+    ];
+
+    final values = await Future.wait(
+      properties.map((name) async {
+        try {
+          return await native.getProperty(name) as String;
+        } catch (_) {
+          return null;
+        }
+      }),
+    );
+
+    final cacheState = values[properties.indexOf('demuxer-cache-state')];
+    return PlaybackRuntimeStats.fromMpvProperties(
+      {
+        for (var index = 0; index < properties.length; index++) properties[index]: values[index],
+      },
+      loadTime: _lastLoadDuration,
+      measuredDownloadBytesPerSecond: _positiveCacheSpeed(_measureCacheDownloadSpeed(cacheState)),
+    );
   }
 
   @override

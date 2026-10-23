@@ -21,6 +21,7 @@ import 'package:fladder/widgets/navigation_scaffold/components/navigation_button
 import 'package:fladder/widgets/navigation_scaffold/components/settings_user_icon.dart';
 import 'package:fladder/widgets/navigation_scaffold/components/side_navigation_buttons.dart';
 import 'package:fladder/widgets/shared/custom_tooltip.dart';
+import 'package:fladder/widgets/syncplay/syncplay_extensions.dart';
 import 'package:fladder/widgets/syncplay/syncplay_utils.dart';
 
 final navBarNode = FocusNode();
@@ -247,7 +248,13 @@ class SideNavigationRail extends ConsumerWidget {
                                     leading: largeBar
                                         ? NavigationButton(
                                             label: context.localized.syncPlay,
-                                            selected: isSyncPlayActive,
+                                            // Section buttons only mirror the active route. A joined group is
+                                            // surfaced as a status badge so it never competes with the current
+                                            // destination's highlight.
+                                            selected: false,
+                                            badge: isSyncPlayActive
+                                                ? const _SyncPlayNavBadge()
+                                                : null,
                                             selectedIcon: const Icon(
                                                 IconsaxPlusBold.people),
                                             icon: const Icon(
@@ -331,6 +338,24 @@ class SideNavigationRail extends ConsumerWidget {
     // here violates AGENTS.md rule 4.
     final fab = actionButton(context);
     return expanded ? fab.extended : fab.normal;
+  }
+}
+
+class _SyncPlayNavBadge extends ConsumerWidget {
+  const _SyncPlayNavBadge();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final color = ref.watch(syncPlayGroupStateProvider).color(context);
+    return Container(
+      key: const Key('syncplay_active_badge'),
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+    );
   }
 }
 

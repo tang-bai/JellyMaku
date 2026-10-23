@@ -307,6 +307,9 @@ class _ChapterProgressSliderState extends ConsumerState<VideoProgressBar> {
                                       ? Image(
                                           image: chapter.imageProvider,
                                           fit: BoxFit.contain,
+                                          // Not every chapter has a generated image; Jellyfin
+                                          // answers 404 and the preview stays empty.
+                                          errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                                         )
                                       : const SizedBox.shrink()
                                   : AspectRatio(

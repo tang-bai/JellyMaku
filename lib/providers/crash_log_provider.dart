@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:fladder/models/error_log_model.dart';
+import 'package:fladder/util/log_time.dart';
 
 final crashLogProvider = StateNotifierProvider<CrashLogNotifier, List<ErrorLogModel>>((ref) => CrashLogNotifier());
 
@@ -96,7 +97,7 @@ class CrashLogNotifier extends StateNotifier<List<ErrorLogModel>> {
 
   void logPrint(LogRecord rec) {
     if (kDebugMode) {
-      print('${rec.level.name}: ${rec.time}: ${rec.message}');
+      print('${rec.level.name}: ${formatLogTime(rec.time)}: ${rec.message}');
     }
     if (rec.level > Level.INFO) {
       state = [ErrorLogModel.fromLogRecord(rec), ...state];

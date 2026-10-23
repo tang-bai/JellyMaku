@@ -29,13 +29,19 @@ import 'package:fladder/widgets/shared/pull_to_refresh.dart';
 import 'package:fladder/widgets/shared/theme_overwrite.dart';
 
 Future<Color?> getDominantColor(ImageProvider imageProvider) async {
-  final paletteGenerator = await PaletteGeneratorMaster.fromImageProvider(
-    imageProvider,
-    size: const Size(16, 16),
-    maximumColorCount: 3,
-  );
+  try {
+    final paletteGenerator = await PaletteGeneratorMaster.fromImageProvider(
+      imageProvider,
+      size: const Size(16, 16),
+      maximumColorCount: 3,
+    );
 
-  return paletteGenerator.dominantColor?.color ?? paletteGenerator.vibrantColor?.color;
+    return paletteGenerator.dominantColor?.color ?? paletteGenerator.vibrantColor?.color;
+  } catch (_) {
+    // Items without artwork answer 404; falling back to the default theme
+    // colour is fine and keeps the failure out of the crash log.
+    return null;
+  }
 }
 
 class DetailScaffold extends ConsumerStatefulWidget {
@@ -239,6 +245,9 @@ class _DetailScaffoldState extends ConsumerState<DetailScaffold> {
                                   alignment: Alignment.topCenter,
                                   placeholderFit: BoxFit.cover,
                                   excludeFromSemantics: true,
+                                  // Missing backdrops are common; show the gradient
+                                  // overlay instead of a crash-log entry.
+                                  imageErrorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                                   image: ResizeImage(
                                     backgroundImage!.imageProvider,
                                     height: maxHeight ~/ 1.5,
