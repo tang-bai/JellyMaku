@@ -1,9 +1,9 @@
 
 # 测试策略与验收
 
-> 状态（2026-10-23）：当前 HEAD analyze 0、156 tests passed + 1 skipped；Windows release 于 2026-10-23 构建成功；beta.5 安装器/便携包已发布。
-> 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动），字幕切换/切集/弹幕叠加层（手动）；用户实机确认 SyncPlay 双客户端、超分性能通过（2026-10-23）。
-> 未验证：安装版完整 E2E；用户确认项缺原始 FPS/误差/截图。
+> 状态（2026-10-23）：当前 HEAD analyze 0、157 tests passed + 1 skipped；Windows release 于 2026-10-23 构建成功；v0.1.0 安装器/便携包已发布。
+> 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动），字幕切换/切集/弹幕叠加层（手动 + 安装版字幕补测）；用户实机确认 SyncPlay 双客户端、超分性能通过（2026-10-23）。
+> 未验证：用户确认项缺原始 FPS/误差/截图。
 >
 > 已执行证据见 [IMPLEMENTATION.md](IMPLEMENTATION.md) 与 artifacts/logs/（本地，不入库）。
 
@@ -39,12 +39,12 @@ $env:CL = "/utf-8"
 
 .flutter\bin\flutter.bat pub get
 dart analyze lib test                 # 0 issue
-.flutter\bin\flutter.bat test --no-pub   # 156 passed + 1 skipped
+.flutter\bin\flutter.bat test --no-pub   # 157 passed + 1 skipped
 .flutter\bin\flutter.bat build windows --release --no-pub
 & .\tools\pack.ps1 -Version 0.1.0
 ~~~
 
-结果（2026-10-23）：analyze 0 issue；156 tests passed + 1 skipped；Windows release 构建成功；beta.5 发布资产见 IMPLEMENTATION.md。
+结果（2026-10-23）：analyze 0 issue；157 tests passed + 1 skipped；Windows release 构建成功；v0.1.0 发布资产见 IMPLEMENTATION.md。
 
 已存在脚本：`tools/pack.ps1`、`tools/verify-assets.ps1`、`tools/build-installer.ps1`。尚未实现：`bootstrap.ps1`、`setup-jellyfin.ps1`、`run-dev.ps1`、`test.ps1`。
 
@@ -93,9 +93,9 @@ dart analyze lib test                 # 0 issue
 - [x] 弹幕叠加层/暂停/seek/切集已手动确认；混合来源系统性回归待补。
 - [x] shader 超分可切换/关闭/持久化；用户确认性能通过（原始 FPS/掉帧待归档）。
 - [x] SyncPlay 双客户端矩阵（用户确认通过；原始日志/误差/截图待归档）。
-- [x] 播放信息面板（用户实机确认通过；原始截图/数值待归档）。
+- [x] 播放信息面板（用户实机确认 + 安装版 E2E 通过；截图/数值已采集）。
 - [ ] Stage B：时间表/图片/评论 Mock 或代理通过；无网降级。
-- [ ] 安装器/便携包干净运行（安装/卸载冒烟已有，完整功能 E2E 缺）。
+- [x] 安装器/便携包主链路 E2E（2026-10-23；登录/播放/暂停/seek/弹幕/超分/播放信息）。
 - [x] 无密钥/真实用户数据入库；许可/署名完整（THIRD_PARTY_NOTICES 已有）。
 - [ ] 所有“已验证”有原始证据；用户确认项仍缺截图/数值归档。
 

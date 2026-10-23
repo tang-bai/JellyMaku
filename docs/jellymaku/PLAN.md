@@ -1,7 +1,7 @@
 
 # 实施总计划（Stage A / Stage B）
 
-> 状态（2026-10-23）：Stage A 核心与 beta.5 发布完成；SyncPlay 双端、超分性能、播放信息面板已由用户实机确认；仍缺安装版完整 E2E 与原始证据归档；Stage B 未开始。任务描述保留原始计划，实际勾选/证据以 [ROADMAP.md](ROADMAP.md) 与 [IMPLEMENTATION.md](IMPLEMENTATION.md) 为准。
+> 状态（2026-10-23）：Stage A 核心与 v0.1.0 正式版发布完成；SyncPlay 双端、超分性能、播放信息面板已由用户实机确认；安装版主链路 E2E 已通过；仅剩原始证据归档、签名证书与 Stage B。任务描述保留原始计划，实际勾选/证据以 [ROADMAP.md](ROADMAP.md) 与 [IMPLEMENTATION.md](IMPLEMENTATION.md) 为准。
 > 日期：2026-10-19（原始计划；2026-10-23 状态注记）。
 > 基座：DonutWare/Fladder develop de7b5a2a23f16f5f3bb164ec0baedf50941e4808 + PR #735。
 > 原则：先交付可用的 Jellyfin 播放器，再叠加 Bangumi；每阶段有可运行产物与证据。
@@ -203,7 +203,7 @@ Gate：
 - [x] 弹幕：自动/手动/本地；样式/过滤/偏移；播放器内叠加层已手动确认。
 - [ ] 超分：profile 可切换、截图已有；FPS/掉帧性能证据待补。
 - [ ] SyncPlay：双客户端矩阵未做。
-- [ ] 打包：安装器/便携包已发布；安装目录完整功能 E2E 未做。
+- [x] 打包：v0.1.0 正式版发布；安装版主链路 E2E + 字幕补测通过。
 - [ ] Stage B：未开始。
 - [ ] 许可/署名/隐私/配额说明完整（THIRD_PARTY_NOTICES 已补，待随发布复核）。
 - [x] 所有“已验证”都有证据；未验证项明确标注。

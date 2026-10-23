@@ -18,7 +18,7 @@
 
 当前 `main` 已包含 PR #735 head（Fladder + SyncPlay）并合并 Fladder develop `de7b5a2a`；origin 为 https://github.com/tang-bai/JellyMaku，本地 `main` 为 `26ac04a4`（origin/main 仍 `21891411`）。实际采用：
 
-1. **main**：工作分支；beta.5 已发布，工作区干净。
+1. **main**：工作分支；v0.1.0 正式版已发布，工作区干净。
 2. **导入基线**：PR #735 head + 上游 develop 合并；保留提交历史/作者。
 3. **后续升级**：固定 commit；小范围 merge/rebase；每次升级跑 analyze/test/build + 弹幕/SyncPlay smoke。
 4. 不直接在上游 develop 上提交；不 force-push 上游；不向 DonutWare 提交未经讨论的大改。

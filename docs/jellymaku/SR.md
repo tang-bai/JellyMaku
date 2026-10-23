@@ -1,7 +1,7 @@
 
 # 视频超分设计（GLSL shader）
 
-> 状态（2026-10-23）：v1 核心已实现（Anime4K Fast/Balanced/Strong/4x + glsl-shaders + 菜单）；156 tests passed + 1 skipped；四档截图已有；用户实机确认性能通过（原始 FPS/掉帧数据待归档）；RTX VSR spike 已测试并回退。FSRCNNX/ArtCNN 未接入。
+> 状态（2026-10-23）：v1 核心已实现（Anime4K Fast/Balanced/Strong/4x + glsl-shaders + 菜单）；157 tests passed + 1 skipped；四档截图已有；用户实机确认性能通过（原始 FPS/掉帧数据待归档）；RTX VSR spike 已测试并回退。FSRCNNX/ArtCNN 未接入。
 > 目标：在 Fladder/media_kit 的 libmpv 上提供可切换的 Anime4K/FSRCNNX/ArtCNN 超分；RTX VSR 不作为 v1 验收。
 
 ## 1. 背景与限制

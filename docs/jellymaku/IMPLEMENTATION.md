@@ -1,10 +1,10 @@
 
 # 实施检查清单与证据模板
 
-> 状态（2026-10-23）：v0.1.0-beta.5 已发布；文档验收状态更新已提交 `d3d3568b`。
-> 当前 HEAD：analyze 0 issue；156 tests passed + 1 skipped；Windows release 于 2026-10-23 构建成功。
-> 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动），字幕切换/切集/弹幕叠加层（手动）；用户实机确认 SyncPlay 双客户端、超分性能通过（2026-10-23）。
-> 未完成：安装版完整 E2E、Stage B；用户确认项缺原始 FPS/误差/截图归档。
+> 状态（2026-10-23）：v0.1.0 正式版已发布；工作区干净。
+> 当前 HEAD：analyze 0 issue；157 tests passed + 1 skipped；Windows release 于 2026-10-23 从当前源码构建成功；v0.1.0 发布包即当前源码。
+> 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动），字幕切换/切集/弹幕叠加层（手动 + 安装版字幕补测）；用户实机确认 SyncPlay 双客户端、超分性能、播放信息面板通过（2026-10-23）；v0.1.0 安装版主链路 E2E 通过。
+> 未完成：Stage B；用户确认项缺原始 FPS/误差/截图归档。
 > 用途：让后续 agent 按清单推进，避免“文档写了但没做”。
 
 ## 1. Stage A 检查清单
@@ -18,7 +18,7 @@
 - [x] 合并最新 develop `de7b5a2a`（分支 `merge/develop-20261021`；冲突：desktop_platform_wrapper/media_control_wrapper/pubspec.lock）。
 - [x] Flutter 3.35.7 到 .flutter；PUB_CACHE 本地。
 - [x] VS BuildTools/Windows SDK/Developer Mode 检查通过。
-- [x] flutter analyze/test 通过（0 issue；当前工作区 156 tests + 1 skipped）。
+- [x] flutter analyze/test 通过（0 issue；当前工作区 157 tests + 1 skipped）。
 - [x] flutter build windows --release 成功；启动冒烟通过。
 - [x] 真实 Jellyfin 12.2（NAS `192.168.8.137:8096`）登录/播放测试片；未在本地启动 Jellyfin/.NET。
 - [x] third_party/manifest.json 生成；`tools/verify-assets.ps1` 通过（8 items）。
@@ -37,7 +37,7 @@
 - [x] 发送弹幕入口已移除（danmu_api 只读；不提供本地回显）。
 - [x] Flutter 叠加层；设置弹窗；播放器入口。
 - [x] 单测/Mock（danmu_api HTTP mock/本地 HttpServer、解析/来源/合并、匹配请求、设置迁移）。
-- [x] Jellyfin E2E：seek/pause 自动验证；字幕切换/切集/弹幕叠加层由用户手动验证通过（2026-10-21）。
+- [x] Jellyfin E2E：seek/pause 自动验证；字幕切换/切集/弹幕叠加层由用户手动验证通过（2026-10-21），安装版字幕补测通过（2026-10-23）。
 - [x] 5000 条解析/布局基准：`parse` 52–55ms、首帧 15–17ms、平均 1.0–1.1ms/帧（`test/danmaku/danmaku_perf_test.dart`；Flutter test 环境，非播放器内 FPS）。
 
 ### A3 超分
@@ -63,15 +63,15 @@
 - [x] 更新检查指向 `tang-bai/JellyMaku`（含 Windows zip 资产识别与 UA）。
 - [x] i18n ARB en/zh；gen-l10n（弹幕设置/手动匹配/按钮提示已迁移，中文 UI 测试通过）。
 - [x] portable zip；Anime4K/Fladder 许可保留；Inno 脚本 `installer/jellymaku.iss` + `tools/build-installer.ps1` 已加。
-- [x] Inno 安装器实际编译；静默安装/启动/卸载冒烟通过（Inno 6.7.3 → tools/inno）。
-- [ ] 干净目录完整功能验证；Stage A 真实 E2E 验收（安装/启动/卸载冒烟已完成，功能 E2E 未做）。
+- [x] Inno 安装器实际编译；静默安装/启动/卸载冒烟通过（Inno 6.7.3 → tools/inno）；`tools/sign-release.ps1` 支持 PFX/证书指纹签名。
+- [x] 安装版主链路 E2E：安装/自动登录/播放/暂停/seek/弹幕/Anime4K/播放信息/字幕补测通过（2026-10-23）。
 
 ### A6 播放信息面板
 
 - [x] `SDR HD` 徽章可点击，打开实时播放信息对话框；显示码率/下载速度/缓冲/丢帧/硬解/渲染帧率/加载耗时。
 - [x] `PlaybackRuntimeStats` + libmpv/MDK/Native 后端分级读取；ARB 三语。
 - [x] 单测/analyze/Windows release 构建通过（2026-10-23）。
-- [x] 用户实机确认播放信息面板通过（2026-10-23）；原始 UI 截图/实时数值待归档。
+- [x] 用户实机确认 + 安装版 E2E 通过（2026-10-23）；截图 `artifacts/ui-test/playback-info-e2e.png`，OCR/数值见 `playback-info-e2e-ocr.txt`。
 
 ## 2. Stage B 检查清单
 
@@ -179,6 +179,16 @@
   - 历史对比：`sr-off-bright.png`、`sr-fast-bright.png`、`sr-quality-bright.png`、`sr-diff-off-quality.png`
 - 性能粗测：GPU 总利用率约 23%，JellyMaku 进程约 4.3%（Strong）；**未采集 FPS/掉帧**，A3 性能项暂不勾选。
 
+### v0.1.0 正式版发布（2026-10-23）
+
+- Release: https://github.com/tang-bai/JellyMaku/releases/tag/v0.1.0
+- 资产:
+  - `JellyMaku-0.1.0-windows-x64-setup.exe` 73,212,013 bytes，SHA256 `2F1DCEBC086DCADB84CFC8568A6E764A6CDB5765698BEE58DC7B7F51057BCF37`
+  - `JellyMaku-0.1.0-windows-x64-portable.zip` 100,910,732 bytes，SHA256 `1371E3BE1B2E7A599E48C8706C9E4FF53241EBA706BA6A4E3783EE9735DDB0E4`
+- 内容：beta.5 功能 + i18n 1188/1188、签名脚本、安装版字幕补测；首个非 Beta 正式版。
+- 安装器验证：v0.1.0 setup 静默安装/启动/卸载通过；应用版本 0.1.0+6；包含 `THIRD_PARTY_NOTICES.md`。
+- 发布包未签名（未提供受信任证书）；便携包/安装器 SHA256 见上。
+
 ### v0.1.0-beta.5 发布（2026-10-23）
 
 - Release: https://github.com/tang-bai/JellyMaku/releases/tag/v0.1.0-beta.5
@@ -186,7 +196,7 @@
   - `JellyMaku-0.1.0-beta.5-windows-x64-setup.exe` 73,183,739 bytes，SHA256 `4084271BE1C56879CAD4D0504A408B618B83921DCCD5C37F169708EA4F1E2596`
   - `JellyMaku-0.1.0-beta.5-windows-x64-portable.zip` 100,878,057 bytes，SHA256 `AFD688B195B8D07FF73A9E79DB274CAC085DE9CAA52DB0FE7D6B1D2ACF0443C6`
 - 内容：播放信息面板、Seerr 未配置修复、缺图 404 占位、日志本地时区、SyncPlay 中文文案/侧栏高亮、`THIRD_PARTY_NOTICES.md`。
-- 安装器验证：静默安装到 `artifacts/install-test-5` → 启动窗口标题 JellyMaku → 静默卸载成功；安装包含 `THIRD_PARTY_NOTICES.md`；未做安装后完整功能 E2E。
+- 安装器验证：静默安装到 `artifacts/install-test-5` → 启动窗口标题 JellyMaku → 静默卸载成功；安装包含 `THIRD_PARTY_NOTICES.md`；后续 2026-10-23 已完成安装版主链路 E2E。
 - 资产校验：`third_party/manifest.json` 8 项，`tools/verify-assets.ps1` 全部 OK。
 
 ### v0.1.0-beta.4 发布（2026-10-21）
@@ -290,7 +300,7 @@
   - 创建/加入后提示「已加入“ZHTest1022”」，活动组面板显示「空闲」及中文引导；
   - 离开组提示「已离开一起看群组」。
 - 证据：`flutter analyze lib test` → No issues found；`flutter test --no-pub` → 151 tests passed（1 skipped）；`flutter build windows --release --no-pub` → `√ Built ...`（124.0s）；截图 `artifacts/ui-test/localized-sheet.png`、`localized-create-dialog.png`。
-- 说明：`zh` 仍有 4 个与深链相关的旧缺失键，`zh_Hant` 仍有 200 个非 SyncPlay 旧缺失键；本次只覆盖一起看模块。
+- 2026-10-23 补齐：`zh` 4 个深链键、`zh_Hant` 200 个非 SyncPlay 键；当前 1188/1188 ARB 键齐全，新增 `test/l10n/arb_keys_test.dart`。
 
 ### 播放信息面板：画质徽章入口 + 实时码率/加载速度（2026-10-23）
 
@@ -301,7 +311,33 @@
   - `PlaybackRuntimeStats` + `BasePlayer.playbackStats()`：libmpv 读取 `video-bitrate`/`audio-bitrate`/`cache-speed`/`demuxer-cache-duration`/`frame-drop-count`/`estimated-vf-fps`/`hwdec-current`/`video-codec`/`audio-codec`/`file-format`，并记录加载耗时；下载速度优先用 `demuxer-cache-state` 的 `total-bytes` 增量计算，`cache-speed` 为 0 时仍可显示实际读取速率；MDK 读取 MediaInfo；Native 后端优雅降级为静态信息。
   - `lib/util/byte_formatting.dart`：字节数/下载速率格式化；ARB 新增中/英/繁中文案。
 - 证据（2026-10-23）：`dart analyze lib test` → No issues found；`flutter test --no-pub` → 156 tests passed（1 skipped）；`flutter build windows --release --no-pub` → `√ Built build\windows\x64\runner\Release\JellyMaku.exe`（114.9s）。
-- 用户复测（2026-10-23）：播放信息面板确认通过；原始 UI 截图与 `cache-speed` 数值未归档。
+- 用户复测（2026-10-23）：播放信息面板确认通过；安装版 E2E 已采集截图/实时数值（`playback-info-e2e.png` / `playback-info-e2e-ocr.txt`）。
+
+### i18n 收尾（2026-10-23）
+
+- `app_zh.arb` 补齐 4 个深链键；`app_zh_Hant.arb` 补齐 200 个非 SyncPlay 键；当前 1188/1188 个 ARB 消息键齐全。
+- `flutter gen-l10n` 无 zh/zh_Hant untranslated 警告。
+- 新增 `test/l10n/arb_keys_test.dart` 校验 key 完整性与空值。
+- 验证：`dart analyze lib test` → 0 issue；`flutter test --no-pub` → 157 passed + 1 skipped；`flutter build windows --release --no-pub` → 成功（402.4s）。
+- 打包冒烟：`tools/pack.ps1` 无证书时 `Signing skipped`，生成测试 ZIP；`tools/build-installer.ps1` 生成测试安装器 73,208,751 bytes，未签名。
+
+### 签名支持（2026-10-23）
+
+- 新增 `tools/sign-release.ps1`：支持 PFX/证书指纹、SHA-256、RFC3161 时间戳。
+- `tools/build-installer.ps1` 与 `tools/pack.ps1` 增加可选 `-CertificatePath`/`-CertificatePassword`/`-CertificateThumbprint`；无证书时明确输出 `Signing skipped`。
+- 使用临时自签名证书验证了签名命令与签名状态输出；生产签名仍需要受信任的 OV/EV 代码签名证书，当前发布包未签名。
+### 安装版 E2E（2026-10-23）
+
+- 安装包：`JellyMaku-0.1.0-beta.5-windows-x64-setup.exe`（73,183,739 bytes；SHA256 `4084271BE1C56879CAD4D0504A408B618B83921DCCD5C37F169708EA4F1E2596`）。
+- 安装目录：`artifacts/install-test-5`；静默安装 exit 0；`JellyMaku.exe` 版本 0.1.0+5；包含 `THIRD_PARTY_NOTICES.md`。
+- 自动登录 NAS Jellyfin 12.2（用户 test）；播放《租借女友》S01E03「海与女友」，DirectPlay。
+- 暂停：会话 `PositionTicks=817.025s`、`IsPaused=true`；3 秒后中心画面裁剪 SHA256 一致。
+- seek：暂停于 817.025s，右方向键一次后恢复播放到 849.014s（约 30s skip，含约 2s 播放）。
+- 弹幕：671 条缓存；OCR 命中 614.90/615.83/617.38s 评论，叠加层实际显示。
+- Anime4K：选择 Fast 2x；`flutter.jellymaku.video.enhancement.v1=anime4kFast`。
+- 播放信息：实时读数已采集（当前 2061 kbps、视频 1927 kbps、音频 153 kbps、下载 169 KB/s、缓冲 1:03、0 丢帧、约 29.8 fps、加载 954 ms）。
+- 字幕补测：药屋少女 S01E01「猫猫」SubtitleStreamIndex=2；暂停 109.026s，T 开/关 OCR 对比通过。
+- 证据：`artifacts/ui-test/e2e-beta5-2026-10-23.md`、`playback-info-e2e.png`、`danmaku-e2e.png`、`pause-frozen-1/2.png`、`e2e-session.json`。
 
 ### 用户实机验收（2026-10-23）
 
@@ -317,7 +353,7 @@
   - `.flutter\bin\flutter.bat test --no-pub` → 156 tests passed + 1 skipped（手动联网探针）
 - 结果：通过（静态/单测）；本次未重新构建/打包，沿用 2026-10-23 的 Windows release 构建记录。
 - 修改：同步 README/AGENTS/ROADMAP/IMPLEMENTATION/PLAN/DANMAKU/TESTING/BUILD_WINDOWS/ASSETS/ARCHITECTURE/UPSTREAM/DECISIONS/SR/PARTY 的状态与计数。
-- 剩余：安装版 E2E、用户确认项的原始性能/联调/播放信息证据归档。
+- 剩余：用户确认项的原始性能/联调证据归档。
 
 ## 4. 禁止事项
 
@@ -330,9 +366,9 @@
 
 ## 5. 当前进度
 
-- 文档：状态页已按 2026-10-23 结果同步；STAGE_A_REPORT 已重写为 beta.5 验收报告。
+- 文档：状态页已按 2026-10-23 结果同步；STAGE_A_REPORT 已重写为 v0.1.0 验收报告。
 - 代码：Fladder + PR #735 head 已导入，develop `de7b5a2a` 已合并；弹幕/超分/SyncPlay/播放信息面板已接入；Bangumi Stage B 未开始。
-- 构建：当前 HEAD Windows release 于 2026-10-23 构建成功；beta.5 发布资产为同一提交产物。
-- 测试：当前 HEAD 156 tests passed + 1 skipped（2026-10-23）；analyze 0 issue。
-- 发布：v0.1.0-beta.5 安装器/便携包已发布；安装器未签名，安装目录完整 E2E 未做。
-- 未验证：安装版完整功能；用户确认项缺原始 FPS/误差/截图。
+- 构建：当前 HEAD Windows release 于 2026-10-23 构建成功；v0.1.0 发布资产为同一提交产物。
+- 测试：当前 HEAD 157 tests passed + 1 skipped（2026-10-23）；analyze 0 issue。
+- 发布：v0.1.0 正式版安装器/便携包已发布；安装版主链路 E2E 已通过（2026-10-23）；安装器未签名。
+- 未验证：用户确认项缺原始 FPS/误差/截图。

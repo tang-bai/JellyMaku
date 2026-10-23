@@ -2,19 +2,20 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：**v0.1.0-beta.5** Windows Beta 已发布（2026-10-23）；Flutter 3.35.7；analyze 0 issue；**156 tests passed + 1 skipped**（2026-10-23）。RTX VSR spike 失败已回退；Anime4K Fast/Balanced/Strong/4x 已接入；danmu_api 默认 https://danmu.api.tangbai.cc，无需凭证；支持自建/本地导入。
+> 状态：**v0.1.0** Windows 正式版已发布（2026-10-23）；Flutter 3.35.7；analyze 0 issue；**157 tests passed + 1 skipped**（2026-10-23）。RTX VSR spike 失败已回退；Anime4K Fast/Balanced/Strong/4x 已接入；danmu_api 默认 https://danmu.api.tangbai.cc，无需凭证；支持自建/本地导入。
 > 日期：2026-10-23。
 
 ## 0. 当前仓库状态（必须先理解）
 
-- 本地 `main` 已同步 origin https://github.com/tang-bai/JellyMaku 的 `main`；v0.1.0-beta.5 已发布；文档验收状态更新已提交 `d3d3568b`。
+- 本地 `main` 已同步 origin https://github.com/tang-bai/JellyMaku 的 `main`；v0.1.0 正式版已发布；收尾更新已提交。
 - `main` 已包含 Fladder 源码 + SyncPlay PR #735（head 79e249e）+ Stage A 弹幕/超分/品牌代码，并于 2026-10-21 合并 Fladder develop `de7b5a2a`。
-- v0.1.0-beta.5 的安装器/便携包已发布（2026-10-23）；安装器未签名。
-- beta.5 发布包含播放信息面板、Seerr/缺图/日志时间修复、SyncPlay 中文化与 `THIRD_PARTY_NOTICES.md`。
+- v0.1.0 的安装器/便携包已发布（2026-10-23）；安装器未签名；`tools/sign-release.ps1` 已支持 PFX/证书指纹，待受信任证书。
+- v0.1.0 在 beta.5 基础上补齐 i18n、签名支持与安装版字幕补测，并包含播放信息面板/Seerr/缺图/日志时间修复。
+- 2026-10-23 收尾：`zh`/`zh_Hant` ARB 键 1188/1188；安装版字幕补测通过；157 tests passed + 1 skipped；签名脚本已就绪，受信任证书未提供。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
-- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、156 tests passed + 1 skipped；Windows release 于 2026-10-23 构建通过**（当前 HEAD，已打包 beta.5）。
-- 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动）以及字幕切换/切集/弹幕叠加层（手动）；用户实机确认 SyncPlay 双客户端、超分性能、播放信息面板通过（2026-10-23，原始数值/截图未归档）。
-- 未验证：安装版完整 E2E；用户确认项缺原始 FPS/误差/截图归档。
+- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、157 tests passed + 1 skipped；Windows release 于 2026-10-23 从当前源码构建通过**（v0.1.0 发布包即当前源码）。
+- 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动）以及字幕切换/切集/弹幕叠加层（手动 + 安装版字幕补测）；用户实机确认 SyncPlay 双客户端、超分性能、播放信息面板通过（2026-10-23）；播放信息截图/实时数值已采集。
+- 未验证：SyncPlay/超分原始 FPS/误差/截图未归档。
 - 因此：
   - 不要把“计划”当成“已实现”；
   - 不要把单测/构建通过当成真实 E2E 通过；
@@ -126,14 +127,14 @@ dart analyze lib test
 |---|---|
 | 文档/AGENTS | 状态页已同步；Stage A 报告已重写（2026-10-23） |
 | Fladder 源码导入 | 完成（PR #735 head + develop `de7b5a2a` 合并） |
-| Flutter/构建 | 当前 HEAD analyze 0、156 tests + 1 skipped、Windows release 构建成功；beta.5 发布包即当前 HEAD |
+| Flutter/构建 | 当前 HEAD analyze 0、157 tests + 1 skipped、Windows release 构建成功；v0.1.0 发布包即当前源码 |
 | SyncPlay | 用户实机确认双客户端通过；原始日志/误差/截图待归档 |
 | 弹幕 | danmu_api/自动+手动匹配/URL 拉取/合并/本地导入/缓存/叠加层已接入；NAS 播放器内叠加层手动确认 |
 | 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；用户确认性能通过；原始 FPS/掉帧待归档 |
-| 播放信息 | 用户实机确认通过；实时码率/速度/缓冲/硬解/帧率面板；原始截图/数值待归档 |
-| 品牌/打包 | beta.5 安装器 + 便携包已发布；安装版完整功能 E2E 未做 |
+| 播放信息 | 用户实机确认 + 安装版 E2E 通过；实时码率/速度/缓冲/硬解/帧率；截图/数值已采集 |
+| 品牌/打包 | v0.1.0 安装器 + 便携包已发布；安装版主链路 E2E + 字幕补测通过 |
 | Bangumi 时间表/图片/评论 | 未开始 |
-| 推送 GitHub | `main` 已同步 origin（v0.1.0-beta.5） |
+| 推送 GitHub | `main` 已同步 origin（v0.1.0） |
 
 ## 10. 已知陷阱
 
@@ -142,7 +143,7 @@ dart analyze lib test
 3. **RTX VSR**：2026-10-20 spike 失败：已加载后切换无变化（0.07/255）；先选 RTX 再重启加载会卡死。media_kit ANGLE/OpenGL 无法直接承载 d3d11vpp；不要把它写成已支持。回退备份：分支 `backup/pre-rtx-vsr`、标签 `backup/pre-rtx-vsr-2026-10-20`。
 4. **PR #735 冲突**：基于旧 develop；2026-10-21 已合并 develop（冲突集中在 desktop_platform_wrapper/media_control_wrapper/pubspec.lock），详见 IMPLEMENTATION。
 5. **中文路径**：Cargokit 生成的 pubspec 会用系统代码页，Dart 无法解析；用 ASCII 路径 + `/utf-8`。
-6. **已推送**：`main` 已同步 origin（beta.5 发布）。RTX 实验分支 `experiment/rtx-vsr` 仅本地保留。后续 push/force-push 仍需用户确认。
+6. **已推送**：`main` 已同步 origin（v0.1.0 发布）。RTX 实验分支 `experiment/rtx-vsr` 仅本地保留。后续 push/force-push 仍需用户确认。
 7. **旧实现丢失**：不要从远程“恢复”旧 MPV Shim 代码（当时远程为空，现仅有新实现历史）。
 8. **许可**：Kazumi 代码 GPL-3.0 可用，但资产不可复制；Anime4K MIT 已附许可。
 9. **原生依赖下载**：libmpv/ANGLE/MDK/SQLite/NuGet 可能卡在 GitHub/SourceForge/sqlite.org/nuget.org；用 third_party 预置与本地 feed。
@@ -156,6 +157,8 @@ dart analyze lib test
 17. **弹幕设置分两类**：时间偏移/屏蔽词/合并/条数会改变解析结果，必须防抖重载（300ms）；字号/颜色/描边/类型与本地开关只影响绘制，直接重绘，不要触发网络或解析。
 18. **本地导入的边界**：`localFile` 优先于在线 API 与手动映射，且不需要任何凭证；不提供发送弹幕（danmu_api 只读）。
 19. **danmu_api 的坑（2026-10-20 实测）**：自动匹配优先 `POST /api/v2/match`（body `{"fileName":"标题 S01E01"}`）；搜索用 `search/episodes`（内嵌 episodes），不要用 `/bangumi/{id}`（404）；`标题 (2026)` 这类带空格年份的查询会 0 结果，客户端会去尾部年份/季集重试；URL 型来源用 `comment?url=<分集页面>&format=json`；非 http 的复合 ID（renren/hanjutv，如 `59377-431845`）必须用 `POST /api/v2/segmentcomment` body `{"type":"renren","url":"59377-431845","segment_start":0,"segment_end":86400000}`，公共 EdgeOne 实例的 `/comment/{id}` 依赖进程内搜索缓存，跨请求会 404；episodeId 不跨服务器稳定，缓存 key 用 `sha1(baseUrl|url)`；自建 TOKEN 放在 `/{TOKEN}` 路径；HTTPS 证书当前公共实例正常；`chConvert` 不受支持（服务端 `DANMU_SIMPLIFIED_TRADITIONAL`）。
+
+20. **代码签名**：PFX/密码/私钥不得入库；`tools/sign-release.ps1` 支持 PFX/证书指纹；没有受信任证书时输出 `Signing skipped`，不要伪造签名。
 
 ## 11. 文档索引
 

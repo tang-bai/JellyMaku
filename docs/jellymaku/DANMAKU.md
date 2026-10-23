@@ -2,7 +2,7 @@
 # 弹幕设计（danmu_api + Flutter 叠加层）
 
 > 状态（2026-10-23）：2026-10-20 已迁移到 [danmu_api](https://github.com/huangxd-/danmu_api)，默认公共实例 `https://danmu.api.tangbai.cc`。
-> 已实现：自动/手动匹配、URL 拉取、多来源聚合解析、缓存、本地 XML/JSON 导入、Flutter 叠加层、设置。当前工作区 `dart analyze` 0 issue；156 tests passed + 1 skipped。
+> 已实现：自动/手动匹配、URL 拉取、多来源聚合解析、缓存、本地 XML/JSON 导入、Flutter 叠加层、设置。当前工作区 `dart analyze` 0 issue；157 tests passed + 1 skipped。
 > 已验证：NAS Jellyfin 12.2 播放器内叠加层手动确认；seek/pause 自动验证，字幕/切集手动验证。
 > 未完成：真实混合来源弹幕的系统性回归/截图；不提供发送弹幕（danmu_api 只读）。
 
@@ -143,7 +143,7 @@ MediaInfo：`itemId/name/seriesName/episode/season/isMovie/duration/tmdbId`。�
 ## 9. 测试/验收
 
 - `dart analyze lib test`：0 issue。
-- `flutter test --no-pub`：156 tests passed + 1 skipped（2026-10-23，当前工作区）。
+- `flutter test --no-pub`：157 tests passed + 1 skipped（2026-10-23，当前工作区）。
 - 弹幕相关：
   - 客户端：match POST、search 查询、comment URL+format、segmentcomment 非 URL 源、UTF-8、URL 规范化、400 回退 id、404 空结果、401 TOKEN 提示、isMatched=false。
   - 解析：来源标签/旧式 uid、模式/颜色/偏移/屏蔽/去重/合并/可见性。

@@ -98,7 +98,29 @@ $env:FLUTTER_SUPPRESS_ANALYTICS = "true"
 - 脚本：`installer/jellymaku.iss`；构建：`tools/build-installer.ps1 -Version 0.1.0`
 - 依赖 Inno Setup 6（`ISCC.exe`）；会依次查找 PATH、`C:\Program Files (x86)\Inno Setup 6`、`C:\Program Files\Inno Setup 6`、`tools/inno\ISCC.exe`
 - 输出：`artifacts/installer/JellyMaku-<version>-windows-x64-setup.exe`
-- 本机 Inno Setup 6.7.3 位于 `tools\inno\app\ISCC.exe`；v0.1.0-beta.5 安装器已实际编译、静默安装/启动/卸载冒烟通过（2026-10-23）。安装器未签名，安装目录完整功能 E2E 仍未做。
+- 本机 Inno Setup 6.7.3 位于 `tools\inno\app\ISCC.exe`；v0.1.0 安装器已实际编译、静默安装/启动/卸载冒烟通过（2026-10-23）。安装版主链路 E2E 已完成；安装器未签名。
+
+### 4.2 Authenticode 签名（可选）
+
+签名工具：Windows SDK 的 `signtool.exe`（自动在 PATH 与 Windows Kits 中查找）。
+
+~~~powershell
+# PFX 证书
+& .\tools\build-installer.ps1 -Version 0.1.0 -CertificatePath C:\secure\jellymaku.pfx -CertificatePassword "***"
+& .\tools\pack.ps1 -Version 0.1.0 -CertificatePath C:\secure\jellymaku.pfx -CertificatePassword "***"
+
+# 或使用证书指纹（证书需安装在 CurrentUser\My）
+& .\tools\build-installer.ps1 -Version 0.1.0 -CertificateThumbprint <THUMBPRINT>
+& .\tools\pack.ps1 -Version 0.1.0 -CertificateThumbprint <THUMBPRINT>
+
+# 单独签名已有文件
+& .\tools\sign-release.ps1 -Files .\artifacts\installer\JellyMaku-0.1.0-windows-x64-setup.exe -CertificatePath C:\secure\jellymaku.pfx -CertificatePassword "***"
+~~~
+
+- 使用 SHA-256 与 DigiCert RFC3161 时间戳；可通过 `-TimestampUrl` 覆盖。
+- PFX、密码、私钥不得提交仓库；CI 用 Secret 注入。
+- 没有证书时脚本会明确输出 `Signing skipped`，不会伪造签名。
+- 当前 v0.1.0 发布包未签名；需要受信任代码签名证书（OV/EV）才能消除 SmartScreen 警告。
 
 ## 5. 常见失败
 

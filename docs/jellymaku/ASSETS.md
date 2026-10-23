@@ -41,7 +41,8 @@ artifacts/build/                便携包/安装器
 | Anime4K | Clamp + Restore M/L + Upscale x2 M/L | assets/shaders/anime4k/ | MIT；已入源码；4x 档串联 L+M 两次 2x |
 | Jellyfin | 12.2 amd64 zip | third_party/jellyfin/ | 未下载；E2E 使用 NAS 12.2 |
 | .NET runtime | 10.0 win-x64 | third_party/dotnet/ | 未下载；使用远端 Jellyfin，无需本地运行时 |
-| Inno Setup | 6.7.3 | tools/inno/app/ | 已下载；beta.5 安装器已编译 |
+| Inno Setup | 6.7.3 | tools/inno/app/ | 已下载；v0.1.0 安装器已编译 |
+| 代码签名证书 | 用户提供 PFX/证书指纹 | 不入库 | 可选；未提供时构建明确跳过签名 |
 | 测试视频 | ffmpeg 生成 + 可选 BBB | testdata/media/ | 未生成；E2E 使用 NAS 媒体库 |
 | Mock danmu_api | test/danmaku/danmaku_api_client_test.dart | 源码 | 本地 HttpServer mock |
 | Mock Bangumi/trace.moe | tool/mock_* | 源码 | 未开始 |

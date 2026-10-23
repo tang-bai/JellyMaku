@@ -1,7 +1,7 @@
 
 # 目标架构
 
-> 状态（2026-10-23）：Stage A 核心架构已落地（Fladder + PR #735 + danmu_api + Anime4K + 播放信息）；SyncPlay 双端/超分性能已由用户实机确认，安装版 E2E 未验收。Bangumi 仍为计划架构。
+> 状态（2026-10-23）：Stage A 核心架构已落地（Fladder + PR #735 + danmu_api + Anime4K + 播放信息）；SyncPlay 双端/超分性能已由用户实机确认，安装版主链路 E2E 已通过。Bangumi 仍为计划架构。
 
 ## 1. 总体结构
 
