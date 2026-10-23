@@ -2,7 +2,7 @@
 # 下载物与测试资产
 
 > 用户要求：测试文件和需要下载的文件都放在本仓库目录。大文件 gitignore，脚本/manifest 入库。
-> 状态：2026-10-19 已下载并用于构建 Flutter/libmpv/ANGLE/MDK/SQLite/NuGet；Jellyfin/.NET/测试媒体/Inno 尚未下载。
+> 状态（2026-10-23）：Flutter/libmpv/ANGLE/MDK/SQLite/NuGet/Inno 已预置并用于构建；Jellyfin/.NET 未本地安装（E2E 使用 NAS 12.2）；测试媒体未在本地生成。
 
 ## 1. 目录约定
 
@@ -32,17 +32,17 @@ artifacts/build/                便携包/安装器
 | 资产 | 版本/来源 | 目标 | 说明 |
 |---|---|---|---|
 | Flutter SDK | 3.35.7 stable | .flutter/ | 已安装；zip 在 tools/downloads/（gitignore） |
-| Fladder | PR #735 head 79e249e | 源码根 | 已导入；最新 develop 未合并 |
+| Fladder | PR #735 head 79e249e + develop de7b5a2a | 源码根 | 已导入并合并（2026-10-21） |
 | libmpv | mpv-dev-x86_64-20260531-git-13a3e3a.7z | third_party/mpv/ | MD5 69141eef...；构建时复制到 build |
 | ANGLE | ANGLE.7z（v1.0.1） | third_party/angle/ | MD5 e866f13e... |
 | MDK SDK | mdk-sdk-windows-x64.7z | third_party/mdk/ | 解压到 FVP pub cache |
 | SQLite | sqlite-autoconf-3520000.tar.gz | third_party/sqlite/ | 本地补丁给 sqlite3_flutter_libs |
 | NuGet | nuget.exe + 3 nupkg | tools/nuget/、third_party/nuget/ | WIL/CppWinRT |
 | Anime4K | Clamp + Restore M/L + Upscale x2 M/L | assets/shaders/anime4k/ | MIT；已入源码；4x 档串联 L+M 两次 2x |
-| Jellyfin | 12.2 amd64 zip | third_party/jellyfin/ | 尚未下载；需要 .NET 10 |
-| .NET runtime | 10.0 win-x64 | third_party/dotnet/ | 尚未下载 |
-| Inno Setup | 6.x | tools/inno/ | 尚未下载；当前 portable zip |
-| 测试视频 | ffmpeg 生成 + 可选 BBB | testdata/media/ | 尚未生成 |
+| Jellyfin | 12.2 amd64 zip | third_party/jellyfin/ | 未下载；E2E 使用 NAS 12.2 |
+| .NET runtime | 10.0 win-x64 | third_party/dotnet/ | 未下载；使用远端 Jellyfin，无需本地运行时 |
+| Inno Setup | 6.7.3 | tools/inno/app/ | 已下载；beta.5 安装器已编译 |
+| 测试视频 | ffmpeg 生成 + 可选 BBB | testdata/media/ | 未生成；E2E 使用 NAS 媒体库 |
 | Mock danmu_api | test/danmaku/danmaku_api_client_test.dart | 源码 | 本地 HttpServer mock |
 | Mock Bangumi/trace.moe | tool/mock_* | 源码 | 未开始 |
 
@@ -70,7 +70,7 @@ URL 可能变化；bootstrap 脚本需校验状态码/SHA256，并写 manifest�
 - flutter pub get / gen-l10n / analyze / test / build windows --release。
 - Flutter 3.35.7 需要 VS 2022 BuildTools + Windows SDK；本机已安装；Developer Mode 已启用。
 - 仓库路径含中文/空格：tools/run-dev.ps1 可 subst J: 到仓库根；构建后保持文件在本目录。
-- Inno Setup 未安装：下载/静默安装到 tools/inno；失败则交付 portable zip。
+- Inno Setup 6.7.3 已解压到 `tools/inno/app`；构建脚本会自动查找 `ISCC.exe`，失败仍可交付 portable zip。
 
 ## 5. 本地 Jellyfin
 

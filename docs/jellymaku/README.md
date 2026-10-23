@@ -1,20 +1,20 @@
-
 # JellyMaku 项目文档
 
-> 状态：Stage A 核心已构建并验证（见 [STAGE_A_REPORT.md](STAGE_A_REPORT.md)）；弹幕已迁移到 danmu_api（2026-10-20）；最新 develop、播放器内真实弹幕/E2E、SyncPlay 双端联调未完成。
-> 日期：2026-10-20
-> 基座：DonutWare/Fladder（Flutter/Dart，GPL-3.0）+ SyncPlay PR #735
-> 说明：除明确标注“已验证”的内容外，所有功能、测试、截图、性能均为计划，不代表已实现。
+> 状态（2026-10-23）：v0.1.0-beta.5 已发布；工作区干净。Flutter 3.35.7；`dart analyze lib test` 0 issue；`flutter test --no-pub` 156 passed + 1 skipped；Windows release 于 2026-10-23 构建成功。
+> 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动）以及字幕切换/切集/弹幕叠加层（手动）。
+> 未完成：SyncPlay 双客户端联调、超分 FPS/掉帧验收、安装版完整 E2E、播放信息面板真实播放验证、Stage B。功能状态以 [ROADMAP.md](ROADMAP.md) 和 [IMPLEMENTATION.md](IMPLEMENTATION.md) 为准。
+> 基座：DonutWare/Fladder（Flutter/Dart，GPL-3.0）+ SyncPlay PR #735。
 
 ## 0. 当前仓库状态（务必先读）
 
-- 本地 main 已包含 Fladder + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 文档。
-- origin https://github.com/tang-bai/JellyMaku 已推送 main（e2b3ca7）。
-- Flutter 3.35.7 已安装；analyze 0 issue；137 tests passed；Windows release 已重新构建（10-20）并通过启动冒烟（含弹幕重构后重建）。
-- 基线仍是 PR #735 head；最新 develop 未合并。真实 Jellyfin 12.2、播放器内真实弹幕、SyncPlay 双端均未联调。
-- 弹幕默认走 danmu_api 公共实例（https://danmu.api.tangbai.cc）；搜索/match/评论接口已实测 200，播放器内 E2E 未做。
+- 本地 `main` 已包含 Fladder + SyncPlay PR #735（head 79e249e），并已合并 Fladder develop `de7b5a2a`（2026-10-21）。
+- 本地 `main` 已同步 origin；v0.1.0-beta.5 已发布，工作区干净。
+- v0.1.0-beta.5 的 Windows x64 安装器与便携包已发布；安装器未签名。
+- 工作区已有 beta.5 发布准备（`pubspec.yaml` 0.1.0+5、CHANGELOG、`THIRD_PARTY_NOTICES.md`、安装/打包脚本），尚未构建/打包/发布。
+- 弹幕默认走 danmu_api 公共实例（https://danmu.api.tangbai.cc），支持自建；不提供发送弹幕。
+- 真实 Jellyfin 12.2 使用 NAS（`192.168.8.137:8096`）验证；没有在本地启动 Jellyfin/.NET。
 - 旧 MPV Shim 实现/旧文档/旧 git 历史已丢失，不可恢复；新方案不再以它为基座。
-- 下一步：合并最新 develop → 真实 Jellyfin/弹幕/SyncPlay 联调 → 安装器/中文文案。
+- 下一步：beta.5 构建/打包/安装冒烟 → SyncPlay 双端 → 超分性能 → 安装版完整 E2E/播放信息面板 → Stage A 报告 → Stage B。
 
 ## 1. 文档索引
 
@@ -35,7 +35,7 @@
 | [DECISIONS.md](DECISIONS.md) | ADR：基座、SyncPlay、弹幕、超分、Bangumi、分支 |
 | [ROADMAP.md](ROADMAP.md) | 状态表、里程碑、当前阻塞与下一步 |
 | [IMPLEMENTATION.md](IMPLEMENTATION.md) | 实施检查清单与证据模板 |
-| [STAGE_A_REPORT.md](STAGE_A_REPORT.md) | Stage A 构建、测试、冒烟、便携包与实际限制 |
+| [STAGE_A_REPORT.md](STAGE_A_REPORT.md) | 2026-10-19/20 的历史构建报告；当前状态不以此为准 |
 | [BUILD_WINDOWS.md](BUILD_WINDOWS.md) | Windows 原生依赖、构建命令、已知失败与处理 |
 | [UPSTREAM.md](UPSTREAM.md) | Fladder/PR #735 固定与合并策略；legacy 说明 |
 
@@ -61,10 +61,10 @@
 
 ## 4. 阶段与边界
 
-| 阶段 | 目标 | 状态 |
+| 阶段 | 目标 | 状态（2026-10-23） |
 |---|---|---|
-| Stage A | 可用 Jellyfin 播放器 + 弹幕 + shader 超分 + SyncPlay + 打包 | 计划中 |
-| Stage B | Bangumi 时间表 + 图片识别 + 评论（条件功能） | 计划中，依赖 Bangumi 网络 |
+| Stage A | 可用 Jellyfin 播放器 + 弹幕 + shader 超分 + SyncPlay + 打包 | 核心完成；验收未完成（SyncPlay 双端/超分性能/安装版 E2E） |
+| Stage B | Bangumi 时间表 + 图片识别 + 评论（条件功能） | 未开始，依赖 Bangumi 网络 |
 
 Stage B 不应阻塞 Stage A；两阶段可独立验收。
 

@@ -1,9 +1,10 @@
 
 # 实施检查清单与证据模板
 
-> 状态：Stage A 核心已构建/验证：Flutter 3.35.7、analyze 0、137 tests（2026-10-21，Fladder develop 合并后）；Windows release 于 2026-10-21 重新构建；portable zip 最近一次为 2026-10-20。
-> 弹幕在 2026-10-20 迁移到 danmu_api：默认公共实例、`/api/v2/match` 自动匹配、URL 拉取、来源标签解析、URL 哈希缓存、移除旧凭证/签名/密钥存储。
-> 真实 Jellyfin/SyncPlay E2E 仍未完成；播放器内真实弹幕加载/切集未验证。
+> 状态（2026-10-23）：v0.1.0-beta.5 已发布；工作区干净。
+> 当前 HEAD：analyze 0 issue；156 tests passed + 1 skipped；Windows release 于 2026-10-23 构建成功。
+> 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动），字幕切换/切集/弹幕叠加层（手动）。
+> 未完成：SyncPlay 双客户端、超分 FPS/掉帧、安装版完整 E2E、播放信息面板真实播放验证、Stage B。
 > 用途：让后续 agent 按清单推进，避免“文档写了但没做”。
 
 ## 1. Stage A 检查清单
@@ -17,7 +18,7 @@
 - [x] 合并最新 develop `de7b5a2a`（分支 `merge/develop-20261021`；冲突：desktop_platform_wrapper/media_control_wrapper/pubspec.lock）。
 - [x] Flutter 3.35.7 到 .flutter；PUB_CACHE 本地。
 - [x] VS BuildTools/Windows SDK/Developer Mode 检查通过。
-- [x] flutter analyze/test 通过（0 issue；137 tests）。
+- [x] flutter analyze/test 通过（0 issue；当前工作区 156 tests + 1 skipped）。
 - [x] flutter build windows --release 成功；启动冒烟通过。
 - [x] 真实 Jellyfin 12.2（NAS `192.168.8.137:8096`）登录/播放测试片；未在本地启动 Jellyfin/.NET。
 - [x] third_party/manifest.json 生成；`tools/verify-assets.ps1` 通过（8 items）。
@@ -51,9 +52,10 @@
 ### A4 SyncPlay
 
 - [x] PR #735 代码导入；Windows release 构建包含 smtc_windows。
+- [x] 中文文案/组面板完善（2026-10-22 补齐 `syncPlay*` 与 `leave`，真实 UI 复测通过）。
+- [x] 侧栏「一起看」状态点与当前页面高亮互斥（2026-10-22 真实 UI 复测）。
 - [ ] 双客户端矩阵；Jellyfin 12.2 WebSocket（单测已通过，真实联调未做）。
-- [ ] 中文文案/组面板完善。
-- [ ] 日志/截图/误差。
+- [ ] 双端日志/截图/位置误差。
 
 ### A5 品牌/打包
 
@@ -62,7 +64,14 @@
 - [x] i18n ARB en/zh；gen-l10n（弹幕设置/手动匹配/按钮提示已迁移，中文 UI 测试通过）。
 - [x] portable zip；Anime4K/Fladder 许可保留；Inno 脚本 `installer/jellymaku.iss` + `tools/build-installer.ps1` 已加。
 - [x] Inno 安装器实际编译；静默安装/启动/卸载冒烟通过（Inno 6.7.3 → tools/inno）。
-- [ ] 干净目录完整功能验证；Stage A 真实 E2E 验收。
+- [ ] 干净目录完整功能验证；Stage A 真实 E2E 验收（安装/启动/卸载冒烟已完成，功能 E2E 未做）。
+
+### A6 播放信息面板
+
+- [x] `SDR HD` 徽章可点击，打开实时播放信息对话框；显示码率/下载速度/缓冲/丢帧/硬解/渲染帧率/加载耗时。
+- [x] `PlaybackRuntimeStats` + libmpv/MDK/Native 后端分级读取；ARB 三语。
+- [x] 单测/analyze/Windows release 构建通过（2026-10-23）。
+- [ ] NAS Jellyfin 播放中点击徽章的 UI 截图与实时数值确认。
 
 ## 2. Stage B 检查清单
 
@@ -170,6 +179,16 @@
   - 历史对比：`sr-off-bright.png`、`sr-fast-bright.png`、`sr-quality-bright.png`、`sr-diff-off-quality.png`
 - 性能粗测：GPU 总利用率约 23%，JellyMaku 进程约 4.3%（Strong）；**未采集 FPS/掉帧**，A3 性能项暂不勾选。
 
+### v0.1.0-beta.5 发布（2026-10-23）
+
+- Release: https://github.com/tang-bai/JellyMaku/releases/tag/v0.1.0-beta.5
+- 资产:
+  - `JellyMaku-0.1.0-beta.5-windows-x64-setup.exe` 73,183,739 bytes，SHA256 `4084271BE1C56879CAD4D0504A408B618B83921DCCD5C37F169708EA4F1E2596`
+  - `JellyMaku-0.1.0-beta.5-windows-x64-portable.zip` 100,878,057 bytes，SHA256 `AFD688B195B8D07FF73A9E79DB274CAC085DE9CAA52DB0FE7D6B1D2ACF0443C6`
+- 内容：播放信息面板、Seerr 未配置修复、缺图 404 占位、日志本地时区、SyncPlay 中文文案/侧栏高亮、`THIRD_PARTY_NOTICES.md`。
+- 安装器验证：静默安装到 `artifacts/install-test-5` → 启动窗口标题 JellyMaku → 静默卸载成功；安装包含 `THIRD_PARTY_NOTICES.md`；未做安装后完整功能 E2E。
+- 资产校验：`third_party/manifest.json` 8 项，`tools/verify-assets.ps1` 全部 OK。
+
 ### v0.1.0-beta.4 发布（2026-10-21）
 
 - Release: https://github.com/tang-bai/JellyMaku/releases/tag/v0.1.0-beta.4
@@ -214,6 +233,85 @@
 - 已知问题：`dart run build_runner build` 会对全部生成文件产生纯格式化重排（dart_style 差异，170 个文件），本次已回退，仅保留上游自带的生成文件；后续如需再生成需单独评审。
 - 未验证项：上游多窗口媒体会话、深链（app_links）、照片同步 UI 在真实 Jellyfin 下的行为；弹幕/超分/SyncPlay 与上游改动的交互。
 
+### Seerr 未配置时的崩溃修复（2026-10-22）
+
+- 现象：日志出现 `SEVERE | Flutter error: HttpException: Seerr server not configured`，栈为 `SeerrRequest.intercept` → `SeerrService.me` → `SeerrUser._fetchUser`。
+- 原因：`SeerrUser.build()` 无条件请求 Seerr 的当前用户；未配置 Seerr 时 `SeerrRequest` 直接抛异常，该 Future 无人 await，最终进入 `PlatformDispatcher.onError` 记一条 SEVERE。打开监听 `seerrUserProvider` 的页面（如“设置 → 个人资料”）即可触发。
+- 修复：
+  - `lib/providers/seerr_api_provider.dart`：新增 `isSeerrConfigured()`（`FladderConfig.seerrBaseUrl` 或 `seerrCredentials.isConfigured`）。
+  - `lib/providers/seerr_user_provider.dart`：`build()` 未配置直接返回 null、不发请求；`refreshUser()` 同样短路；`_fetchUser` 加 try/catch，失败只写 `dart:developer` 日志。
+- 证据（2026-10-22）：`flutter analyze --no-pub` → No issues found（40.9s）；`flutter test --no-pub` → 144 tests passed（含新增 `test/providers/seerr/seerr_config_test.dart` 6 项）。
+- 未验证：真实 Seerr 实例的“连接 → 拉取用户 → 发起请求”E2E；本次仅静态检查 + 单测。
+### 缺图 404 不再写入崩溃日志（2026-10-22）
+
+- 现象：`SEVERE | Flutter error: HttpException: Invalid statusCode: 404, uri = http://<服务器>/Items/<id>/Images/Primary?fillHeight=600&fillWidth=600&quality=90`。
+- 定位：`flutter_cache_manager` 的 `HttpFileService` 对非 200 抛 `HttpExceptionWithStatus`；`FadeInImage`/`Image` 在没有 `imageErrorBuilder`/`errorBuilder` 时会把异常转给 `FlutterError.onError`，被 `CrashLogNotifier` 记为 SEVERE。实测该 URL 在 NAS 上返回 404（响应头 `age` 约 19 天，非偶发），即条目元数据里有 Primary 标签但服务器上没有图。
+- 修复：
+  - `lib/util/fladder_image.dart`：未传 `imageErrorBuilder` 时默认回退到 `placeHolder ?? SizedBox.shrink()`。
+  - `lib/screens/shared/detail_scaffold.dart`：`getDominantColor` 取色失败返回 `null`；详情页头图 `FadeInImage` 加 `imageErrorBuilder`。
+  - `lib/screens/video_player/components/video_progress_bar.dart`：章节缩略图缺失时显示空。
+- 影响面：仅该条目封面/背景是否显示；缺图条目改为显示占位，不再刷崩溃日志。
+- 证据（2026-10-22）：`flutter analyze --no-pub` → No issues found（48.5s）；`flutter test --no-pub` → 146 tests passed（新增 `test/util/image_fallbacks_test.dart` 2 项）。
+### 日志时间跟随本机时区（2026-10-22）
+
+- 需求：日志按电脑当前时间显示，格式 `MM.dd-HH:mm`（如 `10.22-18:28`）。
+- 实现：
+  - `lib/util/log_time.dart`：`formatLogTime()` 取 `toLocal()` 后输出 `MM.dd-HH:mm`。
+  - `lib/models/error_log_model.dart`：崩溃日志页/复制文本（`content`/`clipBoard`）使用该格式；`toJson` 仍存 UTC 瞬时值，重载后按本机时区渲染。
+  - `lib/providers/crash_log_provider.dart`：调试控制台 `logPrint` 同样使用该格式。
+- 说明：早先版本曾固定 UTC+8 并带 `+08:00` 偏移，现按需求改回本机时区；如需排查跨时区问题，可再临时加偏移后缀。
+- 证据（2026-10-22）：`flutter analyze --no-pub` → No issues found；`flutter test --no-pub` → 见本轮测试结果（`test/util/log_time_test.dart` 5 项）。
+
+### 一起看导航按钮不再抢占当前页面高亮（2026-10-22）
+
+- 现象：创建/加入 SyncPlay 组后，侧边栏「一起看」与当前页面（如「媒体库」）同时显示选中背景；切换到其他按钮后「一起看」仍保持高亮。
+- 原因：`lib/widgets/navigation_scaffold/components/side_navigation_bar.dart` 把表示“已加入组”的 `isSyncPlayActive` 直接传给了 `NavigationButton.selected`，而该参数应只表示当前路由。
+- 修复：
+  - 「一起看」按钮固定 `selected: false`，不再参与页面选中态。
+  - 已加入组时改为显示 8px 状态圆点（`_SyncPlayNavBadge`），颜色跟随 `SyncPlayGroupState`；离开组后圆点消失。
+  - 页面高亮仍由 `currentIndex` 决定，保证同一时间只有一个导航项显示选中背景。
+- 证据（2026-10-22）：`dart analyze lib test` → No issues found；`flutter test --no-pub` → 151 tests passed（1 skipped 手动联网探针）。
+- 构建：`flutter build windows --release --no-pub` → `√ Built build\windows\x64\runner\Release\JellyMaku.exe`（2026-10-22 19:00，202.5s；设置 `SystemDrive=C:` 后 MSBuild `FileTracker` 恢复正常）。
+- 真实 UI 点击复测（2026-10-22 18:52–18:56，Windows x64）：自动登录 NAS Jellyfin 12.2，UI 创建 `UITest1022` / `UITest1022B` 组；分别切到「媒体库」「已同步」后，侧边栏只有当前页面显示棕色选中 pill，「一起看」行无选中背景，仅右侧保留 8px 状态圆点；离开组后圆点消失。
+- 截图证据：`artifacts/ui-test/with-group.png`（媒体库）、`with-group-synced.png`（已同步）、`without-group.png`（离开组后）。
+- 复测方式说明：UI 复测使用 `flutter assemble` 生成的新 `app.so`（18:44，已确认含 `syncplay_active_badge`）复制到 Release 目录运行；随后 19:00 的完整 Windows release 构建成功，Release 目录中的 `app.so` 仍为该份 AOT 产物。
+- 未验证：真实双客户端（JellyMaku + Jellyfin Web/第二实例）同步播放；本次只验证侧边栏高亮与组状态点。
+
+### 一起看模块中文化（2026-10-22）
+
+- 问题：`app_zh.arb` / `app_zh_Hant.arb` 缺少 SyncPlay 文案，生成代码回退到英文；UI 出现 `Create SyncPlay Group`、`Group Name`、`No active groups`、`Leave`、`Joined ...` 等英文。
+- 修改：
+  - `lib/l10n/app_zh.arb`：补齐 44 个 `syncPlay*` 文案 + 通用 `leave`（「离开」）。
+  - `lib/l10n/app_zh_Hant.arb`：补齐 45 个 `syncPlay*` 文案 + 通用 `leave`（「離開」）。
+  - 运行 `flutter gen-l10n` 重新生成中文 getter；未改动 SyncPlay 业务逻辑。
+- 真实 UI 复测（2026-10-22 22:22–22:26，Windows x64，NAS Jellyfin 12.2）：
+  - 创建组对话框显示「创建一起看群组」「群组名称」「电影之夜」「取消」「创建」；
+  - 空列表显示「没有活跃的群组」「创建一个群组，和大家一起看」「创建群组」；
+  - 创建/加入后提示「已加入“ZHTest1022”」，活动组面板显示「空闲」及中文引导；
+  - 离开组提示「已离开一起看群组」。
+- 证据：`flutter analyze lib test` → No issues found；`flutter test --no-pub` → 151 tests passed（1 skipped）；`flutter build windows --release --no-pub` → `√ Built ...`（124.0s）；截图 `artifacts/ui-test/localized-sheet.png`、`localized-create-dialog.png`。
+- 说明：`zh` 仍有 4 个与深链相关的旧缺失键，`zh_Hant` 仍有 200 个非 SyncPlay 旧缺失键；本次只覆盖一起看模块。
+
+### 播放信息面板：画质徽章入口 + 实时码率/加载速度（2026-10-23）
+
+- 需求：播放页点击右下角 `SDR HD` 画质徽章，显示当前视频码率、视频加载/下载速度等详细信息。
+- 实现：
+  - `video_player_controls.dart`：`mediaInfoTag` 徽章改为可点击的 `InkWell`（带 Tooltip），与「直接播放」徽章共用 `showVideoPlaybackInformation`。
+  - `video_playback_information.dart`：重写为每秒刷新的播放信息对话框；实时区显示状态、当前/视频/音频码率、下载速度、缓冲、丢帧、硬件解码、渲染帧率、加载耗时；媒体区显示视频/音频编码、分辨率、容器、源码率、文件大小、播放类型、播放器后端、转码原因/进度与 URL。
+  - `PlaybackRuntimeStats` + `BasePlayer.playbackStats()`：libmpv 读取 `video-bitrate`/`audio-bitrate`/`cache-speed`/`demuxer-cache-duration`/`frame-drop-count`/`estimated-vf-fps`/`hwdec-current`/`video-codec`/`audio-codec`/`file-format`，并记录加载耗时；下载速度优先用 `demuxer-cache-state` 的 `total-bytes` 增量计算，`cache-speed` 为 0 时仍可显示实际读取速率；MDK 读取 MediaInfo；Native 后端优雅降级为静态信息。
+  - `lib/util/byte_formatting.dart`：字节数/下载速率格式化；ARB 新增中/英/繁中文案。
+- 证据（2026-10-23）：`dart analyze lib test` → No issues found；`flutter test --no-pub` → 156 tests passed（1 skipped）；`flutter build windows --release --no-pub` → `√ Built build\windows\x64\runner\Release\JellyMaku.exe`（114.9s）。
+- 未验证：真实 NAS Jellyfin 播放中点击徽章的 UI 截图与实时数值；libmpv `cache-speed` 在真实 HTTP 直连流上的数值表现需实机确认（本地文件探测为 0，属预期）。
+
+### 文档复核（2026-10-23）
+
+- 命令：
+  - `.flutter\bin\dart.bat analyze lib test` → No issues found
+  - `.flutter\bin\flutter.bat test --no-pub` → 156 tests passed + 1 skipped（手动联网探针）
+- 结果：通过（静态/单测）；本次未重新构建/打包，沿用 2026-10-23 的 Windows release 构建记录。
+- 修改：同步 README/AGENTS/ROADMAP/IMPLEMENTATION/PLAN/DANMAKU/TESTING/BUILD_WINDOWS/ASSETS/ARCHITECTURE/UPSTREAM/DECISIONS/SR/PARTY 的状态与计数。
+- 剩余：SyncPlay 双端、超分性能、安装版 E2E、播放信息面板实机、Stage A 报告重写、随安装包复核第三方声明。
+
 ## 4. 禁止事项
 
 - 不把“文档计划”写成“已实现”。
@@ -225,9 +323,9 @@
 
 ## 5. 当前进度
 
-- 文档：完成；本次更新 DANMAKU/IMPLEMENTATION/ROADMAP/AGENTS/README/CHANGELOG。
-- 代码：Fladder + PR #735 head 已导入；弹幕已迁移到 danmu_api（自动+手动匹配/URL 拉取/合并/本地导入/叠加层）、超分（Anime4K）已接入；Bangumi Stage B 未开始。
-- 构建：Windows release 于 2026-10-20 23:38 重新构建/冒烟通过；portable zip 已按新代码重打（90,712,816 bytes，SHA256 `5FFC849F33D8E7216EE93AEC17192EBE7EEDAEEC8A47D97452FA891564B61237`）。
-- 测试：137 tests passed（2026-10-20）；`dart analyze lib test` → No issues found。
-- 发布：portable zip 已出；安装器/中文 ARB 未做。
-- 未验证：播放器内真实弹幕加载/切集、真实 Jellyfin 播放、SyncPlay 双端、超分画质/性能。
+- 文档：状态页已按 2026-10-23 结果同步；STAGE_A_REPORT 仍为历史版本，待重写。
+- 代码：Fladder + PR #735 head 已导入，develop `de7b5a2a` 已合并；弹幕/超分/SyncPlay/播放信息面板已接入；Bangumi Stage B 未开始。
+- 构建：当前 HEAD Windows release 于 2026-10-23 构建成功；beta.5 发布资产为同一提交产物。
+- 测试：当前 HEAD 156 tests passed + 1 skipped（2026-10-23）；analyze 0 issue。
+- 发布：v0.1.0-beta.5 安装器/便携包已发布；安装器未签名，安装目录完整 E2E 未做。
+- 未验证：SyncPlay 双端、超分 FPS/掉帧、安装版完整功能、播放信息面板实机数值。

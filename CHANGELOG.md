@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.1.0-beta.5 — 2026-10-23
+
+### 新增
+
+- 播放信息面板：点击播放页 `SDR HD` 徽章打开实时信息，显示码率、下载速度、缓冲、丢帧、硬解、渲染帧率、加载耗时等；libmpv/MDK/Native 后端分级支持。
+
+### 修复
+
+- Seerr 未配置时不再发起当前用户请求并写入 SEVERE 崩溃日志。
+- 缺图 404 使用占位图，不再反复写入崩溃日志。
+- 日志时间跟随本机时区（`MM.dd-HH:mm`）。
+- SyncPlay 侧栏状态点不再抢占当前页面高亮。
+- 补齐一起看模块简体/繁中文案。
+- 新增 `THIRD_PARTY_NOTICES.md`，补齐发布合规声明与许可证检查。
+
+### 验证与已知缺口
+
+- 当前工作区：analyze 0 issue；156 tests passed + 1 skipped；Windows release 构建成功（2026-10-23）。
+- 仍未验证：SyncPlay 真实双端、超分 FPS/掉帧、安装版完整 E2E、播放信息面板实机数值、Stage B。
+
 ## v0.1.0-beta.4 — 2026-10-21
 
 ### Stage A 收尾

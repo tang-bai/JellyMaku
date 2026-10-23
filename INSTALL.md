@@ -1,178 +1,37 @@
-# Installation instructions
+# 安装 JellyMaku
 
-Platform-specific installation instructions can be found in this document.
+JellyMaku 当前只发布 **Windows 10/11 x64** Beta。其他平台不是本项目的验收目标。
 
-*Use the links below to jump to your platform.*
+## 下载
 
-- [Windows](#windows)
-- [macOS](#macos)
-- [Linux](#linux)
-	- [Flatpak](#flatpak)
-	- [Ubuntu/Debian](#ubuntudebian)
-	- [Arch](#arch)
-	- [Fedora](#fedora)
-- [Android](#android)
-	- [Play Store](#play-store)
-	- [Manual installation](#manual)
-- [iOS](#iosipados)
-	- [Sideloadly](#sideloadly)
-- [Docker](#docker)
-- [Web](#web)
+从 [GitHub Releases](https://github.com/tang-bai/JellyMaku/releases) 下载最新版本：
 
+- **安装版**：`JellyMaku-<version>-windows-x64-setup.exe`，运行后按向导安装。
+- **便携版**：`JellyMaku-<version>-windows-x64-portable.zip`，解压后运行 `JellyMaku.exe`。
 
-## Windows
+当前安装器未签名，Windows SmartScreen 可能提示；请只从本仓库 Releases 下载。
 
-### Installer
+## 要求
 
-Download the latest `.exe` installer from the [Releases](https://github.com/DonutWare/Fladder/releases) page and open it. Follow the on-screen instructions.
+- Windows 10/11 x64。
+- 可访问的 Jellyfin 服务器（已在 Jellyfin 12.2 上验证主要播放流程）。
+- 使用弹幕时需要能访问 danmu_api；默认公共实例为 `https://danmu.api.tangbai.cc`，也可在设置中改为自建实例。
+- 超分需要支持 GLSL 的 GPU/驱动；Anime4K 4x 对 GPU 开销较高。
 
-### Portable
+## 首次使用
 
-Download the latest `.zip` file from the [Releases](https://github.com/DonutWare/Fladder/releases) page and extract it somewhere on your PC.
+1. 启动 JellyMaku，添加 Jellyfin 服务器并登录。
+2. 打开视频，底栏可打开弹幕设置、超分菜单和播放信息。
+3. 弹幕默认使用公共 danmu_api；不可用时可在弹幕设置中改地址或导入本地 XML/JSON。
+4. 一起看（SyncPlay）需要所有成员登录同一台 Jellyfin 服务器。
 
-Run `fladder.exe` to start the application.
+## 已知限制
 
-## macOS
+- Beta 版本，功能/接口可能变化。
+- SyncPlay 真实双客户端、超分 FPS/掉帧、安装目录完整 E2E 尚未验收。
+- 不提供发送弹幕、自动更新或安装器签名。
+- 详细状态见 [docs/jellymaku/ROADMAP.md](docs/jellymaku/ROADMAP.md)。
 
-1. Download the latest `*.dmg` file from the [Releases](https://github.com/DonutWare/Fladder/releases) page.
+## 从源码构建
 
-2. Open it and copy the Fladder application file into your `Applications` folder, or another place on your Mac.
-
-3. Right-click the application and click Open while holding `Control`. This will bypass the unidentified developer warning.
-
-> [!TIP]
-> Alternatively, to allow the app to run, open `System Settings > Privacy & Security > Scroll down to Security > Open Anyway`.
-
-## Linux
-
-### Flatpak
-
-Fladder is available on Flathub.
-
-<a href='https://flathub.org/apps/nl.jknaapen.fladder'><img alt='Get it on Flathub' src='https://flathub.org/api/badge?locale=en' width=192/></a>
-
-You can also download the latest `.flatpak` file from the [Releases](https://github.com/DonutWare/Fladder/releases) page and install it manually.
-
-### Ubuntu/Debian
-
-> [!TIP]
-> If you experience issues attempting to run Fladder with the process exiting with `libmpv` shared library errors, you may need to install `libmpv-dev` by running `sudo apt install libmpv-dev`.
-
-Download the latest Linux `.zip` file from the [Releases](https://github.com/DonutWare/Fladder/releases) page and extract it somewhere on your computer.
-
-Open a terminal and `cd` to the directory where you extracted Fladder to. Run `./Fladder` to open the application.
-
-### Arch
-
-An AUR package is available for download (thanks to @tam1m).
-
-You can download it using your favourite AUR helper.
-
-[Yay](https://github.com/Jguer/yay): `yay -S fladder-git`<br>
-[Paru](https://github.com/Morganamilo/paru): `paru -S fladder-git`
-
-### Fedora
-
-> [!TIP]
-> If you experience issues attempting to run Fladder with the process exiting with `libmpv` shared library errors, you may need to install `mpvlibs` by running `yum install mpvlibs`.
-
-Download the latest Linux `.zip` file from the [Releases](https://github.com/DonutWare/Fladder/releases) page and extract it somewhere on your computer.
-
-Open a terminal and `cd` to the directory where you extracted Fladder to. Run `./Fladder` to open the application.
-
-## Android
-
-> [!IMPORTANT]
-> Alpha support added in v0.8.0 and contributions to add further support are always appreciated.
-### Play Store
-
-This is the recommended way to install Fladder on Android.
-
-<a href='https://play.google.com/store/apps/details?id=nl.jknaapen.fladder&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width=250/></a>
-
-### Manual
-
-If your device can't access the Play Store, you can install Fladder manually.
-
-1. Download the latest `.apk` file from the [Releases](https://github.com/DonutWare/Fladder/releases) page and save it to your device.
-
-2. Open it to start the installation. You may need to allow unknown apps to be installed on your device, as this will be disallowed by default.
-
-## iOS/iPadOS
-
-### Sideloadly
-
-> [!NOTE]
-> Installing using Sideloadly is the only method of using Fladder on iOS or iPadOS at this time. See [this issue](https://github.com/DonutWare/Fladder/issues/40) for more information.
-
-> [!IMPORTANT]
-> If you are using Windows, you must install the web versions of iTunes and iCloud (**not the Microsoft Store versions**) before installing Sideloadly. You can download them [here](https://www.apple.com/itunes/download/win64) and [here](https://updates.cdn-apple.com/2020/windows/001-39935-20200911-1A70AA56-F448-11EA-8CC0-99D41950005E/iCloudSetup.exe).
-
-1. Download and install Sideloadly from their [downloads page](https://sideloadly.io/#download).
-
-2. Download the latest iOS IPA file from the [Releases](https://github.com/DonutWare/Fladder/releases) page and save it to your computer.
-
-3. Plug your device into your computer and open iTunes.
-
-4. Click the device icon in the top left next to the navigation buttons.
-
-5. Ensure **Sync with this device over Wi-Fi** is checked.
-
-6. Click Apply, then Done, then close iTunes.
-
-7. Open Sideloadly and click the Open IPA button in the top left. Select the IPA you downloaded earlier.
-
-8. Make sure your device is listed under **iDevice**. It will usually look like this: `<device name> (<iOS version>) <UDID> @USB`.
-
-9. Enter your Apple ID in the **Apple ID** box. Creating a second Apple ID is recommended, but not required.
-
-10. Click Start. You will be prompted to enter your Apple ID password. Enter it and allow any two-factor authentication, if required.
-
-11. The installation process will take a while. Once it's finished, you will see the Fladder icon on your home screen or in your App Library.
-
-> [!NOTE]
-> Your password is only used for authentication to Apple's servers. It is not sent to any third parties.
-
-> [!IMPORTANT]
-> Once installed, Fladder will only be valid for 7 days. Enabling auto refresh will keep the app from expiring (this should already be enabled). Your computer needs to be on for this to occur.
-
-## Docker
-
-You can install Fladder on your server to provide an alternate Jellyfin dashboard.
-
-Copy the contents of the [docker-compose.yml](https://raw.githubusercontent.com/DonutWare/Fladder/refs/heads/develop/docker-compose.yml) file and save it to your server.
-
-Run `docker-compose up -d` to start the container. It will be available on `http://<server-ip>`.
-
-> [!TIP]
-> We recommend changing the `BASE_URL` environment variable to the URL you use to access Jellyfin, as this will skip entering it when you load the web UI.
-
-You can also preconfigure Seerr with this environment variable:
-
-- `SEERR_BASE_URL`: String URL for your Seerr/Jellyseerr instance.
-
-Example:
-
-```env
-BASE_URL=https://jellyfin.example.com
-SEERR_BASE_URL=https://seerr.example.com
-```
-
-## Web
-
-You can also manually copy the web .zip build to any static file server such as Nginx, Caddy, or Apache
-
-> [!TIP]
-> You can preconfigure Fladder by placing a config file in [assets/config/config.json](https://github.com/DonutWare/Fladder/blob/develop/config/config.json)
-
-`config.json` options:
-
-```json
-{
-	"baseUrl": "https://jellyfin.example.com",
-	"seerrBaseUrl": "https://seerr.example.com"
-}
-```
-
-- `baseUrl`: String. Presets Jellyfin URL on login.
-- `seerrBaseUrl`: String. Presets Seerr URL in personal settings.
+见 [docs/jellymaku/BUILD_WINDOWS.md](docs/jellymaku/BUILD_WINDOWS.md)。仓库路径建议使用 ASCII 路径（如 `L:\JellyMaku`）。

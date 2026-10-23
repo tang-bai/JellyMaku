@@ -1,7 +1,7 @@
 
 # 一起看（Jellyfin SyncPlay）设计
 
-> 状态：PR #735 代码已导入；Windows 构建/单测通过；真实 Jellyfin 双端联调未做。
+> 状态（2026-10-23）：PR #735 代码已导入；Windows 构建/单测/组面板中文化/侧栏状态点通过；真实 Jellyfin 双端联调未做。
 > 决策：复用 Fladder PR #735，不重写 SyncPlay，不使用 Kazumi 的公共 SyncPlay 服务器。
 
 ## 1. 目标与前提
@@ -44,7 +44,7 @@
 - 顶栏/首页入口：创建组、组列表、加入、离开。
 - 组面板：组名、成员、状态（Waiting/Playing/Paused）、当前条目。
 - 播放器 badge/提示：已加入/等待/缓冲。
-- 中文文案；错误提示（组不存在/已满/权限/网络）。
+- 中文文案（`app_zh.arb`/`app_zh_Hant.arb` 已补齐 `syncPlay*` 与 `leave`，2026-10-22）；错误提示（组不存在/已满/权限/网络）。
 - 不新增聊天。
 
 ## 6. 测试矩阵

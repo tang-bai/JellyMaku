@@ -2,10 +2,10 @@
 
 JellyMaku 是面向 **Windows 10/11** 的 Jellyfin 桌面播放器，基于 [Fladder](https://github.com/DonutWare/Fladder)（Flutter/Dart，GPL-3.0）二次开发，并集成了弹弹play 兼容的 danmu_api 弹幕、Anime4K GLSL 超分和 Jellyfin SyncPlay 一起看能力。
 
-> **当前状态：v0.1.0-beta.4 Windows Beta**
-> 已发布 Windows x64 便携包与 Inno Setup 安装器；仍处于 Beta 阶段，真实媒体库和不同网络环境下的表现需要继续验证。
+> **当前状态：v0.1.0-beta.5 Windows Beta**
+> 已发布 Windows x64 便携包与 Inno Setup 安装器；本版新增播放信息面板、Seerr/缺图/日志时间修复与 SyncPlay 中文化。仍处于 Beta 阶段，真实媒体库和不同网络环境下的表现需要继续验证。
 >
-> [下载最新 Beta](https://github.com/tang-bai/JellyMaku/releases/tag/v0.1.0-beta.4) · [完整文档](docs/jellymaku/README.md) · [构建说明](docs/jellymaku/BUILD_WINDOWS.md)
+> [下载最新 Beta](https://github.com/tang-bai/JellyMaku/releases/tag/v0.1.0-beta.5) · [完整文档](docs/jellymaku/README.md) · [构建说明](docs/jellymaku/BUILD_WINDOWS.md)
 
 ## 项目简介
 
@@ -62,13 +62,15 @@ JellyMaku 的目标是做一个 Windows 上开箱即用的 Jellyfin 播放器：
 - 提供 Inno Setup 安装器和便携包。
 - SMTC 媒体控制初始化；Windows URL 协议注册。
 - 点击画面暂停；暂停/恢复弹幕连续；弹幕轨道稳定；侧栏展开/折叠动画。
+- 播放页 `SDR HD` 徽章可打开实时播放信息（码率/下载速度/缓冲/丢帧/硬解/帧率/加载耗时），当前工作区已构建，待 NAS 实机确认数值。
 - 安装器当前未签名，Windows SmartScreen 可能提示。
 
 ## 已验证
 
 - dart analyze lib test：0 issue。
-- flutter test --no-pub：137 项测试（136 通过 + 1 个手动联网探针跳过）。
-- Windows Release 构建成功。
+- beta.4 发布包：137 项测试（136 通过 + 1 个手动联网探针跳过）。
+- 当前 HEAD（2026-10-23）：156 项测试通过 + 1 个手动联网探针跳过。
+- Windows Release 构建成功（当前 HEAD，2026-10-23）。
 - NAS Jellyfin 12.2：登录、媒体库（电影 191 条、剧集 5380 条）、播放、暂停、seek 已验证。
 - NAS 环境手动确认：字幕切换、切集、弹幕叠加层。
 - 弹幕性能基准：5000 条解析约 52–55ms，首帧约 15–17ms，后续帧约 1.0–1.1ms（测试环境，非播放器内 FPS）。
@@ -79,6 +81,7 @@ JellyMaku 的目标是做一个 Windows 上开箱即用的 Jellyfin 播放器：
 - **超分**：四档可切换、截图和 GPU 粗测完成，缺 FPS/掉帧和不同 GPU 的画质对比。
 - **公共 danmu_api**：接口在可用网络下实测通过，但公共实例可能受网络、证书或源站风控影响；失败时可改用自建实例。
 - **安装器**：安装/卸载冒烟通过，但未做安装后完整 Jellyfin/播放/弹幕 E2E，且未签名。
+- **播放信息面板**：已实现/构建，但未在 NAS 播放中确认 UI 与实时数值。
 - **Fladder 上游能力**：多窗口媒体会话、深链等上游新功能在真实 Jellyfin 下的行为未逐一验证。
 
 ## 尚未实现
@@ -88,17 +91,17 @@ JellyMaku 的目标是做一个 Windows 上开箱即用的 Jellyfin 播放器：
 - **发送弹幕**：danmu_api 只读，JellyMaku 不提供发送弹幕功能。
 - **自动更新**：未实现；安装器和便携包需要手动下载更新。
 - **安装器签名**：未签名，SmartScreen 可能拦截。
-- **全局中文 ARB**：弹幕相关界面已中文化/双语，但 Fladder 全局文案尚未完整中文化。
+- **全局中文 ARB**：弹幕/一起看相关界面已中文化或双语；`zh` 仍有 4 个深链键、`zh_Hant` 仍有约 200 个非 SyncPlay 键缺失。
 - **RTX VSR**：不作为 v1 支持项；media_kit 的 ANGLE/OpenGL 路径无法可靠承载 d3d11vpp，已记录失败实验，不要期待该功能。
 
 ## 安装与使用
 
 ### 下载
 
-从 [GitHub Releases](https://github.com/tang-bai/JellyMaku/releases/tag/v0.1.0-beta.4) 下载：
+从 [GitHub Releases](https://github.com/tang-bai/JellyMaku/releases/tag/v0.1.0-beta.5) 下载：
 
-- JellyMaku-0.1.0-beta.4-windows-x64-setup.exe：安装版；
-- JellyMaku-0.1.0-beta.4-windows-x64-portable.zip：便携版，解压后运行 JellyMaku.exe。
+- JellyMaku-0.1.0-beta.5-windows-x64-setup.exe：安装版；
+- JellyMaku-0.1.0-beta.5-windows-x64-portable.zip：便携版，解压后运行 JellyMaku.exe。
 
 要求：Windows 10/11 x64、可访问的 Jellyfin 服务器。
 

@@ -2,17 +2,19 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：**v0.1.0-beta.3** Windows Beta（弹幕迁移 danmu_api；analyze 0 issue；137 tests）；GitHub main 持续更新；RTX VSR spike 失败已回退；Anime4K Strong/4x 已接入；danmu_api 默认 https://danmu.api.tangbai.cc，无需凭证；支持自建/本地导入。
-> 日期：2026-10-21。
+> 状态：**v0.1.0-beta.5** Windows Beta 已发布（2026-10-23）；Flutter 3.35.7；analyze 0 issue；**156 tests passed + 1 skipped**（2026-10-23）。RTX VSR spike 失败已回退；Anime4K Fast/Balanced/Strong/4x 已接入；danmu_api 默认 https://danmu.api.tangbai.cc，无需凭证；支持自建/本地导入。
+> 日期：2026-10-23。
 
 ## 0. 当前仓库状态（必须先理解）
 
-- 本地 git 已初始化，main 为工作分支；origin https://github.com/tang-bai/JellyMaku 已推送（Stage A 基线 `dc1f8d5c`）。
-- main 已包含 Fladder 源码 + SyncPlay PR #735（PR head 79e249e）+ Stage A 弹幕/超分/品牌代码 + 项目文档/AGENTS。
+- 本地 `main` 已同步 origin https://github.com/tang-bai/JellyMaku 的 `main`；v0.1.0-beta.5 已发布，工作区干净。
+- `main` 已包含 Fladder 源码 + SyncPlay PR #735（head 79e249e）+ Stage A 弹幕/超分/品牌代码，并于 2026-10-21 合并 Fladder develop `de7b5a2a`。
+- v0.1.0-beta.5 的安装器/便携包已发布（2026-10-23）；安装器未签名。
+- beta.5 发布包含播放信息面板、Seerr/缺图/日志时间修复、SyncPlay 中文化与 `THIRD_PARTY_NOTICES.md`。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
-- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、137 tests passed；Windows release 重新构建/启动冒烟通过（2026-10-20，含弹幕重构后重建）**。
-- 基线说明：main 已含 PR #735 head（Fladder + SyncPlay），并于 2026-10-21 在本地分支 `merge/develop-20261021` 合并 Fladder develop `de7b5a2a`（未推送）。
-- 未验证：真实 Jellyfin 12.2 E2E、播放器内真实弹幕加载/切集、SyncPlay 双客户端、超分画质/性能。
+- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、156 tests passed + 1 skipped；Windows release 于 2026-10-23 构建通过**（当前 HEAD，已打包 beta.5）。
+- 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动）以及字幕切换/切集/弹幕叠加层（手动）。
+- 未验证：SyncPlay 双客户端、超分 FPS/掉帧、安装版完整 E2E、播放信息面板真实播放数值。
 - 因此：
   - 不要把“计划”当成“已实现”；
   - 不要把单测/构建通过当成真实 E2E 通过；
@@ -103,7 +105,7 @@ dart analyze lib test
 - 单元测试优先：danmu_api 客户端/解析/匹配/缓存/布局；Bangumi client/映射/BBCode；shader profile。
 - Widget 测试：设置/弹窗/无网状态。
 - Mock：danmu_api 用 http MockClient/本地 HttpServer；Bangumi/trace.moe fixtures 在 testdata/fixtures。
-- 本地 Jellyfin 12.2 E2E；SyncPlay 用 Jellyfin Web/双实例。
+- Jellyfin 12.2 E2E 使用 NAS（本地未安装服务端）；SyncPlay 用 Jellyfin Web/双实例。
 - 每个“已通过”附命令/输出/截图路径；没有证据就写“未验证”。
 - 不把 lint/analyze 通过等同于功能通过。
 
@@ -118,19 +120,20 @@ dart analyze lib test
 - 不复制 Kazumi 图标/Mi Sans/美术；不冒充 Jellyfin/Bangumi/Fladder 官方。
 - 弹幕功能免费；禁止未授权商用。
 
-## 9. 功能状态（截至文档落盘）
+## 9. 功能状态（截至 2026-10-23）
 
 | 功能 | 状态 |
 |---|---|
-| 文档/AGENTS | 完成；Stage A 报告/BUILD_WINDOWS 已补 |
-| Fladder 源码导入 | 完成（PR #735 head + develop de7b5a2a 合并） |
-| Flutter/构建 | 完成：analyze 0、137 tests、Windows release 成功、启动冒烟（含弹幕重构后重建） |
-| SyncPlay | 代码已导入；单测通过；真实双端未联调 |
-| 弹幕 | danmu_api（默认公共实例，可自建）/自动+手动匹配/URL 拉取/合并去重/本地导入/缓存/叠加层/设置已接入；播放器内真实 E2E 未完成 |
-| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；137 tests；画质/性能未验收 |
-| 品牌/打包 | JellyMaku exe/窗口/资源；portable zip；安装器/中文 ARB 未完成 |
+| 文档/AGENTS | 状态页已同步；Stage A 最终报告仍待重写 |
+| Fladder 源码导入 | 完成（PR #735 head + develop `de7b5a2a` 合并） |
+| Flutter/构建 | 当前 HEAD analyze 0、156 tests + 1 skipped、Windows release 构建成功；beta.5 发布包即当前 HEAD |
+| SyncPlay | 代码/单测/UI 中文化通过；真实双端未联调 |
+| 弹幕 | danmu_api/自动+手动匹配/URL 拉取/合并/本地导入/缓存/叠加层已接入；NAS 播放器内叠加层手动确认 |
+| 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；截图已有；FPS/掉帧未验收 |
+| 播放信息 | 实时码率/速度/缓冲/硬解/帧率面板已实现并构建；真实 NAS 播放 UI/数值未验证 |
+| 品牌/打包 | beta.5 安装器 + 便携包已发布；安装版完整功能 E2E 未做 |
 | Bangumi 时间表/图片/评论 | 未开始 |
-| 推送 GitHub | 完成（基线 dc1f8d5c） |
+| 推送 GitHub | `main` 已同步 origin（v0.1.0-beta.5） |
 
 ## 10. 已知陷阱
 
@@ -139,8 +142,8 @@ dart analyze lib test
 3. **RTX VSR**：2026-10-20 spike 失败：已加载后切换无变化（0.07/255）；先选 RTX 再重启加载会卡死。media_kit ANGLE/OpenGL 无法直接承载 d3d11vpp；不要把它写成已支持。回退备份：分支 `backup/pre-rtx-vsr`、标签 `backup/pre-rtx-vsr-2026-10-20`。
 4. **PR #735 冲突**：基于旧 develop；2026-10-21 已合并 develop（冲突集中在 desktop_platform_wrapper/media_control_wrapper/pubspec.lock），详见 IMPLEMENTATION。
 5. **中文路径**：Cargokit 生成的 pubspec 会用系统代码页，Dart 无法解析；用 ASCII 路径 + `/utf-8`。
-6. **已推送**：main 已推送 origin（Stage A 基线 `dc1f8d5c`）；RTX 实验分支 `experiment/rtx-vsr` 仅本地保留。后续 push/force-push 仍需用户确认。
-7. **旧实现丢失**：不要从远程“恢复”旧 MPV Shim 代码（远程为空）。
+6. **已推送**：`main` 已同步 origin（beta.5 发布）。RTX 实验分支 `experiment/rtx-vsr` 仅本地保留。后续 push/force-push 仍需用户确认。
+7. **旧实现丢失**：不要从远程“恢复”旧 MPV Shim 代码（当时远程为空，现仅有新实现历史）。
 8. **许可**：Kazumi 代码 GPL-3.0 可用，但资产不可复制；Anime4K MIT 已附许可。
 9. **原生依赖下载**：libmpv/ANGLE/MDK/SQLite/NuGet 可能卡在 GitHub/SourceForge/sqlite.org/nuget.org；用 third_party 预置与本地 feed。
 10. **插件注册器过期**：升级 screen_brightness_windows 后必须删除并重新生成 generated_plugin_registrant.cc/.h。

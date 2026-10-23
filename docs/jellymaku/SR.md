@@ -1,7 +1,7 @@
 
 # 视频超分设计（GLSL shader）
 
-> 状态：v1 核心已实现（Anime4K Fast/Balanced/Strong/4x + glsl-shaders + 菜单）；2026-10-20 增加 Strong/4x 并用 103 个测试验证；完整画质/性能验收未做；RTX VSR spike 已测试并回退。
+> 状态（2026-10-23）：v1 核心已实现（Anime4K Fast/Balanced/Strong/4x + glsl-shaders + 菜单）；当前工作区 156 tests passed + 1 skipped；四档截图已有；FPS/掉帧性能验收未做；RTX VSR spike 已测试并回退。FSRCNNX/ArtCNN 未接入。
 > 目标：在 Fladder/media_kit 的 libmpv 上提供可切换的 Anime4K/FSRCNNX/ArtCNN 超分；RTX VSR 不作为 v1 验收。
 
 ## 1. 背景与限制
@@ -58,7 +58,7 @@
 2. 视频已加载后切换：与 Off 同一暂停帧的差异仅约 `0.07/255`，肉眼无变化。
 3. 先选 RTX 档再重启/重新打开视频，让 d3d11va 从解码开始生效：应用卡在“加载中”，窗口“未响应”。
 
-结论：当前 media_kit ANGLE/OpenGL render API 无法可靠承载 `d3d11vpp`；不是换一个 mpv 参数就能启用。实验代码已保留在本地分支 `experiment/rtx-vsr`（commit `fac4a9ce`），**未合入 main、未推送**；main 已回退到备份 `dc1f8d5c`。
+结论：当前 media_kit ANGLE/OpenGL render API 无法可靠承载 `d3d11vpp`；不是换一个 mpv 参数就能启用。实验代码已保留在本地分支 `experiment/rtx-vsr`（commit `fac4a9ce`），**未合入 main、未推送**；当时 main 回退到备份 `dc1f8d5c`。
 
 若未来必须支持：需要独立的 D3D11 视频输出路径，或原生集成 NVIDIA RTX Video SDK；不能在现有 Flutter 纹理路径上直接承诺。
 
@@ -83,6 +83,7 @@
 - 手动/截图：至少 3 个 profile 可切换、关闭恢复、持久化。
 - 失败：缺失资产/权限/不支持 → 回退 off，不阻塞播放。
 - RTX VSR：明确记录“可用/不可用/原因”，不写成已支持。
+- 当前状态（2026-10-23）：四档截图与 GPU 粗测已有；未采集 FPS/掉帧，4x 在 1440p/4K 的性能风险未量化。
 
 ## 9. 许可
 

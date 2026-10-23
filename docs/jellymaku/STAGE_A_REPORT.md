@@ -1,9 +1,10 @@
 
-# Stage A 构建与验证报告
+# Stage A 构建与验证报告（历史）
 
-> 历史说明（2026-10-20）：弹幕数据源已改为 danmu_api，本报告中的旧弹幕/密钥代码、测试与联调项均已删除/不再适用，仅作历史记录。
-> 日期：2026-10-19
-> 结论：Stage A 核心已可构建、可启动；弹幕/超分/SyncPlay 代码已接入。真实 Jellyfin、在线弹幕、SyncPlay 双端联调尚未完成。
+> 状态：**HISTORICAL / 不代表当前状态**。本报告记录 2026-10-19/20 的旧弹幕实现与当时构建，部分内容已删除或已被后续改动取代。
+> 当前状态请看 [ROADMAP.md](ROADMAP.md)、[IMPLEMENTATION.md](IMPLEMENTATION.md)；Stage A 最终报告仍待重写。
+> 日期：2026-10-19（历史）
+> 当时结论：核心可构建/启动；真实 Jellyfin、在线弹幕、SyncPlay 双端未完成（这些项目后来已有部分更新）。
 
 ## 1. 环境
 
@@ -67,18 +68,18 @@
 ### 品牌/打包
 
 - Windows 可执行名、窗口标题、版本资源改为 JellyMaku。
-- portable zip 已生成；安装器（Inno Setup）未做。
-- 更新检查仍可能指向 Fladder 上游；Stage A 未改。
+- 当时仅生成 portable zip；安装器后来已在 beta.4 补齐。
+- 当时更新检查仍可能指向 Fladder 上游；后来已在 beta.4 改为 JellyMaku。
 
-## 5. 重要限制
+## 5. 重要限制（历史，部分已被后续更新）
 
-1. **未合并最新 Fladder develop**：基线仍是 PR #735 head（`79e249e`）。
-2. **未做真实 Jellyfin E2E**：未下载/启动 Jellyfin 12.2；登录、播放、字幕、seek、切集未在真实服务器验证。
-3. **未做真实旧弹幕联调**：旧版本需要应用凭证；旧行为仅由本地 mock 测试覆盖。
-4. **未做 SyncPlay 双端联调**：只有单测；Jellyfin 12.2 WebSocket/时钟误差未验证。
-5. **超分未做画质/性能验收**：未截图、未测掉帧；ANGLE/OpenGL 下部分 shader 可能被 libmpv 拒绝。
-6. **弹幕设置文案未走 ARB**：当前为中文硬编码；i18n 待补。
-7. **已推送 GitHub**：main 已推送 origin（e2b3ca7）；后续变更需重新推送。
+1. **当时未合并最新 Fladder develop**：基线是 PR #735 head（`79e249e`）；已于 2026-10-21 合并 `de7b5a2a`。
+2. **当时未做真实 Jellyfin E2E**：后来已在 NAS Jellyfin 12.2 完成登录/播放/暂停/seek 自动验证及字幕/切集/叠加层手动验证。
+3. **当时未做真实旧弹幕联调**：旧版本需要应用凭证；旧行为仅由本地 mock 测试覆盖，后来旧实现已被 danmu_api 取代。
+4. **当时未做 SyncPlay 双端联调**：只有单测；Jellyfin 12.2 WebSocket/时钟误差仍未真实验证。
+5. **当时超分未做画质/性能验收**：后来已补四档截图，FPS/掉帧仍未验收。
+6. **当时弹幕设置文案未走 ARB**：后来已迁移到 ARB。
+7. **当时 main 已推送 origin（e2b3ca7）**；后来 origin/main 已更新到 `21891411`，本地另有未推送提交。
 
 ## 6. 复现提示
 

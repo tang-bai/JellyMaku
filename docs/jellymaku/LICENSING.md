@@ -1,7 +1,7 @@
 
 # 许可、署名与内容合规
 
-> 状态：Draft。发布前需法务/许可证复核。本文不是法律意见。
+> 状态（2026-10-23）：Draft；发布前需许可证复核。本文不是法律意见。`THIRD_PARTY_NOTICES.md` 已补齐（待随本次改动提交），发布检查清单已按当前仓库内容勾选。
 
 ## 1. 本项目许可
 
@@ -78,9 +78,9 @@
 
 ## 9. 发布检查
 
-- [ ] LICENSE、THIRD_PARTY_NOTICES、源代码链接。
-- [ ] 第三方许可/署名齐全。
-- [ ] 无受限图标/字体/美术。
-- [ ] 无密钥/真实用户数据/版权媒体。
-- [ ] danmu_api/Bangumi/trace.moe 署名与限制说明。
-- [ ] 非官方声明。
+- [x] LICENSE、`THIRD_PARTY_NOTICES.md`、源代码链接（https://github.com/tang-bai/JellyMaku）。
+- [x] 第三方许可/署名齐全（见 `THIRD_PARTY_NOTICES.md`）。
+- [x] 无受限图标/字体/美术（沿用 Fladder 上游资源，未复制 Kazumi 资产）。
+- [x] 无密钥/真实用户数据/版权媒体。
+- [x] danmu_api/Bangumi/trace.moe 署名与限制说明。
+- [x] 非官方声明。

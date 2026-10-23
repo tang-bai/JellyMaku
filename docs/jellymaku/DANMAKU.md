@@ -1,10 +1,10 @@
 
 # 弹幕设计（danmu_api + Flutter 叠加层）
 
-> 状态：2026-10-20 已迁移到 [danmu_api](https://github.com/huangxd-/danmu_api)，默认公共实例 `https://danmu.api.tangbai.cc`。
-> 已实现：自动/手动匹配、URL 拉取、多来源聚合解析、缓存、本地 XML/JSON 导入、Flutter 叠加层、设置。`dart analyze` 0 issue；137 tests passed。
-> 未完成：真实 Jellyfin 播放器内 E2E、真实切集/暂停联调。
-> 不提供发送弹幕；danmu_api 只读。
+> 状态（2026-10-23）：2026-10-20 已迁移到 [danmu_api](https://github.com/huangxd-/danmu_api)，默认公共实例 `https://danmu.api.tangbai.cc`。
+> 已实现：自动/手动匹配、URL 拉取、多来源聚合解析、缓存、本地 XML/JSON 导入、Flutter 叠加层、设置。当前工作区 `dart analyze` 0 issue；156 tests passed + 1 skipped。
+> 已验证：NAS Jellyfin 12.2 播放器内叠加层手动确认；seek/pause 自动验证，字幕/切集手动验证。
+> 未完成：真实混合来源弹幕的系统性回归/截图；不提供发送弹幕（danmu_api 只读）。
 
 ## 1. 为什么用 Flutter 叠加层
 
@@ -143,7 +143,7 @@ MediaInfo：`itemId/name/seriesName/episode/season/isMovie/duration/tmdbId`。�
 ## 9. 测试/验收
 
 - `dart analyze lib test`：0 issue。
-- `flutter test --no-pub`：137 tests passed（2026-10-20）。
+- `flutter test --no-pub`：156 tests passed + 1 skipped（2026-10-23，当前工作区）。
 - 弹幕相关：
   - 客户端：match POST、search 查询、comment URL+format、segmentcomment 非 URL 源、UTF-8、URL 规范化、400 回退 id、404 空结果、401 TOKEN 提示、isMatched=false。
   - 解析：来源标签/旧式 uid、模式/颜色/偏移/屏蔽/去重/合并/可见性。
@@ -152,7 +152,7 @@ MediaInfo：`itemId/name/seriesName/episode/season/isMovie/duration/tmdbId`。�
   - 缓存 key：同 URL 稳定、跨服务器/URL 区分。
   - Widget：设置弹窗高级区、手动匹配首屏。
 - 真实 API 冒烟：search/episodes、match、comment?url 均 200；6,898 条弹幕。
-- 未做：播放器内真实加载/切集/暂停 E2E。
+- 真实播放器内：NAS Jellyfin 12.2 已完成 seek/pause 自动验证与字幕/切集/叠加层手动验证；未做混合来源的系统性回归和截图。
 
 ## 10. 已知限制
 

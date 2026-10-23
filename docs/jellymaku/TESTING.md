@@ -1,9 +1,11 @@
 
 # 测试策略与验收
 
-> 状态：部分执行。2026-10-20 已完成 analyze 0、137 tests；Windows release 已重新构建/冒烟通过（含弹幕迁移后重建）；danmu_api search/match/comment 已实测 200；真实 Jellyfin/播放器内弹幕/SyncPlay 联调仍未执行。
+> 状态（2026-10-23）：当前 HEAD analyze 0、156 tests passed + 1 skipped；Windows release 于 2026-10-23 构建成功；beta.5 安装器/便携包已发布。
+> 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动），字幕切换/切集/弹幕叠加层（手动）。
+> 未验证：SyncPlay 双端、超分 FPS/掉帧、安装版完整 E2E、播放信息面板实机。
 >
-> 已执行证据见 [STAGE_A_REPORT.md](STAGE_A_REPORT.md) 与 artifacts/logs/（本地，不入库）。
+> 已执行证据见 [IMPLEMENTATION.md](IMPLEMENTATION.md) 与 artifacts/logs/（本地，不入库）。
 
 ## 1. 测试层级
 
@@ -12,7 +14,7 @@
 | 单元 | danmu_api 客户端/解析/匹配/缓存；Bangumi client/映射；BBCode；shader profile | Dart test / flutter test |
 | Widget | 弹幕开关/设置/手动匹配；时间表；图片搜索；评论 Tab/Sheet；无网 | flutter test / widget test |
 | Mock 集成 | danmu_api（MockClient/本地 HttpServer）、Mock Bangumi、Mock trace.moe | Dart HttpServer / MockClient |
-| 本地 Jellyfin | 登录/库/播放/字幕/弹幕/seek/切集/设置持久化 | Jellyfin 12.2 + 测试媒体 |
+| Jellyfin 12.2（NAS） | 登录/库/播放/字幕/弹幕/seek/切集/设置持久化 | Jellyfin 12.2 + NAS 媒体库 |
 | SyncPlay | 双客户端矩阵 | JellyMaku + Jellyfin Web / 双实例 |
 | 超分 | profile 切换/关闭/持久化/性能 | 截图 + mpv 属性/掉帧 |
 | 打包 | 干净目录启动/登录/播放/弹幕/超分/SyncPlay | 安装器/便携 zip |
@@ -20,8 +22,8 @@
 ## 2. 环境
 
 - Windows 10/11 x64；VS 2022 BuildTools；Developer Mode；Flutter 3.35.7（已安装）。
-- Jellyfin 12.2 + .NET 10；本地 127.0.0.1:8096（尚未下载/启动）。
-- ffmpeg 9.0.1；测试媒体在 testdata/media。
+- Jellyfin 12.2（NAS `192.168.8.137:8096`，ServerName「媒体库」）；本地未安装 Jellyfin/.NET。
+- 测试媒体使用 NAS 媒体库；本地 `testdata/media` 未生成（合成片计划未执行）。
 - danmu_api：默认公共实例可直接请求；离线/限流时用本地 XML 或缓存。自建 TOKEN 写在地址路径。
 - Bangumi：无网络路径时 Mock；真实联调需用户代理/Worker。
 - trace.moe：Mock 或真实（quota 100/day，concurrency 1）。
@@ -37,21 +39,21 @@ $env:CL = "/utf-8"
 
 .flutter\bin\flutter.bat pub get
 dart analyze lib test                 # 0 issue
-.flutter\bin\flutter.bat test --no-pub   # 100 passed
+.flutter\bin\flutter.bat test --no-pub   # 156 passed + 1 skipped
 .flutter\bin\flutter.bat build windows --release --no-pub
 & .\tools\pack.ps1 -Version 0.1.0
 ~~~
 
-结果：Windows release + 启动冒烟通过；portable zip 90,656,631 bytes，SHA256 28BA756190439324A6F0FCC30AAB1E562B381D48E17E4B1EF8ADA3D934F3986A。
+结果（2026-10-23）：analyze 0 issue；156 tests passed + 1 skipped；Windows release 构建成功；beta.5 发布资产见 IMPLEMENTATION.md。
 
-尚未执行的计划脚本：tools/bootstrap.ps1、verify-assets.ps1、setup-jellyfin.ps1、run-dev.ps1、test.ps1（当前只有 pack.ps1）。
+已存在脚本：`tools/pack.ps1`、`tools/verify-assets.ps1`、`tools/build-installer.ps1`。尚未实现：`bootstrap.ps1`、`setup-jellyfin.ps1`、`run-dev.ps1`、`test.ps1`。
+
+在空环境/agent 进程中运行 Flutter 前，先按 [BUILD_WINDOWS.md](BUILD_WINDOWS.md) §1.1 设置 `ProgramFiles(x86)`、`USERPROFILE`、`APPDATA` 等变量；否则 `flutter test` 可能因 Flutter tool 的环境检查崩溃。
 
 ## 4. Mock
 
-- tool/mock_ddp.dart：/api/v2/search/episodes、/api/v2/comment/{id}、/api/v2/match；记录签名头；支持 401/403/429/空评论/无匹配。
-- tool/mock_bangumi.dart：/p1/calendar、/p1/subjects/{id}/comments、/p1/episodes/{id}/comments、/v0/subjects、/v0/episodes、/v0/search/subjects；支持 401/超时/空。
-- tool/mock_trace.dart：/search；成功/无结果/配额/超时。
-- fixtures 放 testdata/fixtures/；不含真实 token/用户数据。
+- danmu_api mock：`test/danmaku/danmaku_api_client_test.dart` 使用本地 HttpServer/MockClient，覆盖 match/search/comment/segmentcomment/错误。
+- Bangumi/trace.moe mock：尚未开始；原计划的 `tool/mock_bangumi.dart`、`tool/mock_trace.dart` 未创建。
 
 ## 5. 必测场景
 
@@ -86,15 +88,15 @@ dart analyze lib test                 # 0 issue
 
 ## 6. 验收清单
 
-- [ ] Flutter 工具链/构建可用；Fladder + PR #735 基线。
-- [ ] 本地 Jellyfin 登录/播放/字幕/进度。
-- [ ] 弹幕全场景 + 主字幕共存。
-- [ ] shader 超分可切换/关闭/持久化；性能记录。
+- [x] Flutter 工具链/构建可用；Fladder + PR #735 基线。
+- [x] 本地 Jellyfin 登录/播放/字幕/进度（NAS 12.2）。
+- [x] 弹幕叠加层/暂停/seek/切集已手动确认；混合来源系统性回归待补。
+- [ ] shader 超分可切换/关闭/持久化；性能记录（截图已有，FPS/掉帧缺）。
 - [ ] SyncPlay 双客户端矩阵。
 - [ ] Stage B：时间表/图片/评论 Mock 或代理通过；无网降级。
-- [ ] 安装器/便携包干净运行。
-- [ ] 无密钥/真实用户数据入库；许可/署名完整。
-- [ ] 所有“已验证”有证据；未验证明确标注。
+- [ ] 安装器/便携包干净运行（安装/卸载冒烟已有，完整功能 E2E 缺）。
+- [ ] 无密钥/真实用户数据入库；许可/署名完整（THIRD_PARTY_NOTICES 待补）。
+- [x] 所有“已验证”有证据；未验证明确标注。
 
 ## 7. 证据目录
 

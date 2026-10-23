@@ -18,7 +18,7 @@ if (Test-Path $stageRoot) { Remove-Item -Recurse -Force $stageRoot }
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
 
 Copy-Item (Join-Path $BuildDir "*") $stage -Recurse -Force
-foreach ($file in @("README.md", "LICENSE", "AGENTS.md")) {
+foreach ($file in @("README.md", "LICENSE", "AGENTS.md", "THIRD_PARTY_NOTICES.md")) {
     if (Test-Path $file) { Copy-Item $file $stage -Force }
 }
 

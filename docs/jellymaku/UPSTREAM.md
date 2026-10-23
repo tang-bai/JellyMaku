@@ -1,7 +1,7 @@
 
 # 上游策略：Fladder、PR #735、legacy
 
-> 状态：Draft。
+> 状态（2026-10-23）：Accepted；Fladder develop `de7b5a2a` 已合并，PR #735 head 已保留；本地 `main` 为 `26ac04a4`（领先 origin/main 1 个提交，未推送）。
 > 原则：固定上游 commit；小 patch；保留上游历史/许可；不向上游强推。
 
 ## 1. 固定的上游
@@ -16,14 +16,14 @@
 
 ## 2. 分支/仓库策略
 
-当前本地 main 已初始化并导入 PR #735 head（含 Fladder + SyncPlay）+ 文档；远程为空，未推送。实际采用：
+当前 `main` 已包含 PR #735 head（Fladder + SyncPlay）并合并 Fladder develop `de7b5a2a`；origin 为 https://github.com/tang-bai/JellyMaku，本地 `main` 为 `26ac04a4`（origin/main 仍 `21891411`）。实际采用：
 
-1. **本地 main**：提交文档（0c46705）。
-2. **导入基线**：以 PR #735 head 为起点（含 Fladder + SyncPlay），merge 文档得到 e7ce1e97；main 快进到该提交。
-3. **待办**：尚未合并最新 develop；Phase A0 需 merge/rebase 并解决冲突。
+1. **main**：工作分支；beta.5 已发布，工作区干净。
+2. **导入基线**：PR #735 head + 上游 develop 合并；保留提交历史/作者。
+3. **后续升级**：固定 commit；小范围 merge/rebase；每次升级跑 analyze/test/build + 弹幕/SyncPlay smoke。
 4. 不直接在上游 develop 上提交；不 force-push 上游；不向 DonutWare 提交未经讨论的大改。
 5. PR #735：保留作者与提交信息；在 README/THIRD_PARTY_NOTICES 署名。
-6. 后续升级：固定 commit；小范围 merge/rebase；每次升级跑 analyze/test/build + 弹幕/SyncPlay smoke。
+6. `THIRD_PARTY_NOTICES.md` 已补；发布前随安装包核对 `LICENSING.md` 发布检查。
 
 ## 3. 旧实现（legacy MPV Shim）
 

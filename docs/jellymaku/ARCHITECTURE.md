@@ -1,7 +1,7 @@
 
 # 目标架构
 
-> 状态：Draft。Fladder + PR #735 基线已导入；尚未构建。以下为计划架构与集成点。
+> 状态（2026-10-23）：Stage A 核心架构已落地（Fladder + PR #735 + danmu_api + Anime4K + 播放信息）；SyncPlay 双端/超分性能/安装版 E2E 未验收。Bangumi 仍为计划架构。
 
 ## 1. 总体结构
 
@@ -56,7 +56,7 @@ Flutter UI（Fladder 页面 / Riverpod）
 
 ## 4. 超分数据流
 
-1. VideoPlayerSettings 包含 VideoEnhancementProfile（off/anime4k/fsrcnnx/artcnn）。
+1. VideoPlayerSettings 包含 VideoEnhancementProfile（当前实现 off/anime4kFast/Balanced/Strong/4x；FSRCNNX/ArtCNN 仍为计划）。
 2. LibMPV.init/load 后调用 VideoEnhancement.apply(player, profile)。
 3. 首次使用把 assets/shaders 复制到应用缓存目录（libmpv 需要真实路径）。
 4. 通过 command(['change-list','glsl-shaders','clr','']) 清空，再 append 每个 shader 路径。
@@ -82,57 +82,44 @@ Flutter UI（Fladder 页面 / Riverpod）
 - 评论：subject/episode → Next p1 comments → BBCode 子集 → 详情 Tab/播放器 Sheet。
 - 网络不可达：状态/错误提示；模块可关闭；不影响播放。
 
-## 7. 计划的文件布局
+## 7. 文件布局（当前实现 + 计划项）
 
 ~~~text
 lib/
   danmaku/
-    models.dart
-    ddp_client.dart
+    danmaku_api_client.dart
+    danmaku_models.dart
     comment_parser.dart
     matcher.dart
     cache.dart
-    service.dart
-    secret_store.dart
+    local_import.dart
+  video/
+    video_enhancement.dart
   providers/
     danmaku_provider.dart
     settings/danmaku_settings_provider.dart
-  screens/
-    video_player/components/danmaku_overlay.dart
-    video_player/components/danmaku_match_dialog.dart
-    settings/danmaku_settings_page.dart
-  video/
-    enhancement.dart
-  bangumi/
-    client.dart
-    models.dart
-    mapping_store.dart
-    cache.dart
-    connectivity.dart
-    comments.dart
-  screens/
-    schedule/schedule_page.dart
-    search/image_search_page.dart
-    details/components/bangumi_comments_tab.dart
-    video_player/components/episode_comments_sheet.dart
+    settings/video_enhancement_provider.dart
+    syncplay/
+    websocket/
+  screens/video_player/components/
+    danmaku_overlay.dart
+    danmaku_settings_sheet.dart
+    danmaku_match_dialog.dart
+    syncplay_command_indicator.dart
+    video_playback_information.dart
+  bangumi/                    # 计划（Stage B）
 assets/
   shaders/anime4k/
-  shaders/fsrcnnx/
-  shaders/artcnn/
 test/
   danmaku/
+  providers/syncplay/
   video/
-  bangumi/
-tool/
-  mock_ddp.dart
-  mock_bangumi.dart
-  mock_trace.dart
+tool/                         # 计划：mock_bangumi/mock_trace
 tools/
-  bootstrap.ps1
-  setup-jellyfin.ps1
-  test.ps1
   pack.ps1
-  bangumi-proxy/worker.js
+  verify-assets.ps1
+  build-installer.ps1
+  inno/app/
 ~~~
 
 ## 8. 关键不变量
