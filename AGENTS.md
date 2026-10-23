@@ -7,7 +7,7 @@
 
 ## 0. 当前仓库状态（必须先理解）
 
-- 本地 `main` 已同步 origin https://github.com/tang-bai/JellyMaku 的 `main`；v0.1.0-beta.5 已发布；本次文档验收状态更新未提交。
+- 本地 `main` 已同步 origin https://github.com/tang-bai/JellyMaku 的 `main`；v0.1.0-beta.5 已发布；文档验收状态更新已提交 `d3d3568b`。
 - `main` 已包含 Fladder 源码 + SyncPlay PR #735（head 79e249e）+ Stage A 弹幕/超分/品牌代码，并于 2026-10-21 合并 Fladder develop `de7b5a2a`。
 - v0.1.0-beta.5 的安装器/便携包已发布（2026-10-23）；安装器未签名。
 - beta.5 发布包含播放信息面板、Seerr/缺图/日志时间修复、SyncPlay 中文化与 `THIRD_PARTY_NOTICES.md`。

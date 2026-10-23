@@ -1,6 +1,6 @@
 # JellyMaku 项目文档
 
-> 状态（2026-10-23）：v0.1.0-beta.5 已发布；本次文档验收状态更新未提交。Flutter 3.35.7；`dart analyze lib test` 0 issue；`flutter test --no-pub` 156 passed + 1 skipped；Windows release 于 2026-10-23 构建成功。
+> 状态（2026-10-23）：v0.1.0-beta.5 已发布；文档验收状态更新已提交 `d3d3568b`。Flutter 3.35.7；`dart analyze lib test` 0 issue；`flutter test --no-pub` 156 passed + 1 skipped；Windows release 于 2026-10-23 构建成功。
 > 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动）以及字幕切换/切集/弹幕叠加层（手动）；用户实机确认 SyncPlay 双客户端、超分性能通过（2026-10-23）。
 > 未完成：安装版完整 E2E、Stage B；用户确认项缺原始 FPS/误差/截图归档。功能状态以 [ROADMAP.md](ROADMAP.md)、[IMPLEMENTATION.md](IMPLEMENTATION.md) 和 [STAGE_A_REPORT.md](STAGE_A_REPORT.md) 为准。
 > 基座：DonutWare/Fladder（Flutter/Dart，GPL-3.0）+ SyncPlay PR #735。
@@ -8,7 +8,7 @@
 ## 0. 当前仓库状态（务必先读）
 
 - 本地 `main` 已包含 Fladder + SyncPlay PR #735（head 79e249e），并已合并 Fladder develop `de7b5a2a`（2026-10-21）。
-- 本地 `main` 已同步 origin；v0.1.0-beta.5 已发布；本次文档验收状态更新未提交。
+- 本地 `main` 已同步 origin；v0.1.0-beta.5 已发布；文档验收状态更新已提交 `d3d3568b`。
 - v0.1.0-beta.5 的 Windows x64 安装器与便携包已发布；安装器未签名。
 - 弹幕默认走 danmu_api 公共实例（https://danmu.api.tangbai.cc），支持自建；不提供发送弹幕。
 - 真实 Jellyfin 12.2 使用 NAS（`192.168.8.137:8096`）验证；没有在本地启动 Jellyfin/.NET。
