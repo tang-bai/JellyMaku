@@ -7,6 +7,7 @@ import 'package:screen_brightness/screen_brightness.dart';
 import 'package:volume_controller/volume_controller.dart';
 
 import 'package:fladder/models/item_base_model.dart';
+import 'package:fladder/models/items/chapters_model.dart';
 import 'package:fladder/models/items/media_segments_model.dart';
 import 'package:fladder/models/items/media_streams_model.dart';
 import 'package:fladder/models/media_playback_model.dart';
@@ -504,6 +505,7 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                     ),
                   ),
                   previousButton,
+                  previousChapterButton(ref),
                   seekBackwardButton(ref),
                   IconButton.filledTonal(
                     iconSize: 38,
@@ -515,6 +517,7 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                     ),
                   ),
                   seekForwardButton(ref),
+                  nextChapterButton(ref),
                   nextVideoButton,
                   PopupMenuButton<VideoEnhancementProfile>(
                     tooltip: context.localized.superResolution,
@@ -829,6 +832,51 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
         ],
       ),
     );
+  }
+
+  Widget nextChapterButton(WidgetRef ref) {
+    return Consumer(builder: (context, ref2, child) {
+      final chapters = ref.read(playBackModel.select((value) => value?.chapters)) ?? [];
+      final position = ref.read(mediaPlaybackProvider).position;
+      final enabled = chapters.nextChapter(position) != null;
+      return IconButton(
+        onPressed: enabled ? () => _nextChapter(ref) : null,
+        iconSize: 30,
+        tooltip: context.localized.nextChapter,
+        icon: const Icon(IconsaxPlusLinear.arrow_right_1),
+      );
+    });
+  }
+
+  Widget previousChapterButton(WidgetRef ref) {
+    return Consumer(builder: (context, ref2, child) {
+      final chapters = ref.read(playBackModel.select((value) => value?.chapters));
+      final enabled = chapters?.isNotEmpty == true;
+      return IconButton(
+        onPressed: enabled ? () => _previousChapter(ref) : null,
+        iconSize: 30,
+        tooltip: context.localized.prevChapter,
+        icon: const Icon(IconsaxPlusLinear.arrow_left_3),
+      );
+    });
+  }
+
+  void _previousChapter(WidgetRef ref) {
+    final chapters = ref.read(playBackModel.select((value) => value?.chapters)) ?? [];
+    final position = ref.read(mediaPlaybackProvider).position;
+    final target = chapters.previousChapter(position);
+    if (target == null) return;
+    ref.read(videoPlayerProvider).seek(target.startPosition);
+    resetTimer();
+  }
+
+  void _nextChapter(WidgetRef ref) {
+    final chapters = ref.read(playBackModel.select((value) => value?.chapters)) ?? [];
+    final position = ref.read(mediaPlaybackProvider).position;
+    final next = chapters.nextChapter(position);
+    if (next == null) return;
+    ref.read(videoPlayerProvider).seek(next.startPosition);
+    resetTimer();
   }
 
   void skipToSegmentEnd(MediaSegment? mediaSegment, String? segmentId) {
