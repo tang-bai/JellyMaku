@@ -24,12 +24,12 @@ import 'package:screen_brightness/screen_brightness.dart';
 
 class VideoPlayerNextWrapper extends ConsumerStatefulWidget {
   final Widget video;
-  final Widget controls;
+  final Widget Function(bool nextUpVisible) controlsBuilder;
   final List<Widget> overlays;
 
   const VideoPlayerNextWrapper({
     required this.video,
-    required this.controls,
+    required this.controlsBuilder,
     this.overlays = const [],
     super.key,
   });
@@ -298,14 +298,7 @@ class _VideoPlayerNextWrapperState extends ConsumerState<VideoPlayerNextWrapper>
                             child: widget.video,
                           ),
                           ...widget.overlays,
-                          IgnorePointer(
-                            ignoring: show,
-                            child: AnimatedOpacity(
-                              opacity: show ? 0 : 1,
-                              duration: animSpeed,
-                              child: widget.controls,
-                            ),
-                          ),
+                          widget.controlsBuilder(show),
                         ],
                       ),
                     ),
