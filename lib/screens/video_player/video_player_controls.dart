@@ -32,6 +32,7 @@ import 'package:fladder/screens/video_player/components/video_player_screenshot_
 import 'package:fladder/screens/video_player/components/danmaku_settings_sheet.dart';
 import 'package:fladder/screens/video_player/components/video_player_seek_indicator.dart';
 import 'package:fladder/screens/video_player/components/video_player_speed_indicator.dart';
+import 'package:fladder/screens/video_player/components/video_player_subtitle_offset_indicator.dart';
 import 'package:fladder/screens/video_player/components/video_player_volume_indicator.dart';
 import 'package:fladder/screens/video_player/components/video_progress_bar.dart';
 import 'package:fladder/screens/video_player/components/video_volume_slider.dart';
@@ -214,6 +215,7 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
                 ),
                 VideoPlayerSeekIndicator(controller: _seekController),
                 const VideoPlayerVolumeIndicator(),
+                const VideoPlayerSubtitleOffsetIndicator(),
                 const VideoPlayerBrightnessIndicator(),
                 const VideoPlayerSpeedIndicator(),
                 const VideoPlayerScreenshotIndicator(),
@@ -1179,6 +1181,9 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
     final position = ref.read(mediaPlaybackProvider).position;
     final playing =
         ref.read(mediaPlaybackProvider.select((value) => value.playing));
+    final subtitlesEnabled =
+        ref.read(playBackModel)?.mediaStreams?.defaultSubStreamIndex != null &&
+            ref.read(playBackModel)!.mediaStreams!.defaultSubStreamIndex != -1;
 
     MediaSegment? segment = mediaSegments?.atPosition(position);
 
@@ -1245,6 +1250,16 @@ class _DesktopControlsState extends ConsumerState<DesktopControls> {
         return true;
       case VideoHotKeys.toggleSubtitles:
         _toggleSubtitles();
+        return true;
+      case VideoHotKeys.subtitleOffsetBackward:
+        if (!subtitlesEnabled) return false;
+        ref.read(subtitleTimingOffsetProvider.notifier).update((state) => state + const Duration(milliseconds: -250));
+        ref.read(videoPlayerProvider).shiftSubtitleOffset(const Duration(milliseconds: -250));
+        return true;
+      case VideoHotKeys.subtitleOffsetForward:
+        if (!subtitlesEnabled) return false;
+        ref.read(subtitleTimingOffsetProvider.notifier).update((state) => state + const Duration(milliseconds: 250));
+        ref.read(videoPlayerProvider).shiftSubtitleOffset(const Duration(milliseconds: 250));
         return true;
       case VideoHotKeys.seekForwardInstant:
         final seekForwardSeconds = ref.read(userProvider.select((value) =>

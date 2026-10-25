@@ -413,6 +413,8 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
       // keepMediaSession: swapping items must not tear down the SMTC/media session (upstream 5d12e7b8).
       await state.stop(keepMediaSession: true);
       ref.read(playbackRateProvider.notifier).state = 1.0;
+      // A new item starts with no subtitle offset (upstream 4436f910).
+      ref.read(subtitleTimingOffsetProvider.notifier).state = Duration.zero;
       mediaState.update((state) => state.copyWith(
             state: useMinimizedPlayer ? VideoPlayerState.minimized : VideoPlayerState.fullScreen,
             fullScreen: !useMinimizedPlayer,
