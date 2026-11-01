@@ -83,13 +83,24 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
   /// The backend's real playing state: on media-kit the wrapper's `playing` flag is only the requested one.
   bool get _livePlaying => state.isPlayerPlaying;
 
-  ProviderSubscription<VideoPlayerSettingsModel>? settingsChanged;
   @override
   void dispose() {
-    settingsChanged?.close();
     _syncPlayStateSubscription?.cancel();
     _bufferingDebouncer?.dispose();
     super.dispose();
+  }
+
+  /// Settings arrive through the settings notifier instead of a [ref.listen] inside [init]: that listener made
+  /// this provider depend on the settings provider while the settings provider already reads it back, which
+  /// tripped Riverpod's circular-dependency assertion when a volume gesture wrote a setting (upstream 05f568e1).
+  void applySettingsChanged(VideoPlayerSettingsModel settings) {
+    final currentItem = ref.read(playBackModel)?.item;
+    if (currentItem != null) {
+      state.applyReplayGain(
+        currentItem,
+        settings: settings,
+      );
+    }
   }
 
   /// media-kit sometimes drops the first `play()` after a paused `open()` or a reload, and in a group the
@@ -121,19 +132,6 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
     _bufferingDebouncer = BufferingReportDebouncer(
       onBuffering: () => ref.read(syncPlayProvider.notifier).reportBuffering(),
       onReady: () => ref.read(syncPlayProvider.notifier).reportReady(isPlaying: _livePlaying),
-    );
-
-    settingsChanged = ref.listen(
-      videoPlayerSettingsProvider,
-      (previous, next) {
-        final currentItem = ref.read(playBackModel)?.item;
-        if (currentItem != null) {
-          state.applyReplayGain(
-            currentItem,
-            settings: next,
-          );
-        }
-      },
     );
 
     final subscription = state.stateStream.listen((value) {
