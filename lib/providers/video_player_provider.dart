@@ -406,6 +406,7 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
 
     final useMinimizedPlayer =
         model.item.type == FladderItemType.audio || model.mediaStreams?.videoStreams.isEmpty == true;
+    final effectiveStartPosition = await model.resolvedStartPosition(startPosition);
 
     try {
       // keepMediaSession: swapping items must not tear down the SMTC/media session (upstream 5d12e7b8).
@@ -419,11 +420,13 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
             buffering: true,
             errorPlaying: false,
             skippedSegments: {},
+            // Seed the UI clock with the resolved start position, not the stale provider value (upstream b777ebdb).
+            position: effectiveStartPosition,
+            lastPosition: effectiveStartPosition,
           ));
 
       final media = model.media;
       PlaybackModel? newPlaybackModel = model;
-      final effectiveStartPosition = await model.resolvedStartPosition(startPosition);
 
       if (media == null) {
         ref.read(syncPlayProvider.notifier).setPlayerBufferingState(false);
