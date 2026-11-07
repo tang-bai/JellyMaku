@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,7 +32,7 @@ import 'package:fladder/widgets/shared/theme_overwrite.dart';
 Future<Color?> getDominantColor(ImageProvider imageProvider) async {
   try {
     final paletteGenerator = await PaletteGeneratorMaster.fromImageProvider(
-      imageProvider,
+      ResizeImage(imageProvider, width: 64, height: 64, policy: ResizeImagePolicy.fit),
       size: const Size(16, 16),
       maximumColorCount: 3,
     );
@@ -51,7 +52,7 @@ class DetailScaffold extends ConsumerStatefulWidget {
   final List<ItemAction>? Function(BuildContext context)? actions;
   final Color? backgroundColor;
   final ImagesData? backDrops;
-  final Function(BuildContext context, EdgeInsets padding) content;
+  final List<Widget> Function(BuildContext context, EdgeInsets padding) content;
   final Future<void> Function()? onRefresh;
   final bool posterFillsContent;
   final Color? dominantColor;
@@ -78,6 +79,7 @@ class _DetailScaffoldState extends ConsumerState<DetailScaffold> {
   List<ImageData>? lastImages;
   ImageData? backgroundImage;
   Color? dominantColor;
+  final ScrollController _scrollController = ScrollController();
 
   ImageProvider? _lastRequestedImage;
   ImageData? _lastColorImage;
@@ -109,6 +111,7 @@ class _DetailScaffoldState extends ConsumerState<DetailScaffold> {
   @override
   void dispose() {
     _windowTitleNotifier?.removeTitle(this);
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -187,6 +190,7 @@ class _DetailScaffoldState extends ConsumerState<DetailScaffold> {
     return ThemeOverwrite(
       color: dominantColor,
       child: (context) => PullToRefresh(
+        serverUpdateItemId: widget.item?.id,
         onRefresh: () async {
           await widget.onRefresh?.call();
           if (mounted) {
@@ -203,8 +207,12 @@ class _DetailScaffoldState extends ConsumerState<DetailScaffold> {
           extendBodyBehindAppBar: true,
           body: Stack(
             children: [
-              SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
+              AnimatedBuilder(
+                animation: _scrollController,
+                builder: (context, child) => Transform.translate(
+                  offset: Offset(0, _scrollController.hasClients ? -_scrollController.offset : 0),
+                  child: child,
+                ),
                 child: Stack(
                   children: [
                     SizedBox(
@@ -235,23 +243,14 @@ class _DetailScaffoldState extends ConsumerState<DetailScaffold> {
                                 rightFade: sideBarPadding > 0 && isRtl ? 0.05 : 0.0,
                                 topFade: topBarPadding > 0 ? 0.1 : 0.0,
                                 bottomFade: 0.2,
-                                child: FadeInImage(
-                                  placeholder: ResizeImage(
-                                    backgroundImage!.imageProvider,
-                                    height: maxHeight ~/ 1.5,
-                                  ),
-                                  placeholderColor: Colors.transparent,
+                                child: FladderImage(
+                                  image: backgroundImage,
                                   fit: BoxFit.cover,
                                   alignment: Alignment.topCenter,
-                                  placeholderFit: BoxFit.cover,
-                                  excludeFromSemantics: true,
+                                  disableBlur: true,
                                   // Missing backdrops are common; show the gradient
                                   // overlay instead of a crash-log entry.
                                   imageErrorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-                                  image: ResizeImage(
-                                    backgroundImage!.imageProvider,
-                                    height: maxHeight ~/ 1.5,
-                                  ),
                                 ),
                               ),
                             ),
@@ -286,17 +285,20 @@ class _DetailScaffoldState extends ConsumerState<DetailScaffold> {
                       width: size.width,
                       color: widget.backgroundColor,
                     ),
-                    FocusScope(
-                      autofocus: true,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: size.height,
-                          maxWidth: size.width,
-                        ),
-                        child: widget.content(
-                          context,
-                          contentPadding,
-                        ),
+                  ],
+                ),
+              ),
+              FocusScope(
+                autofocus: true,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  scrollCacheExtent: ScrollCacheExtent.pixels(size.height),
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.only(bottom: 64),
+                      sliver: SliverList.list(
+                        children: widget.content(context, contentPadding).map(_KeepAlive.new).toList(),
                       ),
                     ),
                   ],
@@ -425,5 +427,24 @@ class _DetailScaffoldState extends ConsumerState<DetailScaffold> {
         ),
       ),
     );
+  }
+}
+
+class _KeepAlive extends StatefulWidget {
+  final Widget child;
+  const _KeepAlive(this.child);
+
+  @override
+  State<_KeepAlive> createState() => _KeepAliveState();
+}
+
+class _KeepAliveState extends State<_KeepAlive> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }

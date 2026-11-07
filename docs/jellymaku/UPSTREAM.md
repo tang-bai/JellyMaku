@@ -64,4 +64,5 @@ git merge --no-ff pr-735
 - 评估：develop `ac96cd5f`（2026-11-03）较固定点 `de7b5a2a` 多 31 个提交；PR #735 head 前进到 `2b183574` 但**无新 SyncPlay 代码**。详见 [UPSTREAM_2026-11-08.md](UPSTREAM_2026-11-08.md)。
 - 分支 `sync/fladder-a1`（基于 `main` v0.1.0）：摘取 7 个不依赖 Flutter 升级的播放器修复（5d12e7b8、4436f910、d9b75789、6217b49a、26c04f79、05f568e1、b777ebdb），全部保留原作者与 `-x` 来源行。
 - 暂缓 3 个：`9e1d6457`/`091cb3a5`（依赖 `cccc9221` 的 `canAutoFocus`/`ScrollCacheExtent`）、`657e746c`（控件结构重构，与未摘取的 12446136/059a0cb0/05393509 纠缠）。
-- 仍待方案 A 第 2 步：Flutter 3.47.7 + media_kit 整体升级，一并吃掉低资源模式、websocket 实时刷新与上述暂缓项。
+- 方案 A 第 2 步已完成（同日）：分支 `sync/fladder-2-upgrade` 全量 merge develop `ac96cd5f`，Flutter 升级到 3.47.7 / Dart 3.13.5，吃掉低资源模式、websocket 实时刷新、触摸控件重构、刷新率匹配等剩余项；verify：analyze 0 issue、157 tests + 1 skipped、Windows release 构建成功。
+- 遗留：websocket 双栈（上游 `jellyfin_websocket_provider.dart` 与 PR #735 `providers/websocket/*`）未整合；codegen 工具链（analyzer 7.6.0 与 Dart 3.13 的 dot-shorthand 冲突）待修，本次用手工补丁更新 3 个生成文件。

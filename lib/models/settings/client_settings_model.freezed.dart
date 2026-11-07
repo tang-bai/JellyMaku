@@ -49,6 +49,7 @@ mixin _$ClientSettingsModel implements DiagnosticableTreeMixin {
   bool get forceLeanBackMode;
   String? get lastViewedUpdate;
   int? get libraryPageSize;
+  LowResourceMode get lowResourceMode;
   Map<GlobalHotKeys, KeyCombination> get shortcuts;
 
   /// Create a copy of ClientSettingsModel
@@ -99,6 +100,7 @@ mixin _$ClientSettingsModel implements DiagnosticableTreeMixin {
       ..add(DiagnosticsProperty('forceLeanBackMode', forceLeanBackMode))
       ..add(DiagnosticsProperty('lastViewedUpdate', lastViewedUpdate))
       ..add(DiagnosticsProperty('libraryPageSize', libraryPageSize))
+      ..add(DiagnosticsProperty('lowResourceMode', lowResourceMode))
       ..add(DiagnosticsProperty('shortcuts', shortcuts));
   }
 
@@ -148,6 +150,7 @@ abstract mixin class $ClientSettingsModelCopyWith<$Res> {
       bool forceLeanBackMode,
       String? lastViewedUpdate,
       int? libraryPageSize,
+      LowResourceMode lowResourceMode,
       Map<GlobalHotKeys, KeyCombination> shortcuts});
 
   $TranscodeDownloadModelCopyWith<$Res> get transcodeDownloadModel;
@@ -199,6 +202,7 @@ class _$ClientSettingsModelCopyWithImpl<$Res> implements $ClientSettingsModelCop
     Object? forceLeanBackMode = null,
     Object? lastViewedUpdate = freezed,
     Object? libraryPageSize = freezed,
+    Object? lowResourceMode = null,
     Object? shortcuts = null,
   }) {
     return _then(_self.copyWith(
@@ -338,6 +342,10 @@ class _$ClientSettingsModelCopyWithImpl<$Res> implements $ClientSettingsModelCop
           ? _self.libraryPageSize
           : libraryPageSize // ignore: cast_nullable_to_non_nullable
               as int?,
+      lowResourceMode: null == lowResourceMode
+          ? _self.lowResourceMode
+          : lowResourceMode // ignore: cast_nullable_to_non_nullable
+              as LowResourceMode,
       shortcuts: null == shortcuts
           ? _self.shortcuts
           : shortcuts // ignore: cast_nullable_to_non_nullable
@@ -484,6 +492,7 @@ extension ClientSettingsModelPatterns on ClientSettingsModel {
             bool forceLeanBackMode,
             String? lastViewedUpdate,
             int? libraryPageSize,
+            LowResourceMode lowResourceMode,
             Map<GlobalHotKeys, KeyCombination> shortcuts)?
         internal,
     required TResult orElse(),
@@ -526,6 +535,7 @@ extension ClientSettingsModelPatterns on ClientSettingsModel {
             _that.forceLeanBackMode,
             _that.lastViewedUpdate,
             _that.libraryPageSize,
+            _that.lowResourceMode,
             _that.shortcuts);
       case _:
         return orElse();
@@ -582,6 +592,7 @@ extension ClientSettingsModelPatterns on ClientSettingsModel {
             bool forceLeanBackMode,
             String? lastViewedUpdate,
             int? libraryPageSize,
+            LowResourceMode lowResourceMode,
             Map<GlobalHotKeys, KeyCombination> shortcuts)
         internal,
   }) {
@@ -623,6 +634,7 @@ extension ClientSettingsModelPatterns on ClientSettingsModel {
             _that.forceLeanBackMode,
             _that.lastViewedUpdate,
             _that.libraryPageSize,
+            _that.lowResourceMode,
             _that.shortcuts);
       case _:
         throw StateError('Unexpected subclass');
@@ -678,6 +690,7 @@ extension ClientSettingsModelPatterns on ClientSettingsModel {
             bool forceLeanBackMode,
             String? lastViewedUpdate,
             int? libraryPageSize,
+            LowResourceMode lowResourceMode,
             Map<GlobalHotKeys, KeyCombination> shortcuts)?
         internal,
   }) {
@@ -719,6 +732,7 @@ extension ClientSettingsModelPatterns on ClientSettingsModel {
             _that.forceLeanBackMode,
             _that.lastViewedUpdate,
             _that.libraryPageSize,
+            _that.lowResourceMode,
             _that.shortcuts);
       case _:
         return null;
@@ -764,6 +778,7 @@ class _ClientSettingsModel extends ClientSettingsModel with DiagnosticableTreeMi
       this.forceLeanBackMode = false,
       this.lastViewedUpdate,
       this.libraryPageSize,
+      this.lowResourceMode = LowResourceMode.auto,
       final Map<GlobalHotKeys, KeyCombination> shortcuts = const {}})
       : _shortcuts = shortcuts,
         super._();
@@ -865,6 +880,9 @@ class _ClientSettingsModel extends ClientSettingsModel with DiagnosticableTreeMi
   final String? lastViewedUpdate;
   @override
   final int? libraryPageSize;
+  @override
+  @JsonKey()
+  final LowResourceMode lowResourceMode;
   final Map<GlobalHotKeys, KeyCombination> _shortcuts;
   @override
   @JsonKey()
@@ -927,6 +945,7 @@ class _ClientSettingsModel extends ClientSettingsModel with DiagnosticableTreeMi
       ..add(DiagnosticsProperty('forceLeanBackMode', forceLeanBackMode))
       ..add(DiagnosticsProperty('lastViewedUpdate', lastViewedUpdate))
       ..add(DiagnosticsProperty('libraryPageSize', libraryPageSize))
+      ..add(DiagnosticsProperty('lowResourceMode', lowResourceMode))
       ..add(DiagnosticsProperty('shortcuts', shortcuts));
   }
 
@@ -977,6 +996,7 @@ abstract mixin class _$ClientSettingsModelCopyWith<$Res> implements $ClientSetti
       bool forceLeanBackMode,
       String? lastViewedUpdate,
       int? libraryPageSize,
+      LowResourceMode lowResourceMode,
       Map<GlobalHotKeys, KeyCombination> shortcuts});
 
   @override
@@ -1029,6 +1049,7 @@ class __$ClientSettingsModelCopyWithImpl<$Res> implements _$ClientSettingsModelC
     Object? forceLeanBackMode = null,
     Object? lastViewedUpdate = freezed,
     Object? libraryPageSize = freezed,
+    Object? lowResourceMode = null,
     Object? shortcuts = null,
   }) {
     return _then(_ClientSettingsModel(
@@ -1168,6 +1189,10 @@ class __$ClientSettingsModelCopyWithImpl<$Res> implements _$ClientSettingsModelC
           ? _self.libraryPageSize
           : libraryPageSize // ignore: cast_nullable_to_non_nullable
               as int?,
+      lowResourceMode: null == lowResourceMode
+          ? _self.lowResourceMode
+          : lowResourceMode // ignore: cast_nullable_to_non_nullable
+              as LowResourceMode,
       shortcuts: null == shortcuts
           ? _self._shortcuts
           : shortcuts // ignore: cast_nullable_to_non_nullable

@@ -127,3 +127,4 @@ tools/nuget/
 tools/downloads/
 tools/inno/
 tools/bin/
+android/.kotlin/sessions/*

@@ -8,6 +8,7 @@ import 'package:fladder/models/playback/playback_model.dart';
 import 'package:fladder/models/playback/playback_queue_state.dart';
 import 'package:fladder/models/settings/video_player_settings.dart';
 import 'package:fladder/models/syncplay/syncplay_models.dart';
+import 'package:fladder/providers/low_resource_provider.dart';
 import 'package:fladder/providers/settings/client_settings_provider.dart';
 import 'package:fladder/providers/settings/video_player_settings_provider.dart';
 import 'package:fladder/providers/syncplay/buffering_report_debouncer.dart';
@@ -128,6 +129,7 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
       s.cancel();
     }
 
+    subscriptions.clear();
     _bufferingDebouncer?.dispose();
     _bufferingDebouncer = BufferingReportDebouncer(
       onBuffering: () => ref.read(syncPlayProvider.notifier).reportBuffering(),
@@ -559,7 +561,10 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
     await state.jumpToQueueItem(item);
   }
 
-  Future<void> openPlayer(BuildContext context) async => state.openPlayer(context);
+  Future<void> openPlayer(BuildContext context) async {
+    if (ref.read(lowResourceModeProvider)) PaintingBinding.instance.imageCache.clear();
+    return state.openPlayer(context);
+  }
 
   /// Used by SyncPlay when the group ends, stops or removes us, so no dead player screen is left behind.
   Future<void> stopAndClosePlayer({bool closeRoute = true}) async {
