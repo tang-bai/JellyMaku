@@ -44,7 +44,7 @@ $env:Path = "C:\Windows\System32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\
 
 | 依赖 | 文件/位置 | 说明 |
 |---|---|---|
-| libmpv | `third_party/mpv/mpv-dev-x86_64-20260531-git-13a3e3a.7z` | MD5 69141eef346f9c82640274e6a0f36e7a；复制到 `build/windows/x64/` |
+| libmpv | `third_party/mpv/mpv-dev-x86_64-20260531-git-13a3e3a.7z` | MD5 69141eef346f9c82640274e6a0f36e7a；复制到 `build/windows/x64/`（2026-11-08：GitHub 直连首次会下载成 0 字节，重试即可；两轮失败后用 `Invoke-WebRequest` 直接拉取并校验 MD5） |
 | ANGLE | `third_party/angle/ANGLE.7z` | MD5 e866f13e8d552348058afaafe869b1ed；解压到 `build/windows/x64/ANGLE/` |
 | MDK SDK | `third_party/mdk/mdk-sdk-windows-x64.7z` | 解压到 FVP 包目录的 `mdk-sdk/` |
 | SQLite | `third_party/sqlite/sqlite-autoconf-3520000.tar.gz` | 需把 `sqlite3_flutter_libs` 的 Windows CMake `URL` 改为本地路径 |

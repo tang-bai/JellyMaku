@@ -1,7 +1,7 @@
 
 # 上游策略：Fladder、PR #735、legacy
 
-> 状态（2026-10-23）：Accepted；Fladder develop `de7b5a2a` 已合并，PR #735 head 已保留；本地 `main` 为 `26ac04a4`（领先 origin/main 1 个提交，未推送）。
+> 状态（2026-11-08）：Accepted；Fladder develop `de7b5a2a` 已合并，PR #735 head 已保留；2026-11-08 起按方案 A 分步同步上游（见第 7 节）。
 > 原则：固定上游 commit；小 patch；保留上游历史/许可；不向上游强推。
 
 ## 1. 固定的上游
@@ -58,3 +58,10 @@ git merge --no-ff pr-735
 
 - 本项目是用户仓库的衍生；不自动向上游开 PR/推送。
 - 如希望贡献回 Fladder，先与用户确认并遵守其贡献指南/讨论。
+
+## 7. 2026-11-08 上游同步（方案 A 第 1 步）
+
+- 评估：develop `ac96cd5f`（2026-11-03）较固定点 `de7b5a2a` 多 31 个提交；PR #735 head 前进到 `2b183574` 但**无新 SyncPlay 代码**。详见 [UPSTREAM_2026-11-08.md](UPSTREAM_2026-11-08.md)。
+- 分支 `sync/fladder-a1`（基于 `main` v0.1.0）：摘取 7 个不依赖 Flutter 升级的播放器修复（5d12e7b8、4436f910、d9b75789、6217b49a、26c04f79、05f568e1、b777ebdb），全部保留原作者与 `-x` 来源行。
+- 暂缓 3 个：`9e1d6457`/`091cb3a5`（依赖 `cccc9221` 的 `canAutoFocus`/`ScrollCacheExtent`）、`657e746c`（控件结构重构，与未摘取的 12446136/059a0cb0/05393509 纠缠）。
+- 仍待方案 A 第 2 步：Flutter 3.47.7 + media_kit 整体升级，一并吃掉低资源模式、websocket 实时刷新与上述暂缓项。
