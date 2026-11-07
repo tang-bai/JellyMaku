@@ -2,18 +2,20 @@
 # AGENTS.md
 
 > 适用范围：本仓库根目录及其子目录。所有 agent/贡献者在改代码前先读本文与 docs/jellymaku/README.md。
-> 状态：**v0.1.0** Windows 正式版已发布（2026-10-23）；Flutter 3.35.7；analyze 0 issue；**157 tests passed + 1 skipped**（2026-10-23）。RTX VSR spike 失败已回退；Anime4K Fast/Balanced/Strong/4x 已接入；danmu_api 默认 https://danmu.api.tangbai.cc，无需凭证；支持自建/本地导入。
-> 日期：2026-10-23。
+> 状态：**v0.1.0** Windows 正式版已发布（2026-10-23）；**Flutter 3.47.7 / Dart 3.13.5（2026-11-08 上游同步后）**；analyze 0 issue；**157 tests passed + 1 skipped**（2026-11-08）。RTX VSR spike 失败已回退；Anime4K Fast/Balanced/Strong/4x 已接入；danmu_api 默认 https://danmu.api.tangbai.cc，无需凭证；支持自建/本地导入。
+> 日期：2026-11-08。
 
 ## 0. 当前仓库状态（必须先理解）
 
 - 本地 `main` 已同步 origin https://github.com/tang-bai/JellyMaku 的 `main`；v0.1.0 正式版已发布；收尾更新已提交。
 - `main` 已包含 Fladder 源码 + SyncPlay PR #735（head 79e249e）+ Stage A 弹幕/超分/品牌代码，并于 2026-10-21 合并 Fladder develop `de7b5a2a`。
+- 2026-11-08 按方案 A 同步上游：第 1 步 `sync/fladder-a1` 摘 7 个播放器修复；第 2 步 `sync/fladder-2-upgrade` 全量 merge develop `ac96cd5f`，基座升级到 Flutter 3.47.7 / Dart 3.13.5（含低资源模式、websocket 实时刷新、触摸控件重构、刷新率匹配）。SDK 位于 `D:\dev\flutter-3.47.7`（旧 3.35.7 保留为 `D:\dev\flutter-3.35.7`）；**未推送 origin**。
+- 生成代码技术债：`build_runner` 在 Dart 3.13 下崩溃（analyzer 7.6.0 不支持 dot-shorthand），本次手工补齐 `video_player_settings` / `arguments_model` / `client_settings_model` 的生成文件；后续改这些模型前先修 codegen 工具链。
 - v0.1.0 的安装器/便携包已发布（2026-10-23）；安装器未签名；`tools/sign-release.ps1` 已支持 PFX/证书指纹，待受信任证书。
 - v0.1.0 在 beta.5 基础上补齐 i18n、签名支持与安装版字幕补测，并包含播放信息面板/Seerr/缺图/日志时间修复。
 - 2026-10-23 收尾：`zh`/`zh_Hant` ARB 键 1188/1188；安装版字幕补测通过；157 tests passed + 1 skipped；签名脚本已就绪，受信任证书未提供。
 - 旧的 JellyMaku（基于 jellyfin-mpv-shim）实现、旧文档、旧 git 历史已丢失，无法恢复；不要尝试从远程恢复。
-- Flutter 3.35.7 已安装到 .flutter；**analyze 0 issue、157 tests passed + 1 skipped；Windows release 于 2026-10-23 从当前源码构建通过**（v0.1.0 发布包即当前源码）。
+- Flutter 3.47.7 装在 `D:\dev\flutter-3.47.7`（升级前基线 3.35.7 保留在 `D:\dev\flutter-3.35.7`）；**analyze 0 issue、157 tests passed + 1 skipped、Windows release 于 2026-11-08 从当前源码构建通过**（v0.1.0 发布包是 3.35.7 时代的产物）。
 - 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动）以及字幕切换/切集/弹幕叠加层（手动 + 安装版字幕补测）；用户实机确认 SyncPlay 双客户端、超分性能、播放信息面板通过（2026-10-23）；播放信息截图/实时数值已采集。
 - 未验证：SyncPlay/超分原始 FPS/误差/截图未归档。
 - 因此：
@@ -32,7 +34,7 @@
 
 ## 2. 不可协商的决策
 
-- **基座**：Fladder 固定 commit `de7b5a2a23f16f5f3bb164ec0baedf50941e4808`。
+- **基座**：Fladder commit `de7b5a2a23f16f5f3bb164ec0baedf50941e4808`；2026-11-08 起同步到 develop `ac96cd5fef08c7fdacdafe9e011cf309a79a0611`（Flutter 3.47.7 基座）。再升级时同样固定 commit 并走 evolve 文档记录。
 - **SyncPlay**：复用 PR #735 head `79e249ebf99ecc8dc8f0d5d43c3604ace45fbba9`；不要重写，不要用 Kazumi 的公共 SyncPlay。
 - **弹幕**：Flutter CustomPainter 叠加层；不要改成自绘播放器/ASS secondary 为主方案。
 - **超分**：GLSL shader；RTX VSR 不作为 v1 验收项（media_kit ANGLE/OpenGL 限制）。
@@ -73,16 +75,17 @@ artifacts/               截图/日志/性能/安装包（gitignore）
 ## 5. 命令（已实际使用）
 
 ~~~powershell
-# 从 ASCII 路径构建（如 subst L: <repo-parent>; cd L:\JellyMaku）
+# 从 ASCII 路径构建：subst 必须指向仓库**父目录**（指向仓库根会让 flutter_assemble 报 PathNotFoundException）
+subst L: "F:\DeepSeekHarness项目"; cd L:\JellyMaku
 $env:PUB_CACHE = "K:\.pub-cache"
 $env:PUB_HOSTED_URL = "https://pub.flutter-io.cn"
-$env:PATH = "K:\tools\nuget;" + $env:PATH
+$env:PATH = "D:\dev\flutter-3.47.7\bin;F:\DeepSeekHarness项目\JellyMaku\tools\bin;" + $env:PATH
 $env:CL = "/utf-8"
 
-.flutter\bin\flutter.bat pub get
+flutter pub get
 dart analyze lib test
-.flutter\bin\flutter.bat test --no-pub
-.flutter\bin\flutter.bat build windows --release --no-pub
+flutter test --no-pub
+flutter build windows --release --no-pub
 & .\tools\pack.ps1 -Version 0.1.0
 ~~~
 
@@ -127,7 +130,8 @@ dart analyze lib test
 |---|---|
 | 文档/AGENTS | 状态页已同步；Stage A 报告已重写（2026-10-23） |
 | Fladder 源码导入 | 完成（PR #735 head + develop `de7b5a2a` 合并） |
-| Flutter/构建 | 当前 HEAD analyze 0、157 tests + 1 skipped、Windows release 构建成功；v0.1.0 发布包即当前源码 |
+| Flutter/构建 | Flutter 3.47.7：analyze 0、157 tests + 1 skipped、Windows release 构建成功（2026-11-08） |
+| 上游同步 | 方案 A 两步完成：7 个播放器修复 + Flutter 3.47.7 全量基座升级；未推送 origin |
 | SyncPlay | 用户实机确认双客户端通过；原始日志/误差/截图待归档 |
 | 弹幕 | danmu_api/自动+手动匹配/URL 拉取/合并/本地导入/缓存/叠加层已接入；NAS 播放器内叠加层手动确认 |
 | 超分 | Anime4K Fast/Balanced/Strong/4x 已接入；用户确认性能通过；原始 FPS/掉帧待归档 |
@@ -159,6 +163,10 @@ dart analyze lib test
 19. **danmu_api 的坑（2026-10-20 实测）**：自动匹配优先 `POST /api/v2/match`（body `{"fileName":"标题 S01E01"}`）；搜索用 `search/episodes`（内嵌 episodes），不要用 `/bangumi/{id}`（404）；`标题 (2026)` 这类带空格年份的查询会 0 结果，客户端会去尾部年份/季集重试；URL 型来源用 `comment?url=<分集页面>&format=json`；非 http 的复合 ID（renren/hanjutv，如 `59377-431845`）必须用 `POST /api/v2/segmentcomment` body `{"type":"renren","url":"59377-431845","segment_start":0,"segment_end":86400000}`，公共 EdgeOne 实例的 `/comment/{id}` 依赖进程内搜索缓存，跨请求会 404；episodeId 不跨服务器稳定，缓存 key 用 `sha1(baseUrl|url)`；自建 TOKEN 放在 `/{TOKEN}` 路径；HTTPS 证书当前公共实例正常；`chConvert` 不受支持（服务端 `DANMU_SIMPLIFIED_TRADITIONAL`）。
 
 20. **代码签名**：PFX/密码/私钥不得入库；`tools/sign-release.ps1` 支持 PFX/证书指纹；没有受信任证书时输出 `Signing skipped`，不要伪造签名。
+
+21. **codegen 在 Dart 3.13 下崩**：`build_runner` 用的 analyzer 7.6.0 不认 dot-shorthand，会在生成的 `lib/jellyfin/client_index.dart` 上报 `Missing implementation of visitDotShorthandPropertyAccess` 并删除旧的生成文件。改 `*.freezed.dart`/`*.g.dart` 前先确认工具链能跑通（升级 analyzer/build_runner 或临时用 3.35.x 生成），否则恢复 `git checkout HEAD -- <生成文件>` 再手工补齐字段。
+
+22. **Windows 原生依赖（2026-11-08 实测）**：`tools/bin/7z.exe`（`7zr.exe` 改名）必须在 PATH，否则 media-kit libs 走 `tar` 回退分支，在 `cmake_policy(SET CMP0175 NEW)` 下配置期直接报错；手工预置 libmpv 时必须把 `include/mpv/*` 展平到 `include/`（插件 POST_BUILD 会做），否则 `media_kit_video` 报 `client.h` 缺失；`subst` 必须指向仓库**父目录**，指向仓库根会让 `flutter_assemble` 因 `L:;FLUTTER_TARGET=...` 报 `PathNotFoundException`。
 
 ## 11. 文档索引
 
