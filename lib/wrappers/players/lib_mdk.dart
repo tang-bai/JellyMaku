@@ -25,6 +25,7 @@ class LibMDK extends BasePlayer {
   late final player = Player();
 
   bool externalSubEnabled = false;
+  bool _lowResourceMode = false;
 
   final StreamController<PlayerState> _stateController = StreamController.broadcast();
 
@@ -32,8 +33,9 @@ class LibMDK extends BasePlayer {
   Stream<PlayerState> get stateStream => _stateController.stream;
 
   @override
-  Future<void> init(VideoPlayerSettingsModel settings) async {
+  Future<void> init(VideoPlayerSettingsModel settings, {bool lowResourceMode = false}) async {
     dispose();
+    _lowResourceMode = lowResourceMode;
 
     final advancedOptions = {
       'ffmpeg.enable.all': '1',
@@ -92,8 +94,8 @@ class LibMDK extends BasePlayer {
       await _controller?.play();
     }
     _controller?.setBufferRange(
-      min: const Duration(seconds: 15).inMilliseconds,
-      max: const Duration(seconds: 30).inMilliseconds,
+      min: Duration(seconds: _lowResourceMode ? 5 : 15).inMilliseconds,
+      max: Duration(seconds: _lowResourceMode ? 15 : 30).inMilliseconds,
     );
     return setState(lastState.update(
       buffering: true,

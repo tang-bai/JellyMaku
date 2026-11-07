@@ -49,6 +49,7 @@ _ClientSettingsModel _$ClientSettingsModelFromJson(Map<String, dynamic> json) =>
       forceLeanBackMode: json['forceLeanBackMode'] as bool? ?? false,
       lastViewedUpdate: json['lastViewedUpdate'] as String?,
       libraryPageSize: (json['libraryPageSize'] as num?)?.toInt(),
+      lowResourceMode: $enumDecodeNullable(_$LowResourceModeEnumMap, json['lowResourceMode']) ?? LowResourceMode.auto,
       shortcuts: (json['shortcuts'] as Map<String, dynamic>?)?.map(
             (k, e) =>
                 MapEntry($enumDecode(_$GlobalHotKeysEnumMap, k), KeyCombination.fromJson(e as Map<String, dynamic>)),
@@ -91,6 +92,7 @@ Map<String, dynamic> _$ClientSettingsModelToJson(_ClientSettingsModel instance) 
       'forceLeanBackMode': instance.forceLeanBackMode,
       'lastViewedUpdate': instance.lastViewedUpdate,
       'libraryPageSize': instance.libraryPageSize,
+      'lowResourceMode': _$LowResourceModeEnumMap[instance.lowResourceMode]!,
       'shortcuts': instance.shortcuts.map((k, e) => MapEntry(_$GlobalHotKeysEnumMap[k]!, e)),
     };
 
@@ -141,4 +143,10 @@ const _$GlobalHotKeysEnumMap = {
   GlobalHotKeys.closeWindow: 'closeWindow',
   GlobalHotKeys.exit: 'exit',
   GlobalHotKeys.toggleSideBar: 'toggleSideBar',
+};
+
+const _$LowResourceModeEnumMap = <LowResourceMode, String>{
+  LowResourceMode.auto: 'auto',
+  LowResourceMode.on: 'on',
+  LowResourceMode.off: 'off',
 };

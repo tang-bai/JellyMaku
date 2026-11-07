@@ -1842,6 +1842,8 @@
   "posterColorsDesc": "Use generated colors for posters in place of the default color",
   "mediaTunnelingTitle": "Media tunneling",
   "mediaTunnelingDesc": "Enable media tunneling for native player",
+  "refreshRateSwitchingTitle": "Refresh Rate Matching",
+  "refreshRateSwitchingDesc": "Match display refresh rate to video frame rate",
   "clientSettingsUseSystemIMETitle": "Use system keyboard",
   "clientSettingsUseSystemIMEDesc": "Use the built-in keyboard provided by your system",
   "nextUpInCount": "Next-up in {seconds}",
@@ -1878,6 +1880,7 @@
   "screensaverBlack": "Black",
   "playerSettingsScreensaverTitle": "Screensaver",
   "playerSettingsScreensaverDesc": "Select screen saver that will be shown after no player activity",
+  "settingsServerUrlSetDesc": "Change the address used to connect to your Jellyfin server. The new URL must point to the same server.",
   "settingsLocalUrlTitle": "Local Jellyfin URL",
   "settingsLocalUrlSetTitle": "Configure Local Jellyfin URL",
   "settingsLocalUrlSetDesc": "Specify the local Jellyfin address. JellyMaku will automatically use this URL when your device is on the same network.",
@@ -3026,8 +3029,7 @@
       }
     }
   },
-  "deepLinkItemNotFound": "This item isn't available for any of your accounts"
-,
+  "deepLinkItemNotFound": "This item isn't available for any of your accounts",
   "danmakuSettingsTitle": "Danmaku settings",
   "@danmakuSettingsTitle": {},
   "danmakuApiStatus": "danmu_api · Status: {status}",
@@ -3257,5 +3259,8 @@
   "playbackStatsLocalFile": "Local file",
   "@playbackStatsLocalFile": {},
   "playbackStatsTooltip": "Show playback information",
-  "@playbackStatsTooltip": {}
+  "@playbackStatsTooltip": {},
+  "lowResourceModeTitle": "Low resource mode",
+  "lowResourceModeDesc": "Uses less memory on devices with limited RAM by lowering caches and buffers and turning off heavy visual effects. Automatic enables it on devices with 3 GB of RAM or less.",
+  "lowResourceModeAuto": "Automatic"
 }

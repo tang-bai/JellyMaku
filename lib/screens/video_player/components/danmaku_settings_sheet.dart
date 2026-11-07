@@ -47,13 +47,13 @@ class _DanmakuSettingsDialogState
   Future<void> _pickLocalFile() async {
     setState(() => _pickingFile = true);
     try {
-      final result = await FilePicker.platform.pickFiles(
+      // file_picker 13 exposes pickFiles as a static returning the picked files directly.
+      final files = await FilePicker.pickFiles(
         dialogTitle: context.localized.danmakuPickFileTitle,
         type: FileType.custom,
         allowedExtensions: const ['xml', 'json'],
       );
-      final files = result?.files;
-      if (files == null || files.isEmpty) return;
+      if (files.isEmpty) return;
       final path = files.single.path;
       if (path == null || path.isEmpty || !mounted) return;
       ref.read(danmakuSettingsProvider.notifier).setLocalFile(path);
