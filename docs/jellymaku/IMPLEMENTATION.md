@@ -1,7 +1,7 @@
 
 # 实施检查清单与证据模板
 
-> 状态（2026-10-23）：v0.1.0 正式版已发布；工作区干净。
+> 状态（2026-11-08）：v0.1.0 已发布；已按方案 A 同步上游（第 1 步 7 个播放器修复，第 2 步 Flutter 3.47.7 基座升级），本地未推送。
 > 当前 HEAD：analyze 0 issue；157 tests passed + 1 skipped；Windows release 于 2026-10-23 从当前源码构建成功；v0.1.0 发布包即当前源码。
 > 已验证：NAS Jellyfin 12.2 登录/播放/暂停/seek（自动），字幕切换/切集/弹幕叠加层（手动 + 安装版字幕补测）；用户实机确认 SyncPlay 双客户端、超分性能、播放信息面板通过（2026-10-23）；v0.1.0 安装版主链路 E2E 通过。
 > 未完成：Stage B；用户确认项缺原始 FPS/误差/截图归档。
@@ -364,6 +364,16 @@
 - ARB：补 `subtitleOffset`（字幕偏移）、`subtitleOffsetBackward`（字幕提前）、`subtitleOffsetForward`（字幕延后）到 `app_zh.arb` / `app_zh_Hant.arb`；`test/l10n/arb_keys_test.dart` 通过。
 - 验证：`dart analyze lib test` → No issues found（每个提交后各跑一次）；`flutter test --no-pub` → 157 passed + 1 skipped；`flutter build windows --release --no-pub` → `√ Built build\windows\x64\runner\Release\JellyMaku.exe`（255.6s，Flutter 3.35.7 + `subst L:` 父目录）。原生依赖需先手工缓存 libmpv/ANGLE 两个 `.7z`（见 UPSTREAM_2026-11-08.md §8.5）。
 - 未验证：真实 Jellyfin 12.2 上的弹幕/超分/SyncPlay 播放行为（需上机复测）；未推送 origin。
+
+### 上游同步：方案 A 第 2 步（2026-11-08）
+
+- 分支 `sync/fladder-2-upgrade`：`git merge --no-ff refs/remotes/fladder/develop ac96cd5f`，16 个冲突全部解决。
+- 工具链：Flutter 3.47.7 / Dart 3.13.5（`D:\dev\flutter-3.47.7`，3.35.7 保留为 `D:\dev\flutter-3.35.7`）；`.fvmrc` → 3.47.7；file_picker 13 / share_plus 13 / package_info_plus 10 / font_awesome 11 等升级，移除 page_transition、custom_lint，media_kit override 统一 `ref: main`。
+- 冲突要点：SyncPlay 上报逻辑、`SyncPlayCommandIndicator`、`userPlayOrPause`、SMTC 订阅顺序、缺图静默兜底全部保留；Next-up/触摸结构、低资源模式、刷新率匹配、websocket 实时刷新按上游接入。
+- 代码生成：`build_runner` 在 Dart 3.13 下崩溃（analyzer 7.6.0 不认 dot-shorthand），本次手工补齐 `video_player_settings`（refreshRateSwitching）、`arguments_model`（lowResourceDevice）、`client_settings_model`（lowResourceMode + 枚举映射）的生成代码；属已知技术债。
+- Windows 原生依赖：需 `tools/bin/7z.exe`（7zr）在 PATH，且预置 libmpv 时必须把 `include/mpv` 展平为 `include`（media_kit libs 的 POST_BUILD 步骤做的事），否则 `media_kit_video` 报 `client.h` 缺失。
+- 验证（2026-11-08）：`dart analyze lib test` → No issues found；`flutter test --no-pub` → 157 passed + 1 skipped；`flutter build windows --release --no-pub` → `√ Built build\windows\x64\runner\Release\JellyMaku.exe`。
+- 遗留：websocket 双栈未整合；codegen 工具链待修；真实 Jellyfin E2E 未做；未推送 origin。
 
 ## 4. 禁止事项
 

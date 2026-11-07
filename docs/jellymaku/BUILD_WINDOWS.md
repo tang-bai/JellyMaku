@@ -6,7 +6,9 @@
 ## 1. 前置
 
 - Windows 10/11 x64，VS 2022 BuildTools（C++/CMake/Windows SDK），Developer Mode 开启。
-- Flutter 3.35.7 解压到 `.flutter/`；Dart 3.9.2 随 SDK。
+- Flutter 版本按 `.fvmrc`：当前 **3.47.7 / Dart 3.13.5**（2026-11-08 升级；历史基线 3.35.7 / Dart 3.9.2）。
+- `7z.exe`（`7zr.exe` 改名即可）需在 PATH，或放在 `tools/bin/` 并加入 PATH：media-kit 的 Windows libs 包用它解压 libmpv/ANGLE，找不到时会走 `tar` 回退分支，而该分支在 `cmake_policy(SET CMP0175 NEW)` 下配置期直接报错。
+- 手工预置 libmpv 时记得把 `include/mpv/*` 展平到 `include/`（插件自身的 POST_BUILD 步骤会做这件事），否则 `media_kit_video` 报 `client.h` 找不到。
 - Git、`tar.exe`（Windows 自带 bsdtar）、7z 解压能力。
 - 建议把仓库映射到 ASCII 路径再构建；中文路径会让 Cargokit 生成的 `pubspec.yaml` 使用系统代码页，Dart 无法解析。
 
