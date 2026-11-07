@@ -19,6 +19,8 @@ final videoPlayerSettingsProvider =
   return VideoPlayerSettingsProviderNotifier(ref);
 });
 
+final subtitleTimingOffsetProvider = StateProvider<Duration>((ref) => Duration.zero);
+
 final playbackRateProvider = StateProvider<double>((ref) => 1.0);
 
 class VideoPlayerSettingsProviderNotifier extends StateNotifier<VideoPlayerSettingsModel> {
@@ -35,6 +37,7 @@ class VideoPlayerSettingsProviderNotifier extends StateNotifier<VideoPlayerSetti
     if (!oldState.playerSame(value)) {
       ref.read(videoPlayerProvider.notifier).init();
     }
+    ref.read(videoPlayerProvider.notifier).applySettingsChanged(value);
   }
 
   void setScreenBrightness(double? value) async {

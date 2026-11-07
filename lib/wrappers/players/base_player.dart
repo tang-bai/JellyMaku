@@ -50,6 +50,7 @@ abstract class BasePlayer {
   Future<Uint8List?> takeScreenshot();
   Future<int> setSubtitleTrack(SubStreamModel? model, PlaybackModel playbackModel);
   Future<int> setAudioTrack(AudioStreamModel? model, PlaybackModel playbackModel);
+  Future<void> shiftSubtitleOffset(Duration offset) async {}
   void applySubtitleSettings(SubtitleSettingsModel settings) {}
 
   /// Live backend statistics for the playback information panel.

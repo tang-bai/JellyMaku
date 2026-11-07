@@ -2114,6 +2114,9 @@
     "closeWindow": "关闭窗口",
     "openJellyfinQuickConnect": "打开 Jellyfin 快速连接器",
     "toggleSubtitles": "切换字幕",
+    "subtitleOffsetBackward": "字幕提前",
+    "subtitleOffsetForward": "字幕延后",
+    "subtitleOffset": "字幕偏移",
     "share": "分享",
     "authenticateWithBiometrics": "使用生物识别技术进行身份验证 {user}",
     "@authenticateWithBiometrics": {

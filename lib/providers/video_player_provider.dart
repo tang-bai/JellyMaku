@@ -83,13 +83,24 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
   /// The backend's real playing state: on media-kit the wrapper's `playing` flag is only the requested one.
   bool get _livePlaying => state.isPlayerPlaying;
 
-  ProviderSubscription<VideoPlayerSettingsModel>? settingsChanged;
   @override
   void dispose() {
-    settingsChanged?.close();
     _syncPlayStateSubscription?.cancel();
     _bufferingDebouncer?.dispose();
     super.dispose();
+  }
+
+  /// Settings arrive through the settings notifier instead of a [ref.listen] inside [init]: that listener made
+  /// this provider depend on the settings provider while the settings provider already reads it back, which
+  /// tripped Riverpod's circular-dependency assertion when a volume gesture wrote a setting (upstream 05f568e1).
+  void applySettingsChanged(VideoPlayerSettingsModel settings) {
+    final currentItem = ref.read(playBackModel)?.item;
+    if (currentItem != null) {
+      state.applyReplayGain(
+        currentItem,
+        settings: settings,
+      );
+    }
   }
 
   /// media-kit sometimes drops the first `play()` after a paused `open()` or a reload, and in a group the
@@ -121,19 +132,6 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
     _bufferingDebouncer = BufferingReportDebouncer(
       onBuffering: () => ref.read(syncPlayProvider.notifier).reportBuffering(),
       onReady: () => ref.read(syncPlayProvider.notifier).reportReady(isPlaying: _livePlaying),
-    );
-
-    settingsChanged = ref.listen(
-      videoPlayerSettingsProvider,
-      (previous, next) {
-        final currentItem = ref.read(playBackModel)?.item;
-        if (currentItem != null) {
-          state.applyReplayGain(
-            currentItem,
-            settings: next,
-          );
-        }
-      },
     );
 
     final subscription = state.stateStream.listen((value) {
@@ -408,21 +406,27 @@ class VideoPlayerNotifier extends StateNotifier<MediaControlsWrapper> {
 
     final useMinimizedPlayer =
         model.item.type == FladderItemType.audio || model.mediaStreams?.videoStreams.isEmpty == true;
+    final effectiveStartPosition = await model.resolvedStartPosition(startPosition);
 
     try {
-      await state.stop();
+      // keepMediaSession: swapping items must not tear down the SMTC/media session (upstream 5d12e7b8).
+      await state.stop(keepMediaSession: true);
       ref.read(playbackRateProvider.notifier).state = 1.0;
+      // A new item starts with no subtitle offset (upstream 4436f910).
+      ref.read(subtitleTimingOffsetProvider.notifier).state = Duration.zero;
       mediaState.update((state) => state.copyWith(
             state: useMinimizedPlayer ? VideoPlayerState.minimized : VideoPlayerState.fullScreen,
             fullScreen: !useMinimizedPlayer,
             buffering: true,
             errorPlaying: false,
             skippedSegments: {},
+            // Seed the UI clock with the resolved start position, not the stale provider value (upstream b777ebdb).
+            position: effectiveStartPosition,
+            lastPosition: effectiveStartPosition,
           ));
 
       final media = model.media;
       PlaybackModel? newPlaybackModel = model;
-      final effectiveStartPosition = await model.resolvedStartPosition(startPosition);
 
       if (media == null) {
         ref.read(syncPlayProvider.notifier).setPlayerBufferingState(false);

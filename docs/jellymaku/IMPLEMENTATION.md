@@ -355,6 +355,16 @@
 - 修改：同步 README/AGENTS/ROADMAP/IMPLEMENTATION/PLAN/DANMAKU/TESTING/BUILD_WINDOWS/ASSETS/ARCHITECTURE/UPSTREAM/DECISIONS/SR/PARTY 的状态与计数。
 - 剩余：用户确认项的原始性能/联调证据归档。
 
+### 上游同步：方案 A 第 1 步（2026-11-08）
+
+- 背景：上游 develop `ac96cd5f`（2026-11-03）较 `de7b5a2a` 多 31 个提交；评估与分类见 [UPSTREAM_2026-11-08.md](UPSTREAM_2026-11-08.md)。
+- 分支 `sync/fladder-a1`（基于 v0.1.0 的 `main` `e6975e2e`），摘取 7 个不依赖 Flutter 升级的提交：`5d12e7b8`（停播状态/`stop(keepMediaSession:)`）、`4436f910`（字幕偏移快捷键）、`d9b75789`（上下章节按钮）、`6217b49a`（Next-up 期间保持字幕）、`26c04f79`（小屏隐藏章节按钮）、`05f568e1`（音量手势循环依赖）、`b777ebdb`（起播位置参数）。
+- 冲突处理：`video_player_provider.dart` 的 SyncPlay 前置逻辑（加载/缓冲上报、`_playGeneration`）整块保留，只把上游的 `keepMediaSession` 与 `position/lastPosition` 语义搬进来；`video_player_controls.dart` 采用上游 `controlsBuilder(nextUpVisible)` 结构，内部 Stack 保留 `SyncPlayCommandIndicator`，桌面点击走 `userPlayOrPause()`（SyncPlay 需要上报，且避免 AGENTS 陷阱 13 的双重切换）。
+- 暂缓：`9e1d6457`/`091cb3a5`（横向列表，依赖 `cccc9221` 的 `FocusProvider.canAutoFocus`、`ScrollCacheExtent`，直接取上游版本 analyze 报 3 个未定义符号）、`657e746c`（控件 302 行结构重构，与未摘的 12446136/059a0cb0/05393509 纠缠）。
+- ARB：补 `subtitleOffset`（字幕偏移）、`subtitleOffsetBackward`（字幕提前）、`subtitleOffsetForward`（字幕延后）到 `app_zh.arb` / `app_zh_Hant.arb`；`test/l10n/arb_keys_test.dart` 通过。
+- 验证：`dart analyze lib test` → No issues found（每个提交后各跑一次）；`flutter test --no-pub` → 157 passed + 1 skipped；`flutter build windows --release --no-pub` → `√ Built build\windows\x64\runner\Release\JellyMaku.exe`（255.6s，Flutter 3.35.7 + `subst L:` 父目录）。原生依赖需先手工缓存 libmpv/ANGLE 两个 `.7z`（见 UPSTREAM_2026-11-08.md §8.5）。
+- 未验证：真实 Jellyfin 12.2 上的弹幕/超分/SyncPlay 播放行为（需上机复测）；未推送 origin。
+
 ## 4. 禁止事项
 
 - 不把“文档计划”写成“已实现”。

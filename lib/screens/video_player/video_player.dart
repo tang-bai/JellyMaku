@@ -175,7 +175,7 @@ class _VideoPlayerState extends ConsumerState<VideoPlayer> with WidgetsBindingOb
                     ),
                   _ => VideoPlayerNextWrapper(
                       video: player,
-                      controls: const DesktopControls(),
+                      controlsBuilder: (nextUpVisible) => DesktopControls(nextUpVisible: nextUpVisible),
                       overlays: [
                         const DanmakuOverlay(),
                         if (errorPlaying) const _VideoErrorWidget(),
